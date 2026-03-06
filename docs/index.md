@@ -4,6 +4,8 @@
 
 1. MinIO/네트워크 기준:
    [Proxmox Overview](./proxmox/overview.md)
+1. MinIO 설치:
+   [MinIO Installation](./minio/installation.md)
 1. GitLab 설치:
    [GitLab Installation](./gitlab/installation.md)
 1. Harbor 설치:
@@ -20,6 +22,11 @@
   [Installation](./proxmox/installation.md) |
   [Operation Guide](./proxmox/operation-guide.md) |
   [Troubleshooting](./proxmox/troubleshooting.md)
+- MinIO:
+  [Overview](./minio/overview.md) |
+  [Installation](./minio/installation.md) |
+  [Operation Guide](./minio/operation-guide.md) |
+  [Troubleshooting](./minio/troubleshooting.md)
 - Jenkins:
   [Overview](./jenkins/overview.md) |
   [Installation](./jenkins/installation.md) |
