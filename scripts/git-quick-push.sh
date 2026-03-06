@@ -20,9 +20,7 @@ fi
 if [[ -n "${MSG:-}" ]]; then
   commit_msg="${MSG}"
 else
-  default_msg="docs: update on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  read -r -p "Commit message [${default_msg}]: " input_msg
-  commit_msg="${input_msg:-$default_msg}"
+  commit_msg="docs: auto update on $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 fi
 
 git add -A
