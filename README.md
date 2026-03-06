@@ -34,7 +34,8 @@ make link-check
 ## 권장 문서 맵
 - `docs/proxmox/overview.md`
 - `docs/minio/installation.md`
-- `docs/minio/operation-guide.md` (Keycloak OIDC 연동 포함)
+- `docs/minio/operation-guide.md`
+- `docs/minio/oidc-integration.md` (MinIO-Keycloak OIDC 전용)
 - `docs/jenkins/installation.md`
 - `docs/harbor/operation-guide.md`
 - `docs/gitlab/backup-and-restore.md`

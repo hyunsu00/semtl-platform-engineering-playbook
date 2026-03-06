@@ -34,31 +34,9 @@ mc mb local/harbor
 mc admin user add local harbor 'replace-with-strong-password'
 ```
 
-## Keycloak OIDC 연동 절차
-1. Keycloak에서 `minio` client 생성
-2. Client redirect URI에 MinIO callback 등록
-3. 사용자 claim(`policy`) 또는 그룹 claim(`groups`) 매핑
-4. MinIO에 `identity_openid` 설정 반영
-
-예시:
-
-```bash
-mc alias set myminio http://127.0.0.1:9000 <MINIO_ROOT_USER> '<MINIO_ROOT_PASSWORD>'
-
-mc admin config set myminio identity_openid \
-  config_url="https://auth.semtl.synology.me/realms/semtl/.well-known/openid-configuration" \
-  client_id="minio" \
-  client_secret="<keycloak-client-secret>" \
-  claim_name="policy" \
-  scopes="openid,profile,email"
-
-mc admin service restart myminio
-mc admin config get myminio identity_openid
-```
-
-정책 매핑 예시:
-- Keycloak user attribute `policy=readwrite`를 토큰 claim으로 전달
-- MinIO에 동일 이름 정책(`readwrite`)을 사전 생성
+## Keycloak OIDC 연동
+OIDC 상세 절차는 별도 문서로 관리합니다.
+- [MinIO OIDC Integration](./oidc-integration.md)
 
 ## Harbor 연동 계정 비밀번호 변경 절차
 1. MinIO에서 사용자 비밀번호 갱신

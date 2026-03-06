@@ -26,6 +26,7 @@
   [Overview](./minio/overview.md) |
   [Installation](./minio/installation.md) |
   [Operation Guide](./minio/operation-guide.md) |
+  [OIDC Integration](./minio/oidc-integration.md) |
   [Troubleshooting](./minio/troubleshooting.md)
 - Jenkins:
   [Overview](./jenkins/overview.md) |
