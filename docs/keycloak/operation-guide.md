@@ -1,27 +1,82 @@
 # Keycloak Operation Guide
 
 ## 개요
-Keycloak 운영 기준과 점검 절차를 정리합니다.
 
-## 일일/주간 점검
-- 리소스 사용량(CPU/메모리/디스크)
-- 서비스 상태 및 로그
-- 백업 성공 여부
+이 문서는 Keycloak 운영 점검, OIDC 연동 전후 변경 절차,
+백업/복구 기준을 정의합니다.
 
-## 운영 표준
-- 계정/권한 관리 정책
-- 구성 변경 절차
-- 버전 업그레이드 정책
+## 운영 기준
+
+- 운영 도메인: `https://auth.semtl.synology.me`
+- TLS 종료 지점: Synology Reverse Proxy
+- Keycloak은 내부 HTTP(`8080`)로 서비스
+- OIDC issuer는 외부 HTTPS URL로 유지
+
+## 일일 점검
+
+```bash
+# 컨테이너 상태 확인
+docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'
+
+# Keycloak 에러 로그 빠른 점검
+docker logs --tail=200 keycloak | egrep -i 'error|exception|warn'
+
+# OIDC issuer 노출값 확인
+OIDC_DISCOVERY_URL="https://auth.semtl.synology.me/realms/master/.well-known/openid-configuration"
+curl -s "$OIDC_DISCOVERY_URL" \
+  | grep '"issuer"'
+```
+
+확인 항목:
+
+- `keycloak`, `keycloak-postgres` 컨테이너가 `Up`
+- `issuer`가 `https://auth.semtl.synology.me/realms/<realm>` 형태
+
+## 주간 점검
+
+```bash
+# 디스크 사용량 확인
+df -h
+
+# Keycloak/DB 볼륨 사용량 확인
+du -sh ~/keycloak/postgres
+
+# 인증 관련 설정 백업
+cp ~/keycloak/docker-compose.yml ~/keycloak/docker-compose.yml.bak.$(date +%F)
+```
+
+## 변경 작업 표준
+
+1. 변경 전 스냅샷 생성
+2. 변경 범위 문서화(Realm, Client, Redirect URI)
+3. 변경 즉시 issuer/로그인 플로우 검증
+4. 이상 시 즉시 스냅샷 또는 설정 롤백
+
+권장 스냅샷 네이밍:
+
+- `BASE-Keycloak`
+- `OIDC-GitLab-OK`
+- `OIDC-Harbor-OK`
+- `MFA-Enabled`
+
+## OIDC 연동 운영 순서
+
+1. Keycloak Realm 생성 (`semtl` 권장)
+2. Keycloak Client 생성 (`gitlab`, `harbor`)
+3. GitLab OIDC 연동 검증
+4. Harbor OIDC 연동 검증
+5. 그룹/권한 매핑 적용
 
 ## 백업 및 복구
-- 백업 대상
-- 백업 주기
-- 복구 검증 방법
 
-## 장애 대응
-1. 증상 확인
-2. 로그/메트릭 확인
-3. 임시 조치 및 근본 원인 분석
+백업 대상:
 
-## 참고
-- 내부 운영 규정 링크
+- `~/keycloak/docker-compose.yml`
+- `~/keycloak/postgres` (DB 데이터)
+- Realm/Client 설정(주기적 export)
+
+## 운영 시 금지사항
+
+- `master` Realm에 운영 서비스 클라이언트 직접 혼합 구성
+- `--hostname`에 `https://` 스킴 포함
+- Reverse Proxy 헤더 미검증 상태에서 OIDC 연동 진행

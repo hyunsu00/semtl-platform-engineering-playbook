@@ -1,27 +1,90 @@
 # Gitlab Troubleshooting
 
 ## 개요
-Gitlab 주요 장애 사례와 해결 절차를 정리합니다.
+
+GitLab Runner 등록/연동 및 OIDC 로그인에서 발생하는
+대표 이슈를 정리합니다.
 
 ## 공통 점검 절차
-1. 서비스 상태 확인
-2. 최근 변경 사항 확인
-3. 로그 수집 및 원인 범위 축소
+
+```bash
+# GitLab 서비스 상태 확인
+sudo gitlab-ctl status
+
+# GitLab 로그 확인
+sudo gitlab-ctl tail | egrep -i 'error|exception|fail'
+
+# Runner 파드 상태 확인 (K8s executor 사용 시)
+kubectl -n gitlab-runner get pods -o wide
+```
 
 ## 자주 발생하는 이슈
-### 이슈 1: 서비스 시작 실패
-- 증상: 프로세스가 재시작 반복
-- 원인: 설정 오류 또는 포트 충돌
-- 해결: 설정 검증 후 재시작
 
-### 이슈 2: 접속 불가
-- 증상: UI/API 타임아웃
-- 원인: 네트워크/DNS/방화벽 설정 이슈
-- 해결: 경로별 네트워크 확인 후 정책 수정
+### 1. Group Runner 생성 버튼이 보이지 않음
+
+증상:
+
+- `Settings > CI/CD > Runners`에서 `New group runner` 미노출
+
+원인:
+
+- 그룹 Owner 권한 부족
+- Admin 영역에서 Group Runner 생성 제한
+
+해결:
+
+1. 그룹 Owner 권한 확인
+2. Admin -> CI/CD -> Runners에서 Group Runner 허용 확인
+3. 우회로로 Instance Runner 생성 후 사용
+
+### 2. Runner 등록 토큰 발급 실패
+
+증상:
+
+- 기존 방식처럼 Registration token 위치가 보이지 않음
+
+원인:
+
+- GitLab 18.x는 Runner 생성 후 토큰 발급 방식으로 변경
+
+해결:
+
+- `New runner` 생성 후 발급되는 `glrt-...` 토큰 사용
+
+### 3. Runner는 Online인데 Job이 실행되지 않음
+
+증상:
+
+- Job pending 지속
+
+원인:
+
+- `Run untagged jobs` 비활성
+- Job tags와 Runner tags 불일치
+
+해결:
+
+- Runner의 `Run untagged jobs` 활성화
+- 또는 `.gitlab-ci.yml`에 `tags: [k8s]` 지정
+
+### 4. OIDC 로그인 실패
+
+증상:
+
+- 로그인 시 redirect/callback 오류
+
+원인:
+
+- Keycloak client의 redirect URI 불일치
+- GitLab `gitlab.rb` OIDC 설정 오타
+
+해결:
+
+- Callback URI를 정확히 일치시킴
+- `sudo gitlab-ctl reconfigure` 후 재검증
 
 ## 에스컬레이션 기준
-- 15분 이상 서비스 영향 지속
-- 데이터 손실 가능성 존재
 
-## 참고
-- 장애 대응 Runbook 링크
+- Runner Offline 15분 이상 지속
+- 모든 사용자 OIDC 로그인 실패
+- 배포 파이프라인 전체 중단
