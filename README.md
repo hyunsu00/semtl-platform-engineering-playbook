@@ -38,6 +38,8 @@ make link-check
 - `docs/minio/oidc-integration.md` (MinIO-Keycloak OIDC 전용)
 - `docs/jenkins/installation.md`
 - `docs/harbor/operation-guide.md`
+- `docs/harbor/oidc-integration.md` (Harbor-Keycloak OIDC 전용)
+- `docs/gitlab/oidc-integration.md` (GitLab-Keycloak OIDC 전용)
 - `docs/gitlab/backup-and-restore.md`
 - `docs/k8s/cluster-bootstrap.md`
 - `docs/keycloak/sso-integration.md`

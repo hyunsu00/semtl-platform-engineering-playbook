@@ -31,6 +31,7 @@ nav:
       - 개요: gitlab/overview.md
       - 설치: gitlab/installation.md
       - 운영 가이드: gitlab/operation-guide.md
+      - OIDC 연동: gitlab/oidc-integration.md
       - 트러블슈팅: gitlab/troubleshooting.md
   - Jenkins:
       - 개요: jenkins/overview.md
@@ -41,6 +42,7 @@ nav:
       - 개요: harbor/overview.md
       - 설치: harbor/installation.md
       - 운영 가이드: harbor/operation-guide.md
+      - OIDC 연동: harbor/oidc-integration.md
       - 트러블슈팅: harbor/troubleshooting.md
   - Keycloak:
       - 개요: keycloak/overview.md

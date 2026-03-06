@@ -83,6 +83,8 @@ make link-check
 새 컴포넌트 가이드를 추가할 때는 `docs/` 하위의 기존 폴더/파일 네이밍 패턴을 그대로 따릅니다.
 문서를 신설/대폭 업데이트할 때는 관련 항목이 `README.md`, `AGENTS.md`, `mkdocs.yml`에 반영됐는지 함께 확인합니다.
 운영 절차 중 주제가 커지면(예: OIDC/SSO) `docs/<component>/` 하위에 별도 문서로 분리해 유지보수합니다.
+OIDC/SSO 분리 문서 파일명은 `oidc-integration.md` 패턴을 우선 사용합니다.
+OIDC 문서는 Keycloak 측(Client/Realm)과 서비스 측(redirect/callback)의 정합성 검증 절차를 반드시 포함합니다.
 
 ## 검증 가이드
 이 저장소에는 단위 테스트 프레임워크가 없으며, 품질 게이트는 문서 검증입니다.

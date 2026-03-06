@@ -32,19 +32,9 @@ curl -I https://harbor.semtl.synology.me
 - Robot account 만료/권한 점검
 - 미사용 이미지/아티팩트 정리 정책 점검
 
-## OIDC 연동 절차
-
-1. Keycloak realm `semtl`에서 `harbor` client 생성
-2. Harbor Authentication 모드를 `OIDC`로 전환
-3. Issuer를 `https://auth.semtl.synology.me/realms/semtl`로 설정
-4. Harbor가 표시한 Redirect URI를 Keycloak에 정확히 등록
-
-Harbor 설정값 예시:
-
-- OIDC Endpoint(issuer): `https://auth.semtl.synology.me/realms/semtl`
-- Client ID: `harbor`
-- Client Secret: `<keycloak-client-secret>`
-- Scope: `openid,profile,email`
+## OIDC 연동
+OIDC 상세 절차는 별도 문서로 관리합니다.
+- [Harbor OIDC Integration](./oidc-integration.md)
 
 ## 장애 대응 기본 절차
 

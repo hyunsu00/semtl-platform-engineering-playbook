@@ -70,17 +70,9 @@ kubectl -n gitlab-runner get pods
 # GitLab UI에서 runner online 상태 확인
 ```
 
-## Keycloak OIDC 연동 운영 기준
-
-- Keycloak realm: `semtl` 사용 권장 (`master` 직접 사용 지양)
-- GitLab OIDC callback:
-  `https://gitlab.semtl.synology.me/users/auth/openid_connect/callback`
-- 변경 후 `gitlab-ctl reconfigure` 필수
-
-검증:
-
-- GitLab 로그인 화면에 OIDC 로그인 버튼 노출
-- Keycloak 로그인/콜백 후 GitLab 세션 생성
+## Keycloak OIDC 연동
+OIDC 상세 절차는 별도 문서로 관리합니다.
+- [GitLab OIDC Integration](./oidc-integration.md)
 
 ## 주간 점검
 

@@ -83,6 +83,47 @@ kubectl -n gitlab-runner get pods -o wide
 - Callback URI를 정확히 일치시킴
 - `sudo gitlab-ctl reconfigure` 후 재검증
 
+### 5. 로그인 화면에 `Keycloak` 버튼이 보이지 않음
+
+증상:
+- GitLab 로그인 화면이 로컬 계정 폼만 표시
+
+원인:
+- `gitlab.rb` OIDC 설정 누락/오타
+- `gitlab-ctl reconfigure` 미실행
+
+해결:
+```bash
+sudo gitlab-ctl reconfigure
+sudo gitlab-ctl restart
+sudo gitlab-ctl tail gitlab-rails
+```
+
+### 6. Keycloak 로그인 사용자로 인증 불가
+
+증상:
+- Keycloak 버튼 클릭 후 로그인 실패
+
+원인:
+- Realm에 로그인 대상 사용자가 없음
+- 사용자 비밀번호(Credentials) 미설정
+
+해결:
+1. Keycloak `Users`에서 사용자 생성
+2. `Credentials`에서 비밀번호 설정(Temporary 해제 권장)
+3. Email 및 Email verified 상태 확인
+
+### 7. Keycloak 이름 변경이 GitLab에 즉시 반영되지 않음
+
+증상:
+- Keycloak first/last name 변경 후 GitLab 프로필 이름이 유지됨
+
+원인:
+- 기존 GitLab 사용자 프로필은 OIDC 로그인 시 자동 동기화가 제한적임
+
+해결:
+- GitLab 사용자 프로필에서 이름을 수동 수정
+
 ## 에스컬레이션 기준
 
 - Runner Offline 15분 이상 지속

@@ -37,11 +37,13 @@
   [Overview](./harbor/overview.md) |
   [Installation](./harbor/installation.md) |
   [Operation Guide](./harbor/operation-guide.md) |
+  [OIDC Integration](./harbor/oidc-integration.md) |
   [Troubleshooting](./harbor/troubleshooting.md)
 - GitLab:
   [Overview](./gitlab/overview.md) |
   [Installation](./gitlab/installation.md) |
   [Operation Guide](./gitlab/operation-guide.md) |
+  [OIDC Integration](./gitlab/oidc-integration.md) |
   [Troubleshooting](./gitlab/troubleshooting.md)
 - Kubernetes:
   [Overview](./k8s/overview.md) |
