@@ -57,19 +57,19 @@
 아래 이미지는 Proxmox `Hardware` 탭 기준의 실제 구성 예시입니다.
 
 - k8s-cp1
-  ![Proxmox VM Hardware - k8s-cp1](../../assets/images/k8s/proxmox-vm-hw-k8s-cp1.png)
+  ![Proxmox VM Hardware - k8s-cp1](../assets/images/k8s/proxmox-vm-hw-k8s-cp1.png)
   캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 - k8s-cp2
-  ![Proxmox VM Hardware - k8s-cp2](../../assets/images/k8s/proxmox-vm-hw-k8s-cp2.png)
+  ![Proxmox VM Hardware - k8s-cp2](../assets/images/k8s/proxmox-vm-hw-k8s-cp2.png)
   캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 - k8s-cp3
-  ![Proxmox VM Hardware - k8s-cp3](../../assets/images/k8s/proxmox-vm-hw-k8s-cp3.png)
+  ![Proxmox VM Hardware - k8s-cp3](../assets/images/k8s/proxmox-vm-hw-k8s-cp3.png)
   캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 - k8s-w1
-  ![Proxmox VM Hardware - k8s-w1](../../assets/images/k8s/proxmox-vm-hw-k8s-w1.png)
+  ![Proxmox VM Hardware - k8s-w1](../assets/images/k8s/proxmox-vm-hw-k8s-w1.png)
   캡션: `4 vCPU`, `8GB RAM`, `150GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 - k8s-w2
-  ![Proxmox VM Hardware - k8s-w2](../../assets/images/k8s/proxmox-vm-hw-k8s-w2.png)
+  ![Proxmox VM Hardware - k8s-w2](../assets/images/k8s/proxmox-vm-hw-k8s-w2.png)
   캡션: `4 vCPU`, `8GB RAM`, `150GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 
 ## 3. Ubuntu 22.04 설치
