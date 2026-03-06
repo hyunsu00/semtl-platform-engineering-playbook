@@ -54,3 +54,34 @@ sudo journalctl -u minio -n 200 --no-pager
 - `/etc/default/minio` 오타
 - 데이터 경로 권한 불일치
 - 포트 충돌(`9000`, `9001`)
+
+## 5. `No valid configuration found for 'myminio' host alias`
+증상:
+- `mc admin policy list myminio` 실행 시 alias 관련 오류 발생
+
+원인:
+- `myminio` alias 미등록
+- alias가 MinIO Console(`9001`)로 등록됨
+
+해결:
+```bash
+# S3 API endpoint(9000)로 alias 등록
+mc alias set myminio http://127.0.0.1:9000 <MINIO_ROOT_USER> '<MINIO_ROOT_PASSWORD>'
+mc alias ls
+mc admin info myminio
+```
+
+## 6. OIDC 로그인 후 정책 권한이 적용되지 않음
+증상:
+- Keycloak 로그인은 성공하지만 MinIO 권한이 기대와 다름
+- 토큰에 `policy` claim이 없음
+
+원인:
+- Keycloak User Profile 스키마에 `policy` attribute 정의가 없음
+- 사용자 `policy` 값 미입력 또는 mapper 미구성
+
+해결:
+1. Keycloak `Realm settings -> User profile`에서 `policy` attribute 생성
+2. `Who can view/edit`에 최소 `Admin` 권한 부여
+3. 사용자 `Details`에서 `policy=readwrite` 입력
+4. Client mapper가 `policy`를 토큰 claim으로 내보내는지 확인

@@ -67,6 +67,26 @@ cp ~/keycloak/docker-compose.yml ~/keycloak/docker-compose.yml.bak.$(date +%F)
 4. Harbor OIDC 연동 검증
 5. 그룹/권한 매핑 적용
 
+## MinIO OIDC 설정 표준
+
+MinIO 연동 시 핵심 항목:
+- Realm: `semtl`
+- Client ID: `minio`
+- Discovery URL: `https://auth.semtl.synology.me/realms/semtl/.well-known/openid-configuration`
+- 정책 claim: `policy` (권장) 또는 `groups`
+
+Keycloak 최신 버전(21+)에서는 사용자 임의 attribute 입력이 제한될 수 있습니다.
+이 경우 `Realm settings -> User profile`에서 `policy` attribute를 먼저 정의합니다.
+
+권장 attribute 설정:
+- Name: `policy`
+- Multivalued: `OFF`
+- Required: `OFF`
+- Who can edit: `Admin`
+- Who can view: `Admin`
+
+그 다음 `Users -> <user> -> Details`에서 `policy=readwrite`를 부여합니다.
+
 ## 백업 및 복구
 
 백업 대상:

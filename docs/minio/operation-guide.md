@@ -8,6 +8,7 @@ MinIO 운영 점검, 계정/버킷 관리, Harbor 연동 변경 절차를 정의
 - console: `http://192.168.0.171:9001`
 - data path: `/data/minio`
 - 주요 사용처: Harbor, GitLab object storage
+- SSO: Keycloak OIDC(`https://auth.semtl.synology.me/realms/semtl`)
 
 ## 일일 점검
 ```bash
@@ -23,7 +24,7 @@ mc admin info local
 
 ## 버킷/계정 운영 예시
 ```bash
-# alias 설정
+# alias 설정 (반드시 S3 API endpoint 사용, 콘솔(9001) 사용 금지)
 mc alias set local http://127.0.0.1:9000 <MINIO_ROOT_USER> '<MINIO_ROOT_PASSWORD>'
 
 # bucket 생성 예시
@@ -32,6 +33,32 @@ mc mb local/harbor
 # 사용자 생성 또는 비밀번호 갱신(기존 사용자면 덮어씀)
 mc admin user add local harbor 'replace-with-strong-password'
 ```
+
+## Keycloak OIDC 연동 절차
+1. Keycloak에서 `minio` client 생성
+2. Client redirect URI에 MinIO callback 등록
+3. 사용자 claim(`policy`) 또는 그룹 claim(`groups`) 매핑
+4. MinIO에 `identity_openid` 설정 반영
+
+예시:
+
+```bash
+mc alias set myminio http://127.0.0.1:9000 <MINIO_ROOT_USER> '<MINIO_ROOT_PASSWORD>'
+
+mc admin config set myminio identity_openid \
+  config_url="https://auth.semtl.synology.me/realms/semtl/.well-known/openid-configuration" \
+  client_id="minio" \
+  client_secret="<keycloak-client-secret>" \
+  claim_name="policy" \
+  scopes="openid,profile,email"
+
+mc admin service restart myminio
+mc admin config get myminio identity_openid
+```
+
+정책 매핑 예시:
+- Keycloak user attribute `policy=readwrite`를 토큰 claim으로 전달
+- MinIO에 동일 이름 정책(`readwrite`)을 사전 생성
 
 ## Harbor 연동 계정 비밀번호 변경 절차
 1. MinIO에서 사용자 비밀번호 갱신
