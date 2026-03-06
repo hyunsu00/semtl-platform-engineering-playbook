@@ -116,6 +116,24 @@ sudo crictl ps --name kube-vip
 2. `systemctl daemon-reload && systemctl restart kubelet` 실행
 3. `kubectl get nodes -o wide`에서 내부망 IP 반영 확인
 
+## 8. `netplan apply` 시 Open vSwitch 경고
+증상:
+- `sudo netplan apply` 실행 시 아래 경고가 출력됨
+- `Cannot call Open vSwitch: ovsdb-server.service is not running.`
+
+원인:
+- netplan이 OVS 존재 여부를 확인하지만, 현재 설정은 `renderer: networkd`이며 OVS를 사용하지 않음
+
+조치:
+- 해당 경고는 무시 가능합니다.
+- 대신 실제 인터페이스가 의도대로 적용됐는지 확인합니다.
+
+검증:
+```bash
+ip -br a
+networkctl status
+```
+
 ## 공통 진단 순서
 1. `kubectl get nodes -o wide`
 2. `kubectl get pods -A`

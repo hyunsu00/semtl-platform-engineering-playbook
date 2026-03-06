@@ -11,6 +11,25 @@
 - MetalLB + ingress-nginx 설치
 - etcd 자동 백업(systemd timer) 설정
 
+## 설치 전 선택 FAQ
+### 1. Ubuntu Desktop vs Server
+- Proxmox VM 기반 Kubernetes 노드는 `Ubuntu Server 22.04 LTS`를 사용합니다.
+- Desktop 이미지는 GUI 오버헤드가 커서 운영 표준에서 제외합니다.
+
+권장 ISO 예시:
+- `ubuntu-22.04.x-live-server-amd64.iso`
+
+### 2. SCSI Controller 선택
+- Kubernetes VM은 `VirtIO SCSI single`을 권장합니다.
+- 디스크 I/O 경합이 줄어들어 control-plane/worker 동시 부하에서 유리합니다.
+
+### 3. Ubuntu 24.04를 설치했을 때 22.04로 되돌리는 방법
+- VM을 새로 만들지 않고 기존 VM에 ISO만 교체해 재설치합니다.
+- 설치 중 `Use entire disk`를 선택하면 디스크 내부 데이터가 초기화됩니다.
+
+주의:
+- VM 자체(CPU/RAM/NIC 설정)는 유지되지만, 디스크 내부 OS/파일은 삭제됩니다.
+
 ## 목표 아키텍처
 | 노드 | 역할 | vCPU | RAM | 디스크 | 내부 IP |
 | --- | --- | --- | --- | --- | --- |
