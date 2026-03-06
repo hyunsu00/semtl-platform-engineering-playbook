@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-.PHONY: setup lint link-check dev push
+.PHONY: setup lint link-check dev
 
 setup:
 	@echo "[setup] Initialize documentation tooling"
@@ -27,6 +27,3 @@ link-check:
 dev:
 	@echo "No preview server configured yet."
 	@echo "Use your preferred docs viewer/editor."
-
-push:
-	@./scripts/git-quick-push.sh
