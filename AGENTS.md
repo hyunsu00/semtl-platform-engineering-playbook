@@ -99,6 +99,10 @@ OIDC 문서는 Keycloak 측(Client/Realm)과 서비스 측(redirect/callback)의
 - `fix: ...`
 - `chore: ...`
 
+커밋 메시지 작성 규칙:
+- 커밋 메시지 본문(요약 문장)은 한글로 작성합니다.
+- 필요 시 Conventional Commits 접두사(`docs:`, `fix:`, `chore:` 등)는 유지할 수 있습니다.
+
 커밋은 작은 단위로 유지하고, 한 개의 주제/컴포넌트에 집중합니다. PR에는 다음을 포함합니다.
 - 변경된 문서와 영향 경로 요약(예: `docs/gitlab/`)
 - 운영 절차 변경의 이유

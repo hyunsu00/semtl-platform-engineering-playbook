@@ -190,6 +190,37 @@ kubectl -n kube-system get ds cilium -o jsonpath='{.spec.template.spec.container
 3. API 서버 기동/노드 인식/핵심 네임스페이스 확인
 4. 리허설 결과와 소요 시간 기록
 
+## 채팅 재시작용 핸드오프 템플릿
+긴 작업을 새 채팅으로 이어갈 때는 아래 템플릿으로 현재 상태를 전달합니다.
+
+```md
+# Proxmox Kubernetes HA 작업 재개
+
+## 현재 상태
+- 노드 구성: `cp1/cp2/cp3/w1/w2`
+- 권장 vCPU: `2,2,2,4,4`
+- cp1 `kubeadm init` 완료
+- kube-vip 적용 완료
+- 현재 시작 지점: kube-vip 문제 해결
+
+## 먼저 점검할 항목
+1. VIP 바인딩 확인: `ip a | grep <VIP>`
+2. API 응답 확인: `curl -k https://<VIP>:6443`
+3. kube-vip 상태 확인: `kubectl -n kube-system get pods -o wide | grep vip`
+4. kube-vip 로그 확인: `kubectl -n kube-system logs <kube-vip-pod>`
+
+## 다음 진행 순서
+1. kube-vip 정상화
+2. cp2/cp3 조인
+3. worker 조인
+4. CNI/핵심 파드 상태 확인
+5. 전체 Ready 확인 후 스냅샷 생성
+```
+
+중복 방지 원칙:
+- 상세 설치 명령은 [K8s Installation](./installation.md)만 기준으로 유지합니다.
+- 장애 조치는 [K8s Troubleshooting](./troubleshooting.md) 링크로만 참조합니다.
+
 ## 운영 시 금지사항
 - swap 재활성화 상태로 운영 금지
 - control-plane join을 VIP 경유로 수행 금지
