@@ -121,6 +121,10 @@ ping -c 3 10.10.10.12
 ping -c 3 10.10.10.21
 ```
 
+내부망 강제 원칙:
+- Kubernetes `INTERNAL-IP`는 `vmbr1`(`10.10.10.0/24`) 기준으로 통일합니다.
+- 설치 직후 `kubectl get nodes -o wide`에서 외부망(`192.168.0.x`)이 잡히면 `node-ip` 강제 설정을 적용합니다.
+
 ## 5. 공통 OS 준비 (5대 전부)
 ### 5.1 필수 패키지
 ```bash
@@ -322,6 +326,23 @@ sudo systemctl restart kubelet
 
 검증(cp1):
 ```bash
+kubectl get nodes -o wide
+```
+
+`INTERNAL-IP`가 외부망으로 잡힌 경우(예: `192.168.0.x`) 보정:
+```bash
+# cp1
+echo 'KUBELET_EXTRA_ARGS=--node-ip=10.10.10.11' | sudo tee /etc/default/kubelet
+# cp2
+echo 'KUBELET_EXTRA_ARGS=--node-ip=10.10.10.12' | sudo tee /etc/default/kubelet
+# cp3
+echo 'KUBELET_EXTRA_ARGS=--node-ip=10.10.10.13' | sudo tee /etc/default/kubelet
+# w1
+echo 'KUBELET_EXTRA_ARGS=--node-ip=10.10.10.21' | sudo tee /etc/default/kubelet
+# w2
+echo 'KUBELET_EXTRA_ARGS=--node-ip=10.10.10.22' | sudo tee /etc/default/kubelet
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
 kubectl get nodes -o wide
 ```
 

@@ -49,6 +49,12 @@ ip -br a | grep 10.10.10.100
 kubectl -n kube-system get pods -o wide | grep kube-vip
 ```
 
+### 노드 IP 정합성
+```bash
+# 노드 INTERNAL-IP가 내부망(10.10.10.x) 기준인지 확인
+kubectl get nodes -o wide
+```
+
 ### 백업 상태
 ```bash
 # etcd 백업 타이머의 활성/다음 실행 시각을 확인
@@ -190,3 +196,4 @@ kubectl -n kube-system get ds cilium -o jsonpath='{.spec.template.spec.container
 - kube-vip를 단일 CP에만 배포하는 구성 금지
 - `kubeadm-config` 수정 후 검증 없는 배포 금지
 - control-plane 다중 노드 동시 재부팅 금지
+- 노드 `INTERNAL-IP`가 외부망(`192.168.0.x`)으로 잡힌 상태 방치 금지

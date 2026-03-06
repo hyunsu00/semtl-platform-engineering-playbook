@@ -104,6 +104,18 @@ sudo crictl ps --name kube-vip
 1. 즉시 재설치하지 말고 재시도 대기
 2. 장기 지속 시 DNS/egress 네트워크 점검
 
+## 7. INTERNAL-IP가 외부망(192.168.0.x)으로 잡힘
+증상:
+- `kubectl get nodes -o wide`에서 `INTERNAL-IP`가 `10.10.10.x`가 아닌 `192.168.0.x`
+
+원인:
+- kubelet이 첫 번째 NIC(`vmbr0`)를 우선 선택
+
+조치:
+1. 각 노드 `/etc/default/kubelet`에 `KUBELET_EXTRA_ARGS=--node-ip=<10.10.10.x>` 설정
+2. `systemctl daemon-reload && systemctl restart kubelet` 실행
+3. `kubectl get nodes -o wide`에서 내부망 IP 반영 확인
+
 ## 공통 진단 순서
 1. `kubectl get nodes -o wide`
 2. `kubectl get pods -A`

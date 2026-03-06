@@ -62,6 +62,7 @@
 - `make setup`: 권장 도구(`markdownlint-cli`, `lychee`)가 없으면 설치합니다.
 - `make lint`: `**/*.md` 전체의 Markdown 포맷을 검사합니다.
 - `make link-check`: Markdown 파일의 내부/외부 링크를 검사합니다.
+- `make push`: 변경사항을 `git add -A` 후 커밋 메시지를 입력받아 현재 브랜치로 `git push` 합니다. (`MSG="docs: ..."` 환경변수로 메시지 지정 가능)
 - `make dev`: 자리표시자 타깃이며, 현재 로컬 미리보기 서버는 없습니다.
 
 PR 생성 전 권장 검증 순서:

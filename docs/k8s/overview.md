@@ -10,6 +10,7 @@ Proxmox 기반 Kubernetes HA 표준 구축/운영 기준을 정의합니다.
 - 장애 진단 및 복구 절차
 
 ## 표준 구성
+- OS: `Ubuntu 22.04 LTS`
 - Kubernetes: `v1.29.x` (`kubeadm`)
 - Runtime: `containerd`
 - CNI: `Cilium v1.15.5`
@@ -18,6 +19,7 @@ Proxmox 기반 Kubernetes HA 표준 구축/운영 기준을 정의합니다.
 - Ingress: `ingress-nginx`
 - Control Plane: 3노드(stacked etcd)
 - Worker: 2노드
+- 기본 리소스: `2/2/2/4/4 vCPU`, `6/6/6/8/8 GB RAM`
 
 ## 문서 목록
 - [Installation](./installation.md): Proxmox VM 생성부터 HA 구성 전체 설치 절차
