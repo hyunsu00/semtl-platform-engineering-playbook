@@ -1,12 +1,12 @@
 # Documentation Index
 
 ## Platform Components
-- [Proxmox](./proxmox/overview.md)
-- [Jenkins](./jenkins/overview.md)
-- [Harbor](./harbor/overview.md)
-- [GitLab](./gitlab/overview.md)
-- [Kubernetes](./k8s/overview.md)
-- [Keycloak](./keycloak/overview.md)
-- [Prometheus](./prometheus/overview.md)
-- [Grafana](./grafana/overview.md)
-- [Argo CD](./argocd/overview.md)
+- Proxmox: [Overview](./proxmox/overview.md) | [Installation](./proxmox/installation.md) | [Operation Guide](./proxmox/operation-guide.md) | [Troubleshooting](./proxmox/troubleshooting.md)
+- Jenkins: [Overview](./jenkins/overview.md) | [Installation](./jenkins/installation.md) | [Operation Guide](./jenkins/operation-guide.md) | [Troubleshooting](./jenkins/troubleshooting.md)
+- Harbor: [Overview](./harbor/overview.md) | [Installation](./harbor/installation.md) | [Operation Guide](./harbor/operation-guide.md) | [Troubleshooting](./harbor/troubleshooting.md)
+- GitLab: [Overview](./gitlab/overview.md) | [Installation](./gitlab/installation.md) | [Operation Guide](./gitlab/operation-guide.md) | [Troubleshooting](./gitlab/troubleshooting.md)
+- Kubernetes: [Overview](./k8s/overview.md) | [Installation](./k8s/installation.md) | [Operation Guide](./k8s/operation-guide.md) | [Troubleshooting](./k8s/troubleshooting.md)
+- Keycloak: [Overview](./keycloak/overview.md) | [Installation](./keycloak/installation.md) | [Operation Guide](./keycloak/operation-guide.md) | [Troubleshooting](./keycloak/troubleshooting.md)
+- Prometheus: [Overview](./prometheus/overview.md) | [Installation](./prometheus/installation.md) | [Operation Guide](./prometheus/operation-guide.md) | [Troubleshooting](./prometheus/troubleshooting.md)
+- Grafana: [Overview](./grafana/overview.md) | [Installation](./grafana/installation.md) | [Operation Guide](./grafana/operation-guide.md) | [Troubleshooting](./grafana/troubleshooting.md)
+- Argo CD: [Overview](./argocd/overview.md) | [Installation](./argocd/installation.md) | [Operation Guide](./argocd/operation-guide.md) | [Troubleshooting](./argocd/troubleshooting.md)
