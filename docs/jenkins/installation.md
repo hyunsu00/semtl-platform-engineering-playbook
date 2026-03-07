@@ -10,6 +10,17 @@
 - `kubectl` 컨텍스트 연결 완료
 - MetalLB 등 LoadBalancer 할당 가능
 - 설치 방식: Helm
+- Jenkins 워크로드 수용 노드 리소스 기준: 최소 `2 vCPU / 8GB RAM`
+- Jenkins 워크로드 수용 노드 디스크 기준: `200GB+` (운영 확장 시 `1TB` 디스크 추가 예정)
+
+### Proxmox VM H/W 참고 이미지
+
+아래 이미지는 Jenkins 워크로드를 수용하는 Kubernetes 노드의 Proxmox `Hardware` 탭 기준 예시입니다.
+
+![Proxmox VM Hardware - Jenkins](../assets/images/jenkins/proxmox-vm-hw-jenkins-v1.png)
+
+캡션: `4 vCPU`, `8GB RAM`, Data Disk `200GB+`
+향후 Data Disk `1TB` 추가 예정
 
 ## 배치 원칙
 

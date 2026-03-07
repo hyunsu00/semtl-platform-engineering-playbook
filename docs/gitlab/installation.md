@@ -8,9 +8,18 @@
 
 - OS: Ubuntu 22.04 LTS
 - VM 리소스: 최소 `4 vCPU / 12GB RAM`
+- 디스크: OS `60GB` + Data `minio`
 - 도메인: `gitlab.semtl.synology.me`
 - 외부 URL: `https://gitlab.semtl.synology.me`
 - Synology Reverse Proxy 경유 노출
+
+### Proxmox VM H/W 참고 이미지
+
+아래 이미지는 Proxmox `Hardware` 탭 기준의 GitLab VM 구성 예시입니다.
+
+![Proxmox VM Hardware - GitLab](../assets/images/gitlab/proxmox-vm-hw-gitlab-v1.png)
+
+캡션: `4 vCPU`, `12GB RAM`, OS Disk `60GB`
 
 ## 네트워크 기준
 

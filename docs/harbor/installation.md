@@ -7,10 +7,21 @@
 ## 사전 조건
 
 - OS: Ubuntu 22.04 LTS
+- VM 리소스: 최소 `2 vCPU / 6GB RAM`
+- 디스크: OS `60GB` + Data `minio`
 - 배치: VM 설치 (Kubernetes 배치 금지)
 - 도메인: `harbor.semtl.synology.me`
 - Reverse Proxy 경유 노출
 - MinIO endpoint 준비 (`http://192.168.0.171:9000` 예시)
+
+### Proxmox VM H/W 참고 이미지
+
+아래 이미지는 Proxmox `Hardware` 탭 기준의 Harbor VM 구성 예시입니다.
+
+![Proxmox VM Hardware - Harbor](../assets/images/harbor/proxmox-vm-hw-harbor-v1.png)
+
+캡션: `4 vCPU`, `8GB RAM`, OS Disk `100GB`, Data Disk `200GB`
+향후 Data Disk `1TB` 추가 예정
 
 ## 네트워크 기준
 
