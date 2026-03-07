@@ -53,16 +53,12 @@ curl -fsSL "$REPO_SCRIPT_URL" | sudo bash
 #### 1.3 GitLab Omnibus 설치 (Reverse Proxy 환경)
 
 ```bash
-# Reverse Proxy/Registry 정책을 설치 시점에 미리 적용
+# 초기 설치 실패 방지를 위해 최소 설정만 설치 시점에 임시 주입
 OMNIBUS_CFG="letsencrypt['enable'] = false;"
 OMNIBUS_CFG="${OMNIBUS_CFG} nginx['listen_port'] = 80;"
 OMNIBUS_CFG="${OMNIBUS_CFG} nginx['listen_https'] = false;"
 OMNIBUS_CFG="${OMNIBUS_CFG} registry['enable'] = false;"
 OMNIBUS_CFG="${OMNIBUS_CFG} gitlab_rails['registry_enabled'] = false;"
-OMNIBUS_CFG="${OMNIBUS_CFG} gitlab_rails['trusted_proxies'] = ['192.168.0.0/24'];"
-OMNIBUS_CFG="${OMNIBUS_CFG} nginx['real_ip_trusted_addresses'] = ['192.168.0.0/24'];"
-OMNIBUS_CFG="${OMNIBUS_CFG} nginx['real_ip_header'] = 'X-Forwarded-For';"
-OMNIBUS_CFG="${OMNIBUS_CFG} nginx['real_ip_recursive'] = 'on';"
 
 # 외부 URL 지정 후 GitLab EE 설치
 sudo EXTERNAL_URL="https://gitlab.semtl.synology.me" \
@@ -70,19 +66,41 @@ GITLAB_OMNIBUS_CONFIG="$OMNIBUS_CFG" \
 apt install -y gitlab-ee
 ```
 
-#### 1.4 정책 적용 확인 및 서비스 확인
+#### 1.4 정책 영구 반영 및 서비스 확인
+
+`GITLAB_OMNIBUS_CONFIG`는 설치 시점에만 적용되므로,
+운영 정책은 `/etc/gitlab/gitlab.rb`에 영구 반영합니다.
 
 ```bash
-# 적용된 설정 확인
-sudo grep -F "letsencrypt['enable']" /etc/gitlab/gitlab.rb
-sudo grep -F "nginx['listen_port']" /etc/gitlab/gitlab.rb
-sudo grep -F "nginx['listen_https']" /etc/gitlab/gitlab.rb
-sudo grep -F "registry['enable']" /etc/gitlab/gitlab.rb
-sudo grep -F "gitlab_rails['registry_enabled']" /etc/gitlab/gitlab.rb
-sudo grep -F "gitlab_rails['trusted_proxies']" /etc/gitlab/gitlab.rb
-sudo grep -F "nginx['real_ip_trusted_addresses']" /etc/gitlab/gitlab.rb
-sudo grep -F "nginx['real_ip_header']" /etc/gitlab/gitlab.rb
-sudo grep -F "nginx['real_ip_recursive']" /etc/gitlab/gitlab.rb
+# 설정 파일 편집
+sudo editor /etc/gitlab/gitlab.rb
+```
+
+아래 항목 확인/추가(주석 없이):
+
+```ruby
+letsencrypt['enable'] = false
+nginx['listen_port'] = 80
+nginx['listen_https'] = false
+registry['enable'] = false
+gitlab_rails['registry_enabled'] = false
+gitlab_rails['trusted_proxies'] = ['192.168.0.0/24']
+nginx['real_ip_trusted_addresses'] = ['192.168.0.0/24']
+nginx['real_ip_header'] = 'X-Forwarded-For'
+nginx['real_ip_recursive'] = 'on'
+```
+
+```bash
+# 주석 제외 실제 설정 라인 확인
+sudo grep -nE "^[^#].*letsencrypt\\['enable'\\]" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*nginx\\['listen_port'\\]" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*nginx\\['listen_https'\\]" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*registry\\['enable'\\]" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*registry_enabled" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*trusted_proxies" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*real_ip_trusted_addresses" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*real_ip_header" /etc/gitlab/gitlab.rb
+sudo grep -nE "^[^#].*real_ip_recursive" /etc/gitlab/gitlab.rb
 
 # 설정 반영
 sudo gitlab-ctl reconfigure
@@ -124,10 +142,17 @@ sudo cat /etc/gitlab/initial_root_password
 
 - `Validation failed, unable to request certificate`
 - `dpkg returned an error code (1)`
+- `ruby_block[wait for node-exporter service socket]` 단계에서 장시간 대기
 
 다음 순서로 복구합니다.
 
 ```bash
+# runit supervisor 상태 확인(node-exporter 대기 이슈 원인 점검)
+sudo systemctl status gitlab-runsvdir
+
+# gitlab-runsvdir가 failed면 재기동
+sudo systemctl restart gitlab-runsvdir
+
 # 설정 파일 편집
 sudo editor /etc/gitlab/gitlab.rb
 
@@ -135,6 +160,8 @@ sudo editor /etc/gitlab/gitlab.rb
 # letsencrypt['enable'] = false
 # nginx['listen_port'] = 80
 # nginx['listen_https'] = false
+# registry['enable'] = false
+# gitlab_rails['registry_enabled'] = false
 # gitlab_rails['trusted_proxies'] = ['192.168.0.0/24']
 # nginx['real_ip_trusted_addresses'] = ['192.168.0.0/24']
 # nginx['real_ip_header'] = 'X-Forwarded-For'
@@ -146,6 +173,9 @@ sudo dpkg --configure -a
 # 설정 반영
 sudo gitlab-ctl reconfigure
 ```
+
+`gitlab-runsvdir`가 `failed` 상태면 runit 서비스(supervise)가 생성되지 않아
+`node-exporter` 소켓 대기 단계에서 멈춘 것처럼 보일 수 있습니다.
 
 ### 2. 기본 설치 스냅샷
 
