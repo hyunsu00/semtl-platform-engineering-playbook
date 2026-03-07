@@ -30,6 +30,8 @@ nav:
   - GitLab:
       - 개요: gitlab/overview.md
       - 설치: gitlab/installation.md
+      - MinIO 연동: gitlab/minio-integration.md
+      - Harbor 연동: gitlab/harbor-integration.md
       - 운영 가이드: gitlab/operation-guide.md
       - OIDC 연동: gitlab/oidc-integration.md
       - 트러블슈팅: gitlab/troubleshooting.md

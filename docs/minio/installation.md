@@ -25,6 +25,11 @@ Ubuntu 22.04 VM에서 OS 설치를 먼저 완료한 뒤, Proxmox에서 `1TB` 데
 캡션: OS 설치 후 Proxmox에서 `1TB` 데이터 디스크를 추가하고,
 MinIO 데이터 경로를 `/data/minio`로 사용
 
+## 네트워크 기준
+
+- `net0` 단일 NIC 사용 (`192.168.0.x`)
+- 예시 VM IP: `192.168.0.171`
+
 ## 1. OS 설치 후 1TB 디스크 추가
 
 ### 1.1 Proxmox에서 1TB 디스크 추가
@@ -172,3 +177,37 @@ mc admin info local
 - `minio.service`가 `active (running)` 상태
 - `mc admin info local` 응답 정상
 - MinIO 데이터 경로가 `/data/minio`로 설정됨
+
+## 3. 설치 직후 정리 후 스냅샷
+
+스냅샷은 반드시 불필요 파일(찌꺼기) 정리 후 생성합니다.
+
+### 3.1 불필요 파일 정리
+
+```bash
+# /tmp 전체 삭제
+sudo rm -rf /tmp/*
+
+# /var/tmp 전체 삭제
+sudo rm -rf /var/tmp/*
+
+# 미사용 패키지 정리
+sudo apt autoremove -y
+
+# APT 캐시 정리
+sudo apt clean
+
+# journal 로그 전체 정리
+sudo journalctl --vacuum-time=1s
+
+# 현재 사용자 bash 히스토리 비우기
+cat /dev/null > ~/.bash_history && history -c
+```
+
+### 3.2 Proxmox 스냅샷 생성
+
+- Proxmox에서 MinIO VM 선택
+- `Snapshots > Take Snapshot` 실행
+- 이름 예시: `minio-install-clean-v1`
+- 설명 예시: `OS + 1TB disk(xfs) + minio installed on /data/minio`
+- `Include RAM`은 비활성화(권장)
