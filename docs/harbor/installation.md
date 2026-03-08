@@ -206,8 +206,8 @@ cat /dev/null > ~/.bash_history && history -c
   - harbor : v2.13.2
   - hostname : harbor.semtl.synology.me
   - reverse proxy : synology(443) -> harbor vm(80)
-  - admin id : admin
-  - admin pw : 패스워드(설치 시 지정값)
+  - id : admin
+  - pw : 패스워드(설치 시 지정값)
   ```
 - `Include RAM`은 비활성화(권장)
 

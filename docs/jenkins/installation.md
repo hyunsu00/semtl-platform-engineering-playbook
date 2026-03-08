@@ -273,46 +273,38 @@ Kubernetes Agent 연동 절차는 별도 문서에서 관리합니다.
 
 - [Jenkins Kubernetes Agent Integration](./kubernetes-agent-integration.md)
 
-## 8. 설치 직후 정리 후 스냅샷
+## 8. 기본 설치 스냅샷
 
-스냅샷은 반드시 불필요 파일(찌꺼기) 정리 후 생성합니다.
-
-### 8.1 불필요 파일 정리
+스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
 
 ```bash
-# /tmp 전체 삭제
 sudo rm -rf /tmp/*
-
-# /var/tmp 전체 삭제
 sudo rm -rf /var/tmp/*
-
-# 미사용 패키지 정리
 sudo apt autoremove -y
-
-# APT 캐시 정리
 sudo apt clean
-
-# journal 로그 전체 정리
 sudo journalctl --vacuum-time=1s
-
-# 현재 사용자 bash 히스토리 비우기
 cat /dev/null > ~/.bash_history && history -c
 ```
 
-### 8.2 Proxmox 스냅샷 생성
-
+- 시점: `2.516.1` 설치 + 초기 관리자 계정 검증 + 플러그인 설치 검증 완료 후
 - Proxmox에서 Jenkins VM 선택
 - `Snapshots > Take Snapshot` 실행
-- 이름 예시: `jenkins-install-clean-v1`
+- 권장 이름: `jenkins-install-clean-v1`
 - 설명 예시:
 
   ```text
   [설치]
   - jenkins : 2.516.1
-  - vm spec : 2cpu / 8gb / 60gb
+  - jenkins_url : https://jenkins.semtl.synology.me
+  - reverse proxy : synology(443) -> jenkins vm(8080)
   - controller : vm(native)
-  - agent : kubernetes(예정)
-  - minio integration : 예정
+  - installed_plugins :
+    - workflow-aggregator, git, gitlab-plugin, gitlab-api
+    - configuration-as-code, docker-workflow, blueocean
+    - oic-auth, matrix-auth, role-strategy, credentials-binding
+    - aws-credentials, artifact-manager-s3, pipeline-utility-steps
+  - id : admin
+  - pw : 패스워드(설치 시 지정값)
   ```
 
 - `Include RAM`은 비활성화(권장)

@@ -191,8 +191,8 @@ cat /dev/null > ~/.bash_history && history -c
   - reverse proxy : synology(443) -> gitlab vm(80)
   - letsencrypt : disabled
   - registry : disabled
-  - ID : root
-  - PW : 패스워드(로그인 직후 변경)
+  - id : root
+  - pw : 패스워드(설치 시 지정값)
   ```
 - `Include RAM`은 비활성화(권장)
 

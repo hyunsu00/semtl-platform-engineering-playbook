@@ -228,7 +228,7 @@ cat /dev/null > ~/.bash_history && history -c
   - MINIO_VOLUMES="/data/minio"
   - minio : RELEASE.2025-09-07T16-13-09Z
   - mc : RELEASE.2025-08-13T08-35-41Z
-  - ID : admin
-  - PW : 패스워드
+  - id : admin
+  - pw : 패스워드(설치 시 지정값)
   ```
 - `Include RAM`은 비활성화(권장)
