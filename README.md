@@ -37,6 +37,7 @@ make link-check
 - `docs/minio/operation-guide.md`
 - `docs/minio/oidc-integration.md` (MinIO-Keycloak OIDC 전용)
 - `docs/jenkins/installation.md`
+- `docs/jenkins/kubernetes-agent-integration.md` (Jenkins-Kubernetes Agent 연동)
 - `docs/harbor/installation.md`
 - `docs/harbor/minio-integration.md` (Harbor-MinIO S3 backend 연동)
 - `docs/harbor/operation-guide.md`

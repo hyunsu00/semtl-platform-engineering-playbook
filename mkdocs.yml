@@ -38,6 +38,7 @@ nav:
   - Jenkins:
       - 개요: jenkins/overview.md
       - 설치: jenkins/installation.md
+      - Kubernetes Agent 연동: jenkins/kubernetes-agent-integration.md
       - 운영 가이드: jenkins/operation-guide.md
       - 트러블슈팅: jenkins/troubleshooting.md
   - Harbor:
