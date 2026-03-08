@@ -94,6 +94,17 @@ kubectl -n jenkins get svc
 
 ## 스냅샷 권장 시점
 
+스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
+
+```bash
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+sudo apt autoremove -y
+sudo apt clean
+sudo journalctl --vacuum-time=1s
+cat /dev/null > ~/.bash_history && history -c
+```
+
 - 초기 관리자 비밀번호 확인 후
 - 플러그인 대량 설치 전
 

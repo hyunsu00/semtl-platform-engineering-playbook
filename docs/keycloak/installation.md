@@ -120,6 +120,17 @@ curl -s "$OIDC_DISCOVERY_URL" \
 
 OIDC 연동 전 아래 스냅샷을 권장합니다.
 
+스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
+
+```bash
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+sudo apt autoremove -y
+sudo apt clean
+sudo journalctl --vacuum-time=1s
+cat /dev/null > ~/.bash_history && history -c
+```
+
 - 이름: `BASE-Keycloak-Install`
 - 설명: `Keycloak 26.5.4 / Reverse Proxy OK / OIDC 미구성`
 

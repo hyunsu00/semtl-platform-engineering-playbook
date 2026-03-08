@@ -72,6 +72,17 @@ curl -I https://harbor.semtl.synology.me/api/v2.0/health
 
 ## 스냅샷 권장 시점
 
+스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
+
+```bash
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+sudo apt autoremove -y
+sudo apt clean
+sudo journalctl --vacuum-time=1s
+cat /dev/null > ~/.bash_history && history -c
+```
+
 - 시점: GitLab CI에서 Harbor push 성공 검증 후
 - Proxmox: `Snapshots > Take Snapshot`
 - 권장 이름: `BASE-GitLab-Harbor-Integrated-v1`

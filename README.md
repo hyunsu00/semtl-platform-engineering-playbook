@@ -37,6 +37,8 @@ make link-check
 - `docs/minio/operation-guide.md`
 - `docs/minio/oidc-integration.md` (MinIO-Keycloak OIDC 전용)
 - `docs/jenkins/installation.md`
+- `docs/harbor/installation.md`
+- `docs/harbor/minio-integration.md` (Harbor-MinIO S3 backend 연동)
 - `docs/harbor/operation-guide.md`
 - `docs/harbor/oidc-integration.md` (Harbor-Keycloak OIDC 전용)
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)

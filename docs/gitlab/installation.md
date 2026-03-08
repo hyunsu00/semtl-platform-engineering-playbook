@@ -168,6 +168,17 @@ sudo gitlab-rake "gitlab:password:reset[root]"
 
 ### 2. 기본 설치 스냅샷
 
+스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
+
+```bash
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+sudo apt autoremove -y
+sudo apt clean
+sudo journalctl --vacuum-time=1s
+cat /dev/null > ~/.bash_history && history -c
+```
+
 - 시점: `60GB` 기본 설치 + Reverse Proxy 정책 반영 + `reconfigure`/로그인 검증 완료 후
 - Proxmox에서 GitLab VM 선택
 - `Snapshots > Take Snapshot` 실행

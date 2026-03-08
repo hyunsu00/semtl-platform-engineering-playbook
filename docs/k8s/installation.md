@@ -575,6 +575,17 @@ ls -lh /var/backups/etcd
 ## 18. 스냅샷 베이스라인
 최종 검증 완료 후 VM 5대 종료 상태에서 Proxmox 스냅샷을 생성합니다.
 
+스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
+
+```bash
+sudo rm -rf /tmp/*
+sudo rm -rf /var/tmp/*
+sudo apt autoremove -y
+sudo apt clean
+sudo journalctl --vacuum-time=1s
+cat /dev/null > ~/.bash_history && history -c
+```
+
 권장 스냅샷 이름:
 - `baseline-ha-k8s-22.04`
 - `baseline-ha-k8s-3cp-vip-metallb-ingress-utc-swapfixed`

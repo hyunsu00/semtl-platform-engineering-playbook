@@ -43,6 +43,7 @@ nav:
   - Harbor:
       - 개요: harbor/overview.md
       - 설치: harbor/installation.md
+      - MinIO 연동: harbor/minio-integration.md
       - 운영 가이드: harbor/operation-guide.md
       - OIDC 연동: harbor/oidc-integration.md
       - 트러블슈팅: harbor/troubleshooting.md
