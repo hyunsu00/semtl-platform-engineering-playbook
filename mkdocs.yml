@@ -41,6 +41,8 @@ nav:
       - Kubernetes Agent 연동: jenkins/kubernetes-agent-integration.md
       - 운영 가이드: jenkins/operation-guide.md
       - 트러블슈팅: jenkins/troubleshooting.md
+  - n8n:
+      - 설치: n8n/installation.md
   - Harbor:
       - 개요: harbor/overview.md
       - 설치: harbor/installation.md

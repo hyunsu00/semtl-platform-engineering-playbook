@@ -1,6 +1,7 @@
 # SEMTL Platform Engineering Playbook
 
-Proxmox, MinIO, Jenkins, Harbor, GitLab, Kubernetes, Keycloak, Prometheus, Grafana, Argo CD 등 플랫폼 엔지니어링 영역의 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
+Proxmox, MinIO, Jenkins, n8n, Harbor, GitLab, Kubernetes, Keycloak, Prometheus,
+Grafana, Argo CD 등 플랫폼 엔지니어링 영역의 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
 
 ## 목적
 - 설치 및 초기 구성 절차 표준화
@@ -38,6 +39,7 @@ make link-check
 - `docs/minio/oidc-integration.md` (MinIO-Keycloak OIDC 전용)
 - `docs/jenkins/installation.md`
 - `docs/jenkins/kubernetes-agent-integration.md` (Jenkins-Kubernetes Agent 연동)
+- `docs/n8n/installation.md`
 - `docs/harbor/installation.md`
 - `docs/harbor/minio-integration.md` (Harbor-MinIO S3 backend 연동)
 - `docs/harbor/operation-guide.md`

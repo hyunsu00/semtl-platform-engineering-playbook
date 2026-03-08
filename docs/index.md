@@ -33,6 +33,8 @@
   [Installation](./jenkins/installation.md) |
   [Operation Guide](./jenkins/operation-guide.md) |
   [Troubleshooting](./jenkins/troubleshooting.md)
+- n8n:
+  [Installation](./n8n/installation.md)
 - Harbor:
   [Overview](./harbor/overview.md) |
   [Installation](./harbor/installation.md) |
