@@ -90,6 +90,10 @@ sudo apt update && sudo apt -y upgrade
 ### 2.2 MinIO 바이너리 설치
 
 ```bash
+# 설치 버전 고정(예시: 운영 표준 버전으로 변경해 사용)
+MINIO_VERSION="RELEASE.2025-09-07T16-13-09Z"
+MC_VERSION="RELEASE.2025-08-13T08-35-41Z"
+
 # minio 서비스 계정 생성(이미 있으면 무시)
 sudo useradd --system --home /var/lib/minio --shell /sbin/nologin minio || true
 
@@ -99,19 +103,25 @@ sudo mkdir -p /usr/local/bin /etc/minio /var/lib/minio /data/minio
 # 데이터 경로 소유권을 minio 계정으로 설정
 sudo chown -R minio:minio /var/lib/minio /data/minio
 
-# MinIO 서버 바이너리 다운로드
-curl -fsSL -o minio https://dl.min.io/server/minio/release/linux-amd64/minio
+# MinIO 서버 바이너리 다운로드(버전 고정)
+curl -fsSL -o minio \
+  "https://dl.min.io/server/minio/release/linux-amd64/archive/minio.${MINIO_VERSION}"
 # 실행 권한 부여
 chmod +x minio
 # 실행 파일 경로로 이동
 sudo mv minio /usr/local/bin/minio
 
-# MinIO Client(mc) 다운로드
-curl -fsSL -o mc https://dl.min.io/client/mc/release/linux-amd64/mc
+# MinIO Client(mc) 다운로드(버전 고정)
+curl -fsSL -o mc \
+  "https://dl.min.io/client/mc/release/linux-amd64/archive/mc.${MC_VERSION}"
 # 실행 권한 부여
 chmod +x mc
 # 실행 파일 경로로 이동
 sudo mv mc /usr/local/bin/mc
+
+# 설치 버전 확인
+/usr/local/bin/minio --version
+/usr/local/bin/mc --version
 ```
 
 ### 2.3 환경 변수 설정
@@ -177,6 +187,7 @@ mc admin info local
 - `minio.service`가 `active (running)` 상태
 - `mc admin info local` 응답 정상
 - MinIO 데이터 경로가 `/data/minio`로 설정됨
+- `minio --version`, `mc --version`이 의도한 고정 버전과 일치함
 
 ## 3. 설치 직후 정리 후 스냅샷
 
@@ -209,5 +220,15 @@ cat /dev/null > ~/.bash_history && history -c
 - Proxmox에서 MinIO VM 선택
 - `Snapshots > Take Snapshot` 실행
 - 이름 예시: `minio-install-clean-v1`
-- 설명 예시: `OS + 1TB disk(xfs) + minio installed on /data/minio`
+- 설명 예시:
+  ```text
+  [설치]
+  - 1TB disk(xfs) : /data 마운트
+  - minio 서비스 계정 생성
+  - MINIO_VOLUMES="/data/minio"
+  - minio : RELEASE.2025-09-07T16-13-09Z
+  - mc : RELEASE.2025-08-13T08-35-41Z
+  - ID : admin
+  - PW : 패스워드
+  ```
 - `Include RAM`은 비활성화(권장)
