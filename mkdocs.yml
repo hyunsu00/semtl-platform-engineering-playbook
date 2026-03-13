@@ -11,9 +11,15 @@ docs_dir: docs
 
 nav:
   - 홈: index.md
+  - Synology:
+      - 설치: synology/installation.md
+  - AdGuard Home:
+      - 설치: adguardhome/installation.md
   - Proxmox:
       - 개요: proxmox/overview.md
       - 설치: proxmox/installation.md
+      - DNS/Hostname 가이드: proxmox/dns-and-hostname-guide.md
+      - PBS 설치: proxmox/pbs-installation.md
       - 운영 가이드: proxmox/operation-guide.md
       - 트러블슈팅: proxmox/troubleshooting.md
   - MinIO:

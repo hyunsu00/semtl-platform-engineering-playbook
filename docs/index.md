@@ -2,6 +2,10 @@
 
 ## Build Order
 
+1. 공통 NAS/DNS 기반:
+   [Synology Installation](./synology/installation.md)
+1. 네트워크 DNS 필터 설치:
+   [AdGuard Home Installation](./adguardhome/installation.md)
 1. MinIO/네트워크 기준:
    [Proxmox Overview](./proxmox/overview.md)
 1. MinIO 설치:
@@ -17,9 +21,15 @@
 
 ## Platform Components
 
+- Synology:
+  [Installation](./synology/installation.md)
+- AdGuard Home:
+  [Installation](./adguardhome/installation.md)
 - Proxmox:
   [Overview](./proxmox/overview.md) |
   [Installation](./proxmox/installation.md) |
+  [DNS And Hostname Guide](./proxmox/dns-and-hostname-guide.md) |
+  [PBS Installation](./proxmox/pbs-installation.md) |
   [Operation Guide](./proxmox/operation-guide.md) |
   [Troubleshooting](./proxmox/troubleshooting.md)
 - MinIO:
