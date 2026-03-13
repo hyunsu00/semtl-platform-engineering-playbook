@@ -30,6 +30,32 @@ MinIO 데이터 경로를 `/data/minio`로 사용
 - `net0` 단일 NIC 사용 (`192.168.0.x`)
 - 예시 VM IP: `192.168.0.171`
 
+### DNS/hostname 기준
+
+MinIO VM을 DHCP로 운영하는 경우 `/etc/hosts`의 `127.0.1.1` 패턴을
+유지해도 됩니다.
+
+예시:
+
+```text
+127.0.0.1 localhost
+127.0.1.1 minio.semtl.synology.me vm-minio
+```
+
+검증 포인트:
+
+- `hostname` -> `vm-minio`
+- `hostname -f` -> `minio.semtl.synology.me`
+- `getent hosts minio.semtl.synology.me` -> `127.0.1.1 ...`
+- `nslookup minio.semtl.synology.me` -> DHCP로 받은 실제 IP
+
+중요:
+
+- `nslookup` 결과가 `127.0.1.1`이면 비정상입니다.
+- OIDC, Reverse Proxy, 외부 endpoint 검증은 반드시 DNS가 반환하는 실제 IP
+  기준으로 확인합니다.
+- 상세 기준은 `../proxmox/dns-and-hostname-guide.md`를 따릅니다.
+
 ## 1. OS 설치 후 1TB 디스크 추가
 
 ### 1.1 Proxmox에서 1TB 디스크 추가
@@ -221,6 +247,7 @@ cat /dev/null > ~/.bash_history && history -c
 - `Snapshots > Take Snapshot` 실행
 - 이름 예시: `minio-install-clean-v1`
 - 설명 예시:
+
   ```text
   [설치]
   - 1TB disk(xfs) : /data 마운트
@@ -231,4 +258,5 @@ cat /dev/null > ~/.bash_history && history -c
   - id : admin
   - pw : 패스워드(설치 시 지정값)
   ```
+
 - `Include RAM`은 비활성화(권장)

@@ -7,7 +7,7 @@
 - `docs/<component>/operation-guide.md`
 - `docs/<component>/troubleshooting.md`
 
-현재 운영 컴포넌트 예시: `proxmox`, `minio`, `k8s`, `gitlab`, `harbor`, `jenkins`, `n8n`, `keycloak`, `prometheus`, `grafana`, `argocd`
+현재 운영 컴포넌트 예시: `synology`, `adguardhome`, `proxmox`, `minio`, `k8s`, `gitlab`, `harbor`, `jenkins`, `n8n`, `keycloak`, `prometheus`, `grafana`, `argocd`
 
 문서에서 참조하는 다이어그램/스크린샷은 `assets/images/`를 사용합니다. 기본 뼈대는 `templates/how-to-template.md`를 재사용합니다. `scripts/`는 자동화 유틸리티용 디렉터리이며(현재는 최소 구성), 기여자가 실행할 공통 명령은 `Makefile`을 기준으로 합니다.
 
@@ -39,25 +39,6 @@
 - `.local/references/tickets/2026-03-06-jira-plat-1423-keycloak-sso-timeout-v2.md`
 - `.local/references/dumps/2026-03-06-k8s-prod-apiserver-log-v1.txt`
 - `.local/scratch/2026-03-06-gitlab-backup-procedure-draft-v1.md`
-
-## 채팅 히스토리 관리
-사용자-에이전트 채팅 기록은 형상관리 대상이며 `history/chat/` 아래에 저장합니다.
-- 경로: `history/chat/`
-- 템플릿: `templates/chat-history-template.md`
-- 파일명 패턴: `YYYY-MM-DD-주제-vN.md`
-- 시간 표기: UTC 기준 `HH:MM`
-- 파일명/주제는 소문자 `kebab-case` 사용
-
-예시:
-- `history/chat/2026-03-06-agents-md-history-policy-v1.md`
-- `history/chat/2026-03-06-gitlab-runbook-review-v2.md`
-
-채팅 히스토리 작성 규칙:
-- 문서마다 H1(`#`)은 1개만 사용합니다.
-- `Session Info` 섹션에 날짜(UTC), 참여자, 주제, 관련 경로를 기록합니다.
-- 대화 본문은 `Time | Speaker | Message | Action Items` 표 형식을 사용합니다.
-- 민감 정보(토큰, 비밀번호, 내부 URL)는 기록 전에 마스킹합니다.
-- 참고 원본과 달리 채팅 히스토리는 `.local/`이 아니라 Git 추적 경로(`history/chat/`)에 저장합니다.
 
 ## 빌드, 검증, 개발 명령어
 모든 명령은 저장소 루트에서 실행합니다.
