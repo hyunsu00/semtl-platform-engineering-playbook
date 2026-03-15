@@ -39,6 +39,7 @@
 ## 문서 매핑
 
 - Proxmox 배치 원칙: 이 문서
+- 디스크/사설망 확장: `docs/proxmox/storage-and-network-expansion.md`
 - GitLab 설치 상세: `docs/gitlab/installation.md`
 - Harbor 설치 상세: `docs/harbor/installation.md`
 - Jenkins 설치 상세: `docs/jenkins/installation.md`

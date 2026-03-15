@@ -28,6 +28,7 @@
 - Proxmox:
   [Overview](./proxmox/overview.md) |
   [Installation](./proxmox/installation.md) |
+  [Storage And Network Expansion](./proxmox/storage-and-network-expansion.md) |
   [DNS And Hostname Guide](./proxmox/dns-and-hostname-guide.md) |
   [Operation Guide](./proxmox/operation-guide.md) |
   [Troubleshooting](./proxmox/troubleshooting.md)
