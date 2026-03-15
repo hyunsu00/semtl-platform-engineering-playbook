@@ -46,8 +46,10 @@ make link-check
 - `docs/proxmox/overview.md`
 - `docs/proxmox/dns-and-hostname-guide.md`
   (Proxmox Host / DHCP VM DNS·hostname 표준)
-- `docs/proxmox/pbs-installation.md`
-  (Proxmox Backup Server 설치, hostname/DNS 보정, NFS mount)
+- `docs/pbs/installation.md`
+  (Proxmox Backup Server 설치, hostname/DNS 보정, 초기 관리 설정)
+- `docs/pbs/operation-guide.md`
+  (Proxmox VE 연동, 백업 작업, PBS 트러블슈팅)
 - `docs/minio/installation.md`
 - `docs/minio/operation-guide.md`
 - `docs/minio/oidc-integration.md` (MinIO-Keycloak OIDC 전용)

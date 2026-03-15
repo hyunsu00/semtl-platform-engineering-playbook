@@ -7,7 +7,7 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 준비 절차를 정리합니다.
 
 이 문서를 먼저 완료한 뒤 PBS 설치는
-[PBS 설치 가이드](../proxmox/pbs-installation.md)로 이어갑니다.
+[PBS 설치 가이드](../pbs/installation.md)로 이어갑니다.
 
 ## 아키텍처와 예시 값
 
@@ -119,5 +119,5 @@ showmount -e 192.168.0.2
 
 ## 참고
 
-- [PBS 설치 가이드](../proxmox/pbs-installation.md)
+- [PBS 설치 가이드](../pbs/installation.md)
 - [Proxmox DNS/Hostname 가이드](../proxmox/dns-and-hostname-guide.md)

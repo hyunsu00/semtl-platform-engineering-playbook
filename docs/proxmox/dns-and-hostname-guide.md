@@ -270,5 +270,5 @@ nslookup google.com
 ## 참고
 
 - Proxmox Host 운영 절차: `./operation-guide.md`
-- PBS 설치 시 DNS 기준: `./pbs-installation.md`
+- PBS 설치 시 DNS 기준: `../pbs/installation.md`
 - DHCP MinIO VM 설치 예시: `../minio/installation.md`

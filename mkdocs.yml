@@ -19,9 +19,11 @@ nav:
       - 개요: proxmox/overview.md
       - 설치: proxmox/installation.md
       - DNS/Hostname 가이드: proxmox/dns-and-hostname-guide.md
-      - PBS 설치: proxmox/pbs-installation.md
       - 운영 가이드: proxmox/operation-guide.md
       - 트러블슈팅: proxmox/troubleshooting.md
+  - PBS:
+      - 설치: pbs/installation.md
+      - 운영 가이드: pbs/operation-guide.md
   - MinIO:
       - 개요: minio/overview.md
       - 설치: minio/installation.md

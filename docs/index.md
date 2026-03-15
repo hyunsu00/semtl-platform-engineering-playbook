@@ -29,9 +29,11 @@
   [Overview](./proxmox/overview.md) |
   [Installation](./proxmox/installation.md) |
   [DNS And Hostname Guide](./proxmox/dns-and-hostname-guide.md) |
-  [PBS Installation](./proxmox/pbs-installation.md) |
   [Operation Guide](./proxmox/operation-guide.md) |
   [Troubleshooting](./proxmox/troubleshooting.md)
+- PBS:
+  [Installation](./pbs/installation.md) |
+  [Operation Guide](./pbs/operation-guide.md)
 - MinIO:
   [Overview](./minio/overview.md) |
   [Installation](./minio/installation.md) |
