@@ -22,7 +22,7 @@
 1. Harbor VM 생성/Docker Compose 설치
 1. Jenkins VM 생성 및 직접 설치
 1. n8n VM 생성 및 설치
-1. Kubernetes에 GitLab Runner 설치
+1. Kubernetes 설치
 1. Synology Reverse Proxy 라우팅 구성
 
 ## VM/CT 기준 배치
@@ -141,48 +141,48 @@
 - GitLab: 단일 운영 규모 기준으로 Sidekiq, Puma, Gitaly를 감안해 `4 vCPU`
 - Harbor: Registry 및 이미지 처리 부하를 고려해 `4 vCPU`
 - Jenkins: Controller는 전용 VM에 직접 설치하고, 빌드 실행은
-  Kubernetes agent 연동 기준으로 `2 vCPU`로 운영
+  Kubernetes agent 연동 기준으로 `2 vCPU`, 메모리는 `4GB` 시작 후 필요 시 확장
 - MinIO: CPU보다 디스크 I/O와 네트워크 영향이 더 큼
 
 ### Kubernetes Control Plane 리소스
 
-| VM | vCPU | 최소 RAM | 최대 RAM |
+| VM | vCPU | RAM | Disk |
 | --- | --- | --- | --- |
-| `k8s-cp1` | 2 | `6GB` | `8GB` |
-| `k8s-cp2` | 2 | `6GB` | `8GB` |
-| `k8s-cp3` | 2 | `6GB` | `8GB` |
+| `k8s-cp1` | 2 | `6GB` | `60GB` |
+| `k8s-cp2` | 2 | `6GB` | `60GB` |
+| `k8s-cp3` | 2 | `6GB` | `60GB` |
 
 합계:
 
 - CPU: `6 vCPU`
-- RAM: `18GB ~ 24GB`
+- RAM: `18GB`
 
 하드웨어 상세:
 
-| VM | BIOS/Machine | OS Disk | Network |
-| --- | --- | --- | --- |
-| `k8s-cp1` (`201`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` |
-| `k8s-cp2` (`202`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` |
-| `k8s-cp3` (`203`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` |
+| VM | BIOS/Machine | Storage | Network | 추가 설정 |
+| --- | --- | --- | --- | --- |
+| `k8s-cp1` (`201`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
+| `k8s-cp2` (`202`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
+| `k8s-cp3` (`203`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
 
 ### Kubernetes Worker 리소스
 
-| VM | vCPU | 최소 RAM | 최대 RAM |
+| VM | vCPU | RAM | Disk |
 | --- | --- | --- | --- |
-| `k8s-w1` | 4 | `6GB` | `12GB` |
-| `k8s-w2` | 4 | `6GB` | `12GB` |
+| `k8s-w1` | 4 | `6GB` | `200GB` |
+| `k8s-w2` | 4 | `6GB` | `200GB` |
 
 합계:
 
 - CPU: `8 vCPU`
-- RAM: `12GB ~ 24GB`
+- RAM: `12GB`
 
 하드웨어 상세:
 
-| VM | BIOS/Machine | OS Disk | Network |
-| --- | --- | --- | --- |
-| `k8s-w1` (`211`) | `UEFI/q35` | `200GB` / `k8s-service` | `vmbr0+vmbr1` |
-| `k8s-w2` (`212`) | `UEFI/q35` | `200GB` / `k8s-service` | `vmbr0+vmbr1` |
+| VM | BIOS/Machine | Storage | Network | 추가 설정 |
+| --- | --- | --- | --- | --- |
+| `k8s-w1` (`211`) | `UEFI/q35` | `200GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
+| `k8s-w2` (`212`) | `UEFI/q35` | `200GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
 
 ### 전체 리소스 합계
 
@@ -217,11 +217,11 @@ RAM(최대 기준):
 | --- | --- |
 | CT | `3GB` |
 | DevOps | `44GB` |
-| Kubernetes | `48GB` |
-| Total | `95GB` |
+| Kubernetes | `30GB` |
+| Total | `77GB` |
 
-- RAM overcommit: `95 / 64 = 1.48x`
-- 평가: Ballooning + KSM 사용 조건에서 운영 가능한 범위
+- RAM overcommit: `77 / 64 = 1.20x`
+- 평가: Kubernetes VM 고정 메모리 기준으로 RAM 모니터링이 더 중요함
 
 ### 운영 여유와 확장 기준
 
@@ -230,13 +230,13 @@ RAM(최대 기준):
 - 현재 CPU 여유: `34 vCPU` 사용 계획 기준, 실무상 `40 ~ 44 vCPU`까지 확장 여지
 - 추가 가능 CPU: 대략 `6 ~ 10 vCPU`
 - 현재 RAM 여유: 최소 할당 기준 `3GB`
-- KSM 체감 포함 RAM 여유: 대략 `5GB ~ 8GB`
+- KSM 체감 포함 RAM 여유: DevOps VM 사용량과 실제 워커 부하를 함께 모니터링해야 함
 
 추가 배치 예시:
 
 - 소형 VM: `2 vCPU / 2GB ~ 4GB`는 `2 ~ 3대` 추가 가능
 - 중형 VM: `4 vCPU / 4GB ~ 8GB`는 `1 ~ 2대` 추가 가능
-- Kubernetes Worker 추가: `4 vCPU / 6GB ~ 12GB`는 가능하지만 RAM 모니터링 필요
+- Kubernetes Worker 추가: `4 vCPU / 6GB / 200GB` 기준은 가능하지만 RAM 모니터링 필요
 
 ### 최종 평가
 
@@ -244,7 +244,7 @@ RAM(최대 기준):
 운영하기에 균형이 잘 맞는 편입니다.
 
 - CPU 여유: 좋음
-- RAM 여유: 다소 타이트하지만 정상 범위
+- RAM 여유: 고정 메모리 기준으로 매우 타이트함
 - 확장성: 추가 VM 또는 Worker 증설 여지 있음
 
 ## 문서 매핑

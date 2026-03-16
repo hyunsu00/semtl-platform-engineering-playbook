@@ -67,29 +67,33 @@
 - SCSI Controller: `VirtIO SCSI single`
 - NIC 모델: `VirtIO`
 - NIC 2개: `vmbr0` + `vmbr1`
+- Ballooning: 비활성화 (`balloon=0`)
+- KSM: 비활성화 (`allow-ksm=0`)
+- NIC 방화벽: 활성화 (`firewall=1`)
 
 생성 후 반드시 확인:
 - VM 5대 모두 NIC 2개 장착
-- cp 계열은 2 vCPU/6GB RAM, worker 계열은 4 vCPU/6GB RAM
+- cp 계열은 `2 vCPU / 6GB RAM / 60GB Disk`
+- worker 계열은 `4 vCPU / 6GB RAM / 200GB Disk`
 
 ### Proxmox VM H/W 참고 이미지
 아래 이미지는 Proxmox `Hardware` 탭 기준의 실제 구성 예시입니다.
 
 - k8s-cp1
   ![Proxmox VM Hardware - k8s-cp1](../assets/images/k8s/proxmox-vm-hw-k8s-cp1.png)
-  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
+  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
 - k8s-cp2
   ![Proxmox VM Hardware - k8s-cp2](../assets/images/k8s/proxmox-vm-hw-k8s-cp2.png)
-  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
+  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
 - k8s-cp3
   ![Proxmox VM Hardware - k8s-cp3](../assets/images/k8s/proxmox-vm-hw-k8s-cp3.png)
-  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
+  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
 - k8s-w1
   ![Proxmox VM Hardware - k8s-w1](../assets/images/k8s/proxmox-vm-hw-k8s-w1.png)
-  캡션: `4 vCPU`, `6GB ~ 12GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
+  캡션: `4 vCPU`, `6GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
 - k8s-w2
   ![Proxmox VM Hardware - k8s-w2](../assets/images/k8s/proxmox-vm-hw-k8s-w2.png)
-  캡션: `4 vCPU`, `6GB ~ 12GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
+  캡션: `4 vCPU`, `6GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
 
 ## 3. Ubuntu 22.04 설치
 모든 VM에서 동일하게 설치합니다.

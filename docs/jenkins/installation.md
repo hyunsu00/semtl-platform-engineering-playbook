@@ -7,7 +7,7 @@
 ## 사전 조건
 
 - OS: Ubuntu 22.04 LTS
-- VM 리소스: `2 vCPU / 8GB RAM`
+- VM 리소스: `2 vCPU / 4GB ~ 8GB RAM`
 - 디스크: OS `60GB`
 - Jenkins 버전: `2.516.1`
 - 도메인: `jenkins.semtl.synology.me`
@@ -26,6 +26,7 @@
 - Jenkins Controller는 VM에 단독 배치
 - Jenkins Agent는 Kubernetes에서 실행(향후 연동)
 - Artifact/Backup/Object Storage는 MinIO 연동(향후 연동)
+- 메모리는 `4GB`를 기본 할당으로 두고 필요 시 `8GB`까지 확장
 
 ## 설치 절차
 
