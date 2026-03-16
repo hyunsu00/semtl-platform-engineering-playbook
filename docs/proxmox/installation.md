@@ -323,7 +323,7 @@ systemctl status ssh
 ss -tulpen | grep ':22'
 ```
 
-외부 단말에서 접속 확인:
+초기 설치 직후 임시 확인:
 
 ```bash
 ssh root@192.168.0.254
@@ -332,7 +332,7 @@ ssh root@192.168.0.254
 운영 권장:
 
 - 초기 설정 후에는 비밀번호 로그인보다 SSH 키 기반 접속을 우선
-- 필요 시 `root` 직접 사용을 줄이고 운영자 계정을 별도 생성
+- 초기 확인 후에는 `root` SSH 로그인을 차단하고 운영자 계정을 별도 사용
 - 계정/권한 운영은 [운영 가이드](./operation-guide.md)를 따름
 
 ## 설치 검증
@@ -400,9 +400,70 @@ passwd root
 운영 메모:
 
 - `root`와 `semtl` 계정의 비밀번호를 동일하게 사용하지 않습니다.
-- 비밀번호 변경 후 SSH 로그인과 Web UI 로그인 모두 재확인합니다.
+- 비밀번호 변경 후 Web UI 로그인과 `sudo` 사용을 재확인합니다.
+- `root` SSH는 차단하더라도 Web UI의 `root@pam` 로그인까지 즉시 막지는 않습니다.
+- 초기 운영과 장애 대응을 위해 `root@pam`은 비상 관리자 계정으로 유지합니다.
 
-### 9-3. Proxmox 관리자 계정 `admin@pve` 생성
+### 9-3. SSH를 `semtl` 전용으로 제한
+
+`root` 비밀번호 변경이 끝나면 SSH는 `semtl` 계정만 허용하도록 제한합니다.
+
+이 저장소 기준 Proxmox SSH 운영 원칙은 아래와 같습니다.
+
+- SSH 접속은 `semtl` 계정으로만 허용
+- `root`는 SSH 직접 접속 금지
+- 필요 작업은 `semtl` 로그인 후 `sudo`로 수행
+
+실행 권한:
+
+- 아래 명령은 `root` 쉘에서 실행하거나 `semtl` 계정으로 로그인한 뒤 `sudo`를 붙여 실행합니다.
+
+설정 파일 생성:
+
+```bash
+install -d -m 0755 /etc/ssh/sshd_config.d
+cat <<'EOF' > /etc/ssh/sshd_config.d/90-semtl-access.conf
+PermitRootLogin no
+PasswordAuthentication yes
+PubkeyAuthentication yes
+AllowUsers semtl
+EOF
+```
+
+파일명 규칙 메모:
+
+- `sshd_config.d` 아래 `*.conf` 파일은 보통 이름순으로 읽습니다.
+- 그래서 `00-`, `10-`, `50-`, `90-`처럼 앞에 숫자를 붙여 적용 순서를 관리합니다.
+- `90-semtl-access.conf`는 기본 설정 뒤에서 운영 정책을 덮어쓰는 용도로 사용합니다.
+
+설정 검증 및 적용:
+
+```bash
+sshd -t
+systemctl restart ssh
+systemctl status ssh --no-pager
+```
+
+접속 검증:
+
+```bash
+ssh semtl@192.168.0.254
+ssh root@192.168.0.254
+```
+
+기대 결과:
+
+- `ssh semtl@192.168.0.254` 접속 성공
+- `ssh root@192.168.0.254` 접속 실패
+- Proxmox Web UI의 `root@pam` 로그인은 계속 사용 가능
+
+추가 권장:
+
+- SSH 키를 사용할 경우 `su - semtl` 후 `~/.ssh/authorized_keys`를 구성
+- 키 전환이 끝나면 `PasswordAuthentication no`를 추가로 검토
+- 평소 Web UI 운영은 `admin@pve`를 우선 사용하고 `root@pam`은 비상용으로 유지
+
+### 9-4. Proxmox 관리자 계정 `admin@pve` 생성
 
 Proxmox Web UI 전용 관리자 계정은 Linux 계정과 별도로 `pve` realm에
 생성합니다.

@@ -76,26 +76,26 @@ curl -k -b "PVEAuthCookie=<ticket>" \
   기대한 형태로 모두 보이지 않을 수 있으므로, 운영 점검은 `pveum user list`
   기준으로 맞춥니다.
 
-### root SSH 접속 허용 여부 확인
+### SSH 접속 정책 확인
 
-`root`가 SSH로 접속 가능한지 확인할 때는 SSH 데몬 설정과 실제 접속 경로를
-함께 봐야 합니다.
+이 저장소의 기본 운영 원칙은 SSH를 `semtl` 계정으로만 허용하고,
+`root` SSH 접속은 차단하는 것입니다.
 
 1. `PermitRootLogin` 설정 확인
+1. `AllowUsers` 설정 확인
 1. SSH 데몬/포트 상태 확인
-1. 외부 단말에서 실제 접속 테스트
+1. `semtl`/`root` 실제 접속 테스트
 
 설정 확인:
 
 ```bash
-grep -Rin "PermitRootLogin" /etc/ssh/sshd_config /etc/ssh/sshd_config.d 2>/dev/null
+grep -RinE "PermitRootLogin|AllowUsers" /etc/ssh/sshd_config /etc/ssh/sshd_config.d 2>/dev/null
 ```
 
 결과 해석:
 
-- `PermitRootLogin yes`: 비밀번호 또는 키 기반 root SSH 허용
-- `PermitRootLogin prohibit-password`: 비밀번호 로그인 차단, SSH 키만 허용
 - `PermitRootLogin no`: root SSH 차단
+- `AllowUsers semtl`: `semtl`만 SSH 허용
 
 서비스 상태 확인:
 
@@ -107,12 +107,16 @@ ss -tulpen | rg ':22'
 실제 접속 테스트:
 
 ```bash
+ssh semtl@<PVE-IP>
 ssh root@<PVE-IP>
 ```
 
 운영 원칙:
 
-- 외부 노출 환경에서는 `PermitRootLogin yes`를 기본값으로 두지 않음
+- SSH 로그인 계정은 `semtl`만 사용
+- `root`는 로컬 콘솔 또는 `sudo` 승격으로만 사용
+- `PermitRootLogin no`는 SSH에만 적용되며 Web UI의 `root@pam` 로그인과는 별개
+- Web UI의 `root@pam`은 초기 운영 및 장애 대응을 위한 비상 관리자 계정으로 유지
 - 비밀번호 로그인보다 SSH 키 기반 접속을 우선
 - 설정 변경 후 `systemctl restart ssh`로 반영하고 재접속으로 검증
 
@@ -190,7 +194,9 @@ Proxmox Host 예시:
 
 ## 백업 및 복구
 
-- 백업 대상: 핵심 VM/CT + 중요 스토리지 메타데이터
+- 로컬 설정 백업은 [Proxmox 로컬 설정 백업 및 복구](./config-backup-and-restore.md)
+  문서를 기준으로 수행
+- VM/CT 디스크 백업은 `vzdump` 또는 PBS 기준으로 분리 운영
 - 백업 주기: 운영 정책(일일/주간) 기준
 - 복구 검증: 월 1회 이상 샘플 복구 테스트
 

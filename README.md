@@ -48,6 +48,8 @@ make link-check
   (추가 디스크 구성, Kubernetes 사설망 `10.0.0.x` 준비)
 - `docs/proxmox/dns-and-hostname-guide.md`
   (Proxmox Host / DHCP VM DNS·hostname 표준)
+- `docs/proxmox/config-backup-and-restore.md`
+  (Proxmox 로컬 설정 백업 스크립트, 검증, 복구 절차)
 - `docs/pbs/installation.md`
   (Proxmox Backup Server 설치, hostname/DNS 보정, 초기 관리 설정)
 - `docs/pbs/operation-guide.md`
