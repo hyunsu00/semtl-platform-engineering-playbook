@@ -19,7 +19,7 @@
 
 ![Proxmox VM Hardware - Jenkins](../assets/images/jenkins/proxmox-vm-hw-jenkins-v1.png)
 
-캡션: `2 vCPU`, `8GB RAM`, OS Disk `60GB`
+캡션: `2 vCPU`, `4GB ~ 8GB RAM`, `q35`, `OVMF (UEFI)`, OS Disk `60GB`, `vmbr0`
 
 ## 배치 원칙
 

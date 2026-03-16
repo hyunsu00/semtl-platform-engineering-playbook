@@ -36,8 +36,8 @@
 | k8s-cp1 | control-plane | 2 | 6GB | 60GB | 10.10.10.11 |
 | k8s-cp2 | control-plane | 2 | 6GB | 60GB | 10.10.10.12 |
 | k8s-cp3 | control-plane | 2 | 6GB | 60GB | 10.10.10.13 |
-| k8s-w1 | worker | 4 | 8GB | 150GB | 10.10.10.21 |
-| k8s-w2 | worker | 4 | 8GB | 150GB | 10.10.10.22 |
+| k8s-w1 | worker | 4 | 6GB | 200GB | 10.10.10.21 |
+| k8s-w2 | worker | 4 | 6GB | 200GB | 10.10.10.22 |
 | API VIP | kube-vip | - | - | - | 10.10.10.100 |
 
 네트워크:
@@ -70,7 +70,7 @@
 
 생성 후 반드시 확인:
 - VM 5대 모두 NIC 2개 장착
-- cp 계열은 2 vCPU/6GB RAM, worker 계열은 4 vCPU/8GB RAM
+- cp 계열은 2 vCPU/6GB RAM, worker 계열은 4 vCPU/6GB RAM
 
 ### Proxmox VM H/W 참고 이미지
 아래 이미지는 Proxmox `Hardware` 탭 기준의 실제 구성 예시입니다.
@@ -86,10 +86,10 @@
   캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 - k8s-w1
   ![Proxmox VM Hardware - k8s-w1](../assets/images/k8s/proxmox-vm-hw-k8s-w1.png)
-  캡션: `4 vCPU`, `8GB RAM`, `150GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
+  캡션: `4 vCPU`, `6GB ~ 12GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 - k8s-w2
   ![Proxmox VM Hardware - k8s-w2](../assets/images/k8s/proxmox-vm-hw-k8s-w2.png)
-  캡션: `4 vCPU`, `8GB RAM`, `150GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
+  캡션: `4 vCPU`, `6GB ~ 12GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`, `q35/OVMF/VirtIO SCSI single`
 
 ## 3. Ubuntu 22.04 설치
 모든 VM에서 동일하게 설치합니다.

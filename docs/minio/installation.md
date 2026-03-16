@@ -23,7 +23,8 @@ Ubuntu 22.04 VM에서 OS 설치를 먼저 완료한 뒤, Proxmox에서 `1TB` 데
 ![Proxmox VM Hardware - MinIO](../assets/images/minio/proxmox-vm-hw-minio-v1.png)
 
 캡션: OS 설치 후 Proxmox에서 `1TB` 데이터 디스크를 추가하고,
-MinIO 데이터 경로를 `/data/minio`로 사용
+MinIO 데이터 경로를 `/data/minio`로 사용. 기본 VM은 `2 vCPU`, `4GB ~ 6GB RAM`,
+`q35`, `OVMF (UEFI)`, OS Disk `40GB`, `vmbr0` 기준
 
 ## 네트워크 기준
 

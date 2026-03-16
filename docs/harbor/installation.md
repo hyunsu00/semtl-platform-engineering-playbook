@@ -7,7 +7,7 @@
 ## 사전 조건
 
 - OS: Ubuntu 22.04 LTS
-- VM 리소스: 최소 `2 vCPU / 6GB RAM`
+- VM 리소스: 최소 `4 vCPU / 4GB RAM`
 - 디스크: OS `60GB` 이상
 - Harbor 버전: `v2.13.2`
 - 배치: VM 설치 (Kubernetes 배치 금지)
@@ -20,7 +20,7 @@
 
 ![Proxmox VM Hardware - Harbor](../assets/images/harbor/proxmox-vm-hw-harbor-v1.png)
 
-캡션: `2 vCPU`, `6GB RAM`, OS Disk `60GB`
+캡션: `4 vCPU`, `4GB ~ 6GB RAM`, `q35`, `OVMF (UEFI)`, OS Disk `60GB`, `vmbr0`
 
 ## 네트워크 기준
 

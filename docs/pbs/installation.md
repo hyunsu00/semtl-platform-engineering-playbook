@@ -57,7 +57,7 @@ Proxmox Web UI에서 `Create VM`을 실행합니다.
 
 ![Proxmox VM Hardware - PBS](../assets/images/proxmox/proxmox-vm-hw-pbs-v1.png)
 
-캡션: `2 vCPU`, `4GB RAM`, `q35`, `OVMF (UEFI)`, OS Disk `40GB`
+캡션: `2 vCPU`, `2GB ~ 4GB RAM`, `q35`, `OVMF (UEFI)`, OS Disk `40GB`, `vmbr0`
 
 ### General
 
@@ -86,7 +86,7 @@ Proxmox Web UI에서 `Create VM`을 실행합니다.
 
 ### CPU / Memory
 
-- 기본 권장: `2 vCPU`, `4GB RAM`
+- 기본 권장: `2 vCPU`, `2GB RAM`
 - 리소스 여유 시: `4 vCPU`, `8GB RAM`까지 확장
 
 ### Network

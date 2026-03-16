@@ -24,7 +24,7 @@
 
 ![Proxmox VM Hardware - n8n](../assets/images/n8n/proxmox-vm-hw-n8n-v1.png)
 
-캡션: `2 vCPU`, `6GB RAM`, OS Disk `60GB`
+캡션: `2 vCPU`, `2GB ~ 4GB RAM`, `q35`, `OVMF (UEFI)`, OS Disk `60GB`, `vmbr0`
 
 ## 네트워크 기준
 

@@ -20,7 +20,7 @@
 
 ![Proxmox VM Hardware - GitLab](../assets/images/gitlab/proxmox-vm-hw-gitlab-v1.png)
 
-캡션: `4 vCPU`, `12GB RAM`, OS Disk `60GB`
+캡션: `4 vCPU`, `12GB ~ 16GB RAM`, `q35`, `OVMF (UEFI)`, OS Disk `60GB`, `vmbr0`
 
 ## 네트워크 기준
 

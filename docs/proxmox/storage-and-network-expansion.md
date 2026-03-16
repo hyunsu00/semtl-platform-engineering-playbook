@@ -162,6 +162,16 @@ lvs
 
 ## 4) Kubernetes 내부망 `vmbr1` 준비
 
+현재 적용 기준:
+
+- 외부/관리 브리지: `vmbr0`
+- `vmbr0` 주소: `192.168.0.254/24`
+- `vmbr0` 게이트웨이: `192.168.0.1`
+- `vmbr0` 포트: `nic0`
+- 내부 브리지: `vmbr1`
+- `vmbr1` 주소: `10.10.10.1/24`
+- `vmbr1` 설명: `k8s internal network`
+
 1. 노드 선택 -> `Network`
 1. `Create` -> `Linux Bridge`
 
@@ -182,12 +192,15 @@ lvs
 
 - 내부 전용망이면 외부 NIC를 연결하지 않습니다.
 - Kubernetes 노드 VM은 보통 `vmbr0`와 `vmbr1` 두 개 NIC를 사용합니다.
+- 현재 호스트 기본 게이트웨이는 `vmbr0`에만 설정합니다.
+- `vmbr1`에는 게이트웨이를 넣지 않습니다.
 
 ## 5) 최종 확인
 
 - `Datacenter -> Storage`에 `local-lvm`이 없어짐
 - `k8s-service` 스토리지가 생성됨
 - `vmct-service` 스토리지가 생성됨
+- `vmbr0`가 `192.168.0.254/24`, gateway `192.168.0.1`, port `nic0`로 설정됨
 - `vmbr1`가 생성됨
 
 ## 참고
