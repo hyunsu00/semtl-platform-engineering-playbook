@@ -84,7 +84,7 @@
 
 ## 최종 리소스 계획
 
-현재 Proxmox 물리 서버 기준 리소스는 `20 cores / 64GB RAM`입니다.
+현재 Proxmox 물리 서버 기준 리소스는 `10 cores / 20 threads / 64GB RAM`입니다.
 아래 계획은 DevOps VM, Kubernetes, 보조 CT를 함께 운영하는 최종 기준안입니다.
 
 ### CT (LXC)
@@ -195,9 +195,13 @@ CPU:
 | Kubernetes | `14 vCPU` |
 | Total | `34 vCPU` |
 
-- 물리 CPU: `20 cores`
-- CPU overcommit: `34 / 20 = 1.7x`
-- 평가: 운영 기준에서 비교적 안정적인 CPU overcommit 범위
+- 물리 CPU: `10 cores / 20 threads`
+- CPU overcommit:
+  - 물리 코어 기준 `34 / 10 = 3.4x`
+  - 논리 스레드 기준 `34 / 20 = 1.7x`
+- 평가: 하이퍼스레딩을 감안한 논리 스레드 기준으로는 운영 가능한 범위지만,
+  물리 코어 기준으로는 overcommit이 높은 편이라 빌드, 압축, 레지스트리 처리,
+  GitLab 백그라운드 작업이 겹치면 CPU 경합이 발생할 수 있음
 
 RAM(최소 기준):
 
@@ -227,8 +231,11 @@ RAM(최대 기준):
 
 - KSM 절감 효과: 대략 `5GB ~ 10GB`
 - 체감 메모리 여유: `64GB` 물리 서버를 약 `70GB` 수준으로 운용하는 효과 기대
-- 현재 CPU 여유: `34 vCPU` 사용 계획 기준, 실무상 `40 ~ 44 vCPU`까지 확장 여지
-- 추가 가능 CPU: 대략 `6 ~ 10 vCPU`
+- 현재 CPU 여유: `34 vCPU` 사용 계획 기준으로 논리 스레드 `20`개 대비
+  overcommit `1.7x` 수준
+- 물리 코어 기준 CPU 밀도: `3.4x`
+- 추가 가능 CPU: 상시 부하가 낮은 소규모 서비스 기준 `2 ~ 4 vCPU` 정도는
+  가능하지만, CPU 집약 워크로드가 늘어나면 증설보다 재배치가 우선임
 - 현재 RAM 여유: 최소 할당 기준 `3GB`
 - KSM 체감 포함 RAM 여유: DevOps VM 사용량과 실제 워커 부하를 함께 모니터링해야 함
 
@@ -240,10 +247,11 @@ RAM(최대 기준):
 
 ### 최종 평가
 
-`20 cores / 64GB RAM` 기준에서 현재 구성은 DevOps 서비스와 Kubernetes를 함께
+`10 cores / 20 threads / 64GB RAM` 기준에서 현재 구성은 DevOps 서비스와 Kubernetes를 함께
 운영하기에 균형이 잘 맞는 편입니다.
 
-- CPU 여유: 좋음
+- CPU 여유: 보통 이상
+- CPU 밀도: 물리 `10코어` 기준으로는 다소 높은 편
 - RAM 여유: 고정 메모리 기준으로 매우 타이트함
 - 확장성: 추가 VM 또는 Worker 증설 여지 있음
 
