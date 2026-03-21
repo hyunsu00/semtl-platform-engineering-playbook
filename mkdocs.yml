@@ -18,6 +18,7 @@ nav:
   - Proxmox:
       - 개요: proxmox/overview.md
       - 설치: proxmox/installation.md
+      - VM 템플릿 등록: proxmox/vm-template-guide.md
       - 스토리지/네트워크 확장: proxmox/storage-and-network-expansion.md
       - DNS/Hostname 가이드: proxmox/dns-and-hostname-guide.md
       - 로컬 설정 백업/복구: proxmox/config-backup-and-restore.md

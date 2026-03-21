@@ -335,6 +335,12 @@ ssh root@192.168.0.254
 - 초기 확인 후에는 `root` SSH 로그인을 차단하고 운영자 계정을 별도 사용
 - 계정/권한 운영은 [운영 가이드](./operation-guide.md)를 따름
 
+## 9. 참고 문서
+
+반복 배포용 VM 템플릿 등록 절차는 별도 문서로 분리해 관리합니다.
+
+- [Proxmox VM Template Guide](./vm-template-guide.md)
+
 ## 설치 검증
 
 아래 명령이 모두 기대한 결과를 주면 초기 설치는 완료로 봅니다.
@@ -356,12 +362,12 @@ systemctl is-active pveproxy pvedaemon pvestatd
 - 시스템 업데이트 완료
 - 재부팅 후에도 동일 상태 유지
 
-## 9. 운영자 계정 및 Proxmox 관리자 계정 생성
+## 10. 운영자 계정 및 Proxmox 관리자 계정 생성
 
 설치 검증이 끝나면 `root`만 계속 사용하지 않도록 Linux 운영자 계정과
 Proxmox 관리자 계정을 분리해 생성합니다.
 
-### 9-1. `sudo` 설치 및 `semtl` 계정 생성
+### 10-1. `sudo` 설치 및 `semtl` 계정 생성
 
 기본 설치 환경에 `sudo`가 없을 수 있으므로 먼저 설치합니다.
 
@@ -388,7 +394,7 @@ sudo whoami
 
 정상 결과는 `root`입니다.
 
-### 9-2. `root` 비밀번호 변경
+### 10-2. `root` 비밀번호 변경
 
 설치 중 설정한 `root` 비밀번호를 계속 사용하지 않고 초기 검증 후 한 번 더
 변경합니다.
@@ -404,7 +410,7 @@ passwd root
 - `root` SSH는 차단하더라도 Web UI의 `root@pam` 로그인까지 즉시 막지는 않습니다.
 - 초기 운영과 장애 대응을 위해 `root@pam`은 비상 관리자 계정으로 유지합니다.
 
-### 9-3. SSH를 `semtl` 전용으로 제한
+### 10-3. SSH를 `semtl` 전용으로 제한
 
 `root` 비밀번호 변경이 끝나면 SSH는 `semtl` 계정만 허용하도록 제한합니다.
 

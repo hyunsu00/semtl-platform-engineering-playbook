@@ -44,6 +44,8 @@ make link-check
 - `docs/adguardhome/installation.md`
   (Synology Container Manager 기반 AdGuard Home 설치, DNS/필터 최적화)
 - `docs/proxmox/overview.md`
+- `docs/proxmox/vm-template-guide.md`
+  (Proxmox VM 템플릿 등록, Cloud-Init 기반 복제 절차)
 - `docs/proxmox/storage-and-network-expansion.md`
   (추가 디스크 구성, Kubernetes 사설망 `10.0.0.x` 준비)
 - `docs/proxmox/dns-and-hostname-guide.md`
