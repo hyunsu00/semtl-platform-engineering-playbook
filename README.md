@@ -41,6 +41,8 @@ make link-check
 
 - `docs/synology/installation.md`
   (Synology DNS Server, DHCP DNS 배포, PBS NFS Export 준비)
+- `docs/synology/wireguard-zigbee2mqtt-ha-integration.md`
+  (WireGuard VM 게이트웨이, Zigbee2MQTT 원격 브리지 연결, Home Assistant 연동)
 - `docs/adguardhome/installation.md`
   (Synology Container Manager 기반 AdGuard Home 설치, DNS/필터 최적화)
 - `docs/proxmox/overview.md`
