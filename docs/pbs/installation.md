@@ -55,7 +55,7 @@ Proxmox Web UI에서 `Create VM`을 실행합니다.
 
 아래 이미지는 Proxmox `Hardware` 탭 기준의 PBS VM 구성 예시입니다.
 
-![Proxmox VM Hardware - PBS](../assets/images/proxmox/proxmox-vm-hw-pbs-v1.png)
+![Proxmox VM Hardware - PBS](../assets/images/pbs/proxmox-vm-hw-pbs-v1.png)
 
 캡션: `2 vCPU`, `2GB ~ 4GB RAM`, `q35`, `OVMF (UEFI)`, OS Disk `40GB`, `vmbr0`
 
