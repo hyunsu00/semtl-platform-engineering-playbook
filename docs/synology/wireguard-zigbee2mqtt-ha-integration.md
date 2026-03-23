@@ -386,19 +386,23 @@ wg show
 구분:
 
 - `/etc/sysctl.conf`는 `ip_forward`, `rp_filter` 같은 커널 네트워크 옵션을 부팅 후에도 유지하는 설정입니다.
-- `rc-update add wg-quick.default`는 부팅 시 `wg0` 인터페이스 자체를 자동으로 올리는 설정입니다.
+- OpenRC 자동 시작은 `wg-quick.wg0` 서비스로 등록합니다.
 - 즉, `sysctl.conf`를 수정했다고 해서 `WireGuard`가 자동 기동되지는 않습니다.
 
 OpenRC 자동 시작 등록:
 
 ```bash
-rc-update add wg-quick.default
+apk add wireguard-tools-openrc
+ln -s /etc/init.d/wg-quick /etc/init.d/wg-quick.wg0
+rc-service wg-quick.wg0 start
+rc-update add wg-quick.wg0 default
 ```
 
 필요 시 부팅 후 상태 확인:
 
 ```bash
-wg show
+rc-service wg-quick.wg0 status
+sudo wg show
 ip route
 ```
 
@@ -561,6 +565,7 @@ services:
     restart: unless-stopped
     environment:
       - TZ=Asia/Seoul
+      - Z2M_WATCHDOG=default
     volumes:
       - /volume1/docker/zigbee2mqtt-zbbridge-pro/data:/app/data
     ports:
@@ -645,6 +650,7 @@ devices: {}
 - `mqtt.user`, `mqtt.password`는 실제 값으로 교체합니다.
 - `base_topic`은 기존 Zigbee2MQTT 인스턴스와 겹치지 않게 분리합니다.
 - 원격 브리지 종류에 따라 `adapter` 값은 조정이 필요할 수 있습니다.
+- 원격 TCP 브리지 환경에서는 `Z2M_WATCHDOG=default`를 두는 편이 재시작 복구에 유리합니다.
 
 ### 5-4. 컨테이너 기동
 
