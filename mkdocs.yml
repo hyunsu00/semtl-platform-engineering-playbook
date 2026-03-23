@@ -13,6 +13,7 @@ nav:
   - 홈: index.md
   - Synology:
       - 설치: synology/installation.md
+      - Tailscale 설치: synology/tailscale-installation.md
       - WireGuard + Zigbee2MQTT + HA 연동: synology/wireguard-zigbee2mqtt-ha-integration.md
   - AdGuard Home:
       - 설치: adguardhome/installation.md

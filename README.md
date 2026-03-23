@@ -41,6 +41,8 @@ make link-check
 
 - `docs/synology/installation.md`
   (Synology DNS Server, DHCP DNS 배포, PBS NFS Export 준비)
+- `docs/synology/tailscale-installation.md`
+  (Synology DSM에서 Tailscale 설치, 자동 업데이트, DSM7 outbound 연결 활성화)
 - `docs/synology/wireguard-zigbee2mqtt-ha-integration.md`
   (WireGuard VM 게이트웨이, Zigbee2MQTT 원격 브리지 연결, Home Assistant 연동)
 - `docs/adguardhome/installation.md`

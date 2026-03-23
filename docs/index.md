@@ -23,6 +23,7 @@
 
 - Synology:
   [Installation](./synology/installation.md) |
+  [Tailscale Installation](./synology/tailscale-installation.md) |
   [WireGuard Zigbee2MQTT HA Integration](./synology/wireguard-zigbee2mqtt-ha-integration.md)
 - AdGuard Home:
   [Installation](./adguardhome/installation.md)
