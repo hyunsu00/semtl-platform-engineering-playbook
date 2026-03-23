@@ -77,7 +77,7 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
   ```bash
   cat /etc/network/interfaces
   cat /etc/resolv.conf
-  nslookup proxmox.semtl.synology.me 192.168.0.2
+  nslookup proxmox.internal.semtl.synology.me 192.168.0.2
   nslookup google.com 192.168.0.2
   ```
 

@@ -242,6 +242,65 @@ passwd root
 - 가능하면 `semtl` 계정으로 `sudo`를 사용하고 `root` 직접 로그인은 최소화
 - 비밀번호 변경 후 SSH 세션과 Web UI 로그인 모두 재확인
 
+### 6-4. SSH를 `semtl` 전용으로 제한
+
+`root` 비밀번호 변경이 끝나면 SSH는 `semtl` 계정만 허용하도록 제한합니다.
+
+이 저장소 기준 PBS SSH 운영 원칙은 아래와 같습니다.
+
+- SSH 접속은 `semtl` 계정으로만 허용
+- `root`는 SSH 직접 접속 금지
+- 필요 작업은 `semtl` 로그인 후 `sudo`로 수행
+
+실행 권한:
+
+- 아래 명령은 `root` 쉘에서 실행하거나 `semtl` 계정으로 로그인한 뒤 `sudo`를 붙여 실행합니다.
+
+설정 파일 생성:
+
+```bash
+install -d -m 0755 /etc/ssh/sshd_config.d
+cat <<'EOF' > /etc/ssh/sshd_config.d/90-semtl-access.conf
+PermitRootLogin no
+PasswordAuthentication yes
+PubkeyAuthentication yes
+AllowUsers semtl
+EOF
+```
+
+파일명 규칙 메모:
+
+- `sshd_config.d` 아래 `*.conf` 파일은 보통 이름순으로 읽습니다.
+- 그래서 `00-`, `10-`, `50-`, `90-`처럼 앞에 숫자를 붙여 적용 순서를 관리합니다.
+- `90-semtl-access.conf`는 기본 설정 뒤에서 운영 정책을 덮어쓰는 용도로 사용합니다.
+
+설정 검증 및 적용:
+
+```bash
+sshd -t
+systemctl restart ssh
+systemctl status ssh --no-pager
+```
+
+접속 검증:
+
+```bash
+ssh semtl@192.168.0.253
+ssh root@192.168.0.253
+```
+
+기대 결과:
+
+- `ssh semtl@192.168.0.253` 접속 성공
+- `ssh root@192.168.0.253` 접속 실패
+- PBS Web UI 로그인은 계속 사용 가능
+
+추가 권장:
+
+- SSH 키를 사용할 경우 `su - semtl` 후 `~/.ssh/authorized_keys`를 구성
+- 키 전환이 끝나면 `PasswordAuthentication no`를 추가로 검토
+- 평소 OS 작업은 `semtl`로 수행하고 `root`는 비상용으로만 유지
+
 ## 7) 설치 후 hostname/DNS 확인 및 보정
 
 ### 7-1. hostname 수정
@@ -373,7 +432,7 @@ ss -tulpen | grep ':8007'
 
 스냅샷은 반드시 불필요 파일(찌꺼기) 정리 후 생성합니다.
 
-### 10-1. 불필요 파일 정리
+### 10-1. 불필요 파일 정리 (semtl 실행)
 
 ```bash
 # /tmp 전체 삭제
@@ -392,7 +451,9 @@ sudo apt clean
 sudo journalctl --vacuum-time=1s
 
 # root / semtl bash 히스토리 비우기
+su -
 cat /dev/null > /root/.bash_history && history -c
+exit
 cat /dev/null > /home/semtl/.bash_history && history -c
 ```
 
@@ -400,6 +461,7 @@ cat /dev/null > /home/semtl/.bash_history && history -c
 
 - `admin@pbs` 계정 생성 및 Web UI 접속 확인 완료 후
 - `sudo` 설치 및 `semtl` 계정 생성 완료 후
+- `6-4. SSH를 semtl 전용으로 제한` 적용 및 접속 확인 완료 후
 - `hostname`, `/etc/hosts`, DNS 보정 완료 후
 - Datastore 연결 및 실제 백업 작업 생성 전
 
@@ -413,7 +475,22 @@ Proxmox Web UI 절차:
 권장 예시:
 
 - `Name`: `BASELINE`
-- `Description`: `PBS 4.x 초기 설치 완료, pbs-enterprise 비활성화 및 no-subscription 추가, 시스템 업데이트 완료, qemu-guest-agent 설치 및 활성화, sudo 설치, semtl 계정 생성 및 sudo 권한 부여, root 비밀번호 변경, hostname vm-pbs로 변경, /etc/hosts 및 DNS 설정 보정, admin@pbs 계정 생성 및 Admin ACL 부여, Web UI 접속 확인 완료`
+- `Description` 예시:
+
+```text
+- PBS 4.x 초기 설치 완료
+- pbs-enterprise 비활성화 및 no-subscription 추가
+- 시스템 업데이트 완료
+- qemu-guest-agent 설치 및 활성화
+- sudo 설치
+- semtl 계정 생성 및 sudo 권한 부여
+- root 비밀번호 변경
+- ssh를 semtl 전용으로 제한 적용 및 접속 확인 완료
+- hostname vm-pbs로 변경
+- /etc/hosts 및 DNS 설정 보정
+- admin@pbs 계정 생성 및 Admin ACL 부여
+- Web UI 접속 확인 완료
+```
 
 운영 메모:
 

@@ -40,21 +40,23 @@ MinIO VM을 DHCP로 운영하는 경우 `/etc/hosts`의 `127.0.1.1` 패턴을
 
 ```text
 127.0.0.1 localhost
-127.0.1.1 minio.semtl.synology.me vm-minio
+127.0.1.1 minio.internal.semtl.synology.me vm-minio
 ```
 
 검증 포인트:
 
 - `hostname` -> `vm-minio`
-- `hostname -f` -> `minio.semtl.synology.me`
-- `getent hosts minio.semtl.synology.me` -> `127.0.1.1 ...`
-- `nslookup minio.semtl.synology.me` -> DHCP로 받은 실제 IP
+- `hostname -f` -> `minio.internal.semtl.synology.me`
+- `getent hosts minio.internal.semtl.synology.me` -> `127.0.1.1 ...`
+- MinIO VM 자신에서 `nslookup minio.internal.semtl.synology.me` -> `127.0.0.1`
+- 다른 PC에서 `nslookup minio.internal.semtl.synology.me` -> DHCP로 받은 실제 IP
 
 중요:
 
-- `nslookup` 결과가 `127.0.1.1`이면 비정상입니다.
-- OIDC, Reverse Proxy, 외부 endpoint 검증은 반드시 DNS가 반환하는 실제 IP
-  기준으로 확인합니다.
+- MinIO VM 자신에서 `nslookup` 결과가 `127.0.0.1`로 보이는 것은 의도한 동작입니다.
+- 다른 PC에서 `nslookup` 결과가 `127.0.0.1` 또는 `127.0.1.1`이면 비정상입니다.
+- OIDC, Reverse Proxy, 외부 endpoint 검증은 반드시 다른 PC 기준 DNS가 반환하는
+  실제 IP로 확인합니다.
 - 상세 기준은 `../proxmox/dns-and-hostname-guide.md`를 따릅니다.
 
 ## 1. OS 설치 후 1TB 디스크 추가

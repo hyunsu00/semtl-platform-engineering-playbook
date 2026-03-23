@@ -31,8 +31,8 @@ Synology `DNS Server` 확인 항목:
 
 예시:
 
-- `proxmox.semtl.synology.me -> 192.168.0.254`
-- `minio.semtl.synology.me -> 192.168.0.x`
+- `proxmox.internal.semtl.synology.me -> 192.168.0.254`
+- `minio.internal.semtl.synology.me -> 192.168.0.x`
 - `pbs.semtl.synology.me -> 192.168.0.253`
 
 ## Proxmox Host 표준
@@ -43,19 +43,19 @@ Synology `DNS Server` 확인 항목:
 예시:
 
 - short hostname: `proxmox`
-- FQDN: `proxmox.semtl.synology.me`
+- FQDN: `proxmox.internal.semtl.synology.me`
 
 권장 정합성:
 
 - `hostname` -> `proxmox`
-- `hostname -f` -> `proxmox.semtl.synology.me`
-- `/etc/hosts` -> `192.168.0.254 proxmox.semtl.synology.me proxmox`
+- `hostname -f` -> `proxmox.internal.semtl.synology.me`
+- `/etc/hosts` -> `192.168.0.254 proxmox.internal.semtl.synology.me proxmox`
 
 예시:
 
 ```text
 127.0.0.1 localhost.localdomain localhost
-192.168.0.254 proxmox.semtl.synology.me proxmox
+192.168.0.254 proxmox.internal.semtl.synology.me proxmox
 ```
 
 검증 명령:
@@ -63,8 +63,8 @@ Synology `DNS Server` 확인 항목:
 ```bash
 hostname
 hostname -f
-getent hosts proxmox.semtl.synology.me
-nslookup proxmox.semtl.synology.me
+getent hosts proxmox.internal.semtl.synology.me
+nslookup proxmox.internal.semtl.synology.me
 ```
 
 주의:
@@ -82,7 +82,7 @@ nslookup proxmox.semtl.synology.me
 
 ```text
 127.0.0.1 localhost
-127.0.1.1 minio.semtl.synology.me vm-minio
+127.0.1.1 minio.internal.semtl.synology.me vm-minio
 ```
 
 이 구성의 의미:
@@ -93,14 +93,16 @@ nslookup proxmox.semtl.synology.me
 정상 예시:
 
 - `hostname` -> `vm-minio`
-- `hostname -f` -> `minio.semtl.synology.me`
-- `getent hosts minio.semtl.synology.me` -> `127.0.1.1 ...`
-- `nslookup minio.semtl.synology.me` -> `192.168.0.x`
+- `hostname -f` -> `minio.internal.semtl.synology.me`
+- `getent hosts minio.internal.semtl.synology.me` -> `127.0.1.1 ...`
+- MinIO VM 자신에서 `nslookup minio.internal.semtl.synology.me` -> `127.0.0.1`
+- 다른 PC에서 `nslookup minio.internal.semtl.synology.me` -> `192.168.0.x`
 
 중요:
 
 - `nslookup`은 `/etc/hosts`가 아니라 DNS 서버를 조회합니다.
-- 따라서 `nslookup` 결과는 `127.0.1.1`이 아니라 실제 VM IP여야 정상입니다.
+- MinIO VM 자신에서 `127.0.0.1`을 반환하도록 구성했다면 이는 정상 동작입니다.
+- 다른 PC 기준으로는 실제 VM IP가 반환되어야 정상입니다.
 
 ## Static IP 인프라 노드 표준
 
@@ -212,7 +214,7 @@ nameserver 1.1.1.1
 ### 4) Synology DNS 확인
 
 ```bash
-nslookup proxmox.semtl.synology.me 192.168.0.2
+nslookup proxmox.internal.semtl.synology.me 192.168.0.2
 nslookup google.com 192.168.0.2
 ```
 
@@ -244,7 +246,7 @@ hostname -f
 cat /etc/resolv.conf
 cat /etc/network/interfaces
 cat /etc/hosts
-nslookup proxmox.semtl.synology.me
+nslookup proxmox.internal.semtl.synology.me
 ```
 
 DHCP VM:

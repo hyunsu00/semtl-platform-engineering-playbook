@@ -164,14 +164,14 @@ Proxmox Host 예시:
 ```text
 /etc/hosts
 127.0.0.1 localhost.localdomain localhost
-192.168.0.254 proxmox.semtl.synology.me proxmox
+192.168.0.254 proxmox.internal.semtl.synology.me proxmox
 ```
 
 정상 예시:
 
 - `hostname` -> `proxmox`
-- `hostname -f` -> `proxmox.semtl.synology.me`
-- `nslookup proxmox.semtl.synology.me` -> `192.168.0.254`
+- `hostname -f` -> `proxmox.internal.semtl.synology.me`
+- `nslookup proxmox.internal.semtl.synology.me` -> `192.168.0.254`
 
 운영 메모:
 
