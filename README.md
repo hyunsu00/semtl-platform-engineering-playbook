@@ -56,6 +56,8 @@ make link-check
   (Proxmox Host / DHCP VM DNS·hostname 표준)
 - `docs/proxmox/config-backup-and-restore.md`
   (Proxmox 로컬 설정 백업 스크립트, 검증, 복구 절차)
+- `docs/proxmox/amt-watchdog-and-alerting.md`
+  (Intel AMT 응답 불안정 원인 분석, GRUB 보정, Synology NAS 감시/Telegram 알림)
 - `docs/pbs/installation.md`
   (Proxmox Backup Server 설치, hostname/DNS 보정, 초기 관리 설정)
 - `docs/pbs/operation-guide.md`

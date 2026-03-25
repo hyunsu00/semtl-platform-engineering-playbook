@@ -81,6 +81,23 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
   nslookup google.com 192.168.0.2
   ```
 
+### 이슈 6: Proxmox Host는 정상인데 Intel AMT만 죽음
+
+- 증상:
+  - Proxmox Web UI, SSH, VM은 정상
+  - Intel AMT Web UI만 간헐적으로 접속 불가
+  - 재부팅 후 일시 복구
+- 원인:
+  - C-State, PCIe ASPM, Intel ME firmware 계열 이슈 가능성이 높음
+  - Proxmox Host 자기 자신에서 자기 AMT를 점검하면 오탐 가능
+- 해결:
+  - GRUB에서 `intel_idle.max_cstate=1 processor.max_cstate=1 pcie_aspm=off`
+    적용
+  - 외부 장비(Synology NAS)에서 AMT 포트 감시
+  - DSM 로그 및 Telegram 알림 구성
+- 상세 문서:
+  - [Intel AMT Watchdog And Alerting](./amt-watchdog-and-alerting.md)
+
 ## 에스컬레이션 기준
 
 - 15분 이상 서비스 영향 지속
