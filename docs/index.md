@@ -34,6 +34,12 @@
   [DNS And Hostname Guide](./proxmox/dns-and-hostname-guide.md) |
   [Operation Guide](./proxmox/operation-guide.md) |
   [Troubleshooting](./proxmox/troubleshooting.md)
+- ttyd:
+  [Installation](./ttyd/installation.md)
+- Upsnap:
+  [Installation](./upsnap/installation.md)
+- tmux:
+  [Installation And Usage](./tmux/installation.md)
 - PBS:
   [Installation](./pbs/installation.md) |
   [Operation Guide](./pbs/operation-guide.md)

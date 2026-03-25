@@ -27,6 +27,12 @@ nav:
       - Intel AMT 감시/알림: proxmox/amt-watchdog-and-alerting.md
       - 운영 가이드: proxmox/operation-guide.md
       - 트러블슈팅: proxmox/troubleshooting.md
+  - ttyd:
+      - 설치: ttyd/installation.md
+  - Upsnap:
+      - 설치: upsnap/installation.md
+  - tmux:
+      - 설치 및 사용법: tmux/installation.md
   - PBS:
       - 설치: pbs/installation.md
       - 운영 가이드: pbs/operation-guide.md

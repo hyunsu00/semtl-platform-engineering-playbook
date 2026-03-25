@@ -58,6 +58,12 @@ make link-check
   (Proxmox 로컬 설정 백업 스크립트, 검증, 복구 절차)
 - `docs/proxmox/amt-watchdog-and-alerting.md`
   (Intel AMT 응답 불안정 원인 분석, GRUB 보정, Synology NAS 감시/Telegram 알림)
+- `docs/ttyd/installation.md`
+  (Ubuntu/Alpine Linux에서 ttyd 설치, 서비스 등록, 기본 검증)
+- `docs/upsnap/installation.md`
+  (Docker 기반 Upsnap 설치, 장비 등록, Wake-on-LAN 검증)
+- `docs/tmux/installation.md`
+  (Ubuntu/Alpine Linux에서 tmux 설치, 세션/윈도우/패인 기본 사용법)
 - `docs/pbs/installation.md`
   (Proxmox Backup Server 설치, hostname/DNS 보정, 초기 관리 설정)
 - `docs/pbs/operation-guide.md`
