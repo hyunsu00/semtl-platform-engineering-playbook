@@ -74,10 +74,7 @@
   [Operation Guide](./k8s/operation-guide.md) |
   [Troubleshooting](./k8s/troubleshooting.md)
 - Keycloak:
-  [Overview](./keycloak/overview.md) |
-  [Installation](./keycloak/installation.md) |
-  [Operation Guide](./keycloak/operation-guide.md) |
-  [Troubleshooting](./keycloak/troubleshooting.md)
+  [Installation](./keycloak/installation.md)
 - Prometheus:
   [Overview](./prometheus/overview.md) |
   [Installation](./prometheus/installation.md) |
