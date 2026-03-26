@@ -1,0 +1,3702 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Platform engineering documentation for Proxmox, Kubernetes, and related components.">
+      
+      
+      
+        <link rel="canonical" href="https://hyunsu00.github.io/semtl-platform-engineering-playbook/pbs/installation/">
+      
+      
+        <link rel="prev" href="../../tmux/installation/">
+      
+      
+        <link rel="next" href="../operation-guide/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>설치 - SEMTL Platform Engineering Playbook</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#proxmox-backup-server-installation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SEMTL Platform Engineering Playbook" class="md-header__button md-logo" aria-label="SEMTL Platform Engineering Playbook" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SEMTL Platform Engineering Playbook
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              설치
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hyunsu00/semtl-platform-engineering-playbook" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hyunsu00/semtl-platform-engineering-playbook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SEMTL Platform Engineering Playbook" class="md-nav__button md-logo" aria-label="SEMTL Platform Engineering Playbook" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SEMTL Platform Engineering Playbook
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hyunsu00/semtl-platform-engineering-playbook" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hyunsu00/semtl-platform-engineering-playbook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    홈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Synology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Synology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/tailscale-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tailscale 설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/wireguard-zigbee2mqtt-ha-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard + Zigbee2MQTT + HA 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AdGuard Home
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    AdGuard Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adguardhome/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Proxmox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/vm-template-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM 템플릿 등록
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/storage-and-network-expansion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    스토리지/네트워크 확장
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/dns-and-hostname-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DNS/Hostname 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/config-backup-and-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    로컬 설정 백업/복구
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/amt-watchdog-and-alerting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intel AMT 감시/알림
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ttyd
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ttyd
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ttyd/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upsnap
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Upsnap
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../upsnap/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tmux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    tmux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tmux/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치 및 사용법
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PBS
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    PBS
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        개요
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        아키텍처와 버전 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        네이밍 및 DNS 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        사전 조건
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-pbs-vm-proxmox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1) PBS VM 생성 (Proxmox)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1) PBS VM 생성 (Proxmox)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proxmox-vm-hw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proxmox VM H/W 참고 이미지
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disk-os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disk (OS 디스크)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cpu-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CPU / Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-pbs-iso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2) PBS ISO 설치
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-web-ui-apt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3) Web UI에서 APT 리포지토리 설정
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4) 설치 후 초기 업데이트
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-qemu-guest-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5) qemu-guest-agent 설치 및 활성화
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6) 운영자 계정 및 sudo 초기 설정
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6) 운영자 계정 및 sudo 초기 설정">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-1. sudo 설치
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2-semtl-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-2. semtl 계정 생성 및 sudo 권한 부여
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-3-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-3. root 비밀번호 변경
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-4-ssh-semtl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-4. SSH를 semtl 전용으로 제한
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-hostnamedns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7) 설치 후 hostname/DNS 확인 및 보정
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7) 설치 후 hostname/DNS 확인 및 보정">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-1-hostname" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7-1. hostname 수정
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-2-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7-2. DNS 수정
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-pbs-acl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8) PBS 로컬 사용자 ACL 추가
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-pbs-web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9) PBS Web UI 접속 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10) 초기 설치 완료 후 스냅샷 생성
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10) 초기 설치 완료 후 스냅샷 생성">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-1-semtl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10-1. 불필요 파일 정리 (semtl 실행)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MinIO
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MinIO
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../minio/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Kubernetes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitLab
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    GitLab
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/minio-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MinIO 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/harbor-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jenkins
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Jenkins
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/kubernetes-agent-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Agent 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    n8n
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    n8n
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../n8n/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Harbor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../harbor/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Keycloak
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Keycloak
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../keycloak/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prometheus
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Prometheus
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" >
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grafana
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Grafana
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Argo CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        개요
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        아키텍처와 버전 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        네이밍 및 DNS 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        사전 조건
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-pbs-vm-proxmox" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1) PBS VM 생성 (Proxmox)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1) PBS VM 생성 (Proxmox)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proxmox-vm-hw" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proxmox VM H/W 참고 이미지
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#general" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        General
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#disk-os" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Disk (OS 디스크)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cpu-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CPU / Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-pbs-iso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2) PBS ISO 설치
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-web-ui-apt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3) Web UI에서 APT 리포지토리 설정
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4) 설치 후 초기 업데이트
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-qemu-guest-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5) qemu-guest-agent 설치 및 활성화
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6) 운영자 계정 및 sudo 초기 설정
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6) 운영자 계정 및 sudo 초기 설정">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-1. sudo 설치
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2-semtl-sudo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-2. semtl 계정 생성 및 sudo 권한 부여
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-3-root" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-3. root 비밀번호 변경
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-4-ssh-semtl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-4. SSH를 semtl 전용으로 제한
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-hostnamedns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7) 설치 후 hostname/DNS 확인 및 보정
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7) 설치 후 hostname/DNS 확인 및 보정">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-1-hostname" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7-1. hostname 수정
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-2-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7-2. DNS 수정
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-pbs-acl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8) PBS 로컬 사용자 ACL 추가
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-pbs-web-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9) PBS Web UI 접속 확인
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10) 초기 설치 완료 후 스냅샷 생성
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10) 초기 설치 완료 후 스냅샷 생성">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-1-semtl" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10-1. 불필요 파일 정리 (semtl 실행)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="proxmox-backup-server-installation">Proxmox Backup Server Installation</h1>
+<h2 id="_1">개요</h2>
+<p>이 문서는 Proxmox VE 환경에서 Proxmox Backup Server(PBS)를 별도 VM으로
+설치하고, 초기 접속 및 기본 관리 설정까지 수행하는 절차를 정리합니다.</p>
+<h2 id="_2">아키텍처와 버전 기준</h2>
+<ul>
+<li>권장 구조: <code>Proxmox VM(PBS)</code></li>
+<li>권장 배치: <code>PBS</code>는 <code>Kubernetes</code> 밖(독립 VM)에서 운영</li>
+<li>버전 기준: <code>Proxmox VE 9.x</code> 환경은 <code>PBS 4.x</code> 사용</li>
+</ul>
+<h2 id="dns">네이밍 및 DNS 기준</h2>
+<ul>
+<li>내부 전용 이름보다 실제 관리 중인 도메인 우선</li>
+<li>이 환경에서는 <code>*.internal.semtl.synology.me</code> 체계를 사용</li>
+<li>PBS short hostname 권장: <code>vm-pbs</code></li>
+<li>PBS 권장 FQDN: <code>pbs.internal.semtl.synology.me</code></li>
+<li>PBS 관리 IP 예시: <code>192.168.0.253</code></li>
+<li>Synology DNS Server IP 예시: <code>192.168.0.2</code></li>
+<li>Gateway 예시: <code>192.168.0.1</code></li>
+</ul>
+<p>참고:</p>
+<ul>
+<li>설치 자체는 짧은 이름(<code>vm-pbs</code>)만으로도 진행될 수 있습니다.</li>
+<li>다만 내부 DNS, 인증서, 메일 알림, 자기 자신에 대한 이름 해석까지
+  고려하면 PBS에는 FQDN을 맞추는 편이 안정적입니다.</li>
+<li>운영 정합성은 <code>hostname</code>은 short hostname, <code>hostname -f</code>는 FQDN이
+  되도록 맞추는 구성을 우선 권장합니다.</li>
+<li><code>.local</code>은 mDNS 충돌 여지가 있으므로 기본 선택지로 두지 않습니다.</li>
+</ul>
+<h2 id="_3">사전 조건</h2>
+<ul>
+<li>Proxmox VE에서 PBS용 VM 생성 권한</li>
+<li>PBS ISO 이미지 다운로드 (<code>https://www.proxmox.com/en/downloads</code>)</li>
+<li>Synology 측 DNS 사전 준비
+  (<a href="../../synology/installation/">시놀로지 설치 가이드</a> 참고)</li>
+<li>PBS 고정 IP 및 FQDN 계획</li>
+</ul>
+<p>예시 PBS IP:
+<code>192.168.0.253</code></p>
+<p>예시 FQDN:
+<code>pbs.internal.semtl.synology.me</code></p>
+<p>사전 준비 상세:
+<a href="../../synology/installation/">시놀로지 설치 가이드</a></p>
+<h2 id="1-pbs-vm-proxmox">1) PBS VM 생성 (Proxmox)</h2>
+<p>Proxmox Web UI에서 <code>Create VM</code>을 실행합니다.</p>
+<h3 id="proxmox-vm-hw">Proxmox VM H/W 참고 이미지</h3>
+<p>아래 이미지는 Proxmox <code>Hardware</code> 탭 기준의 PBS VM 구성 예시입니다.</p>
+<p><img alt="Proxmox VM Hardware - PBS" src="../../assets/images/pbs/proxmox-vm-hw-pbs-v1.png" /></p>
+<p>캡션: <code>2 vCPU</code>, <code>2GB ~ 4GB RAM</code>, <code>q35</code>, <code>OVMF (UEFI)</code>, OS Disk <code>40GB</code>, <code>vmbr0</code></p>
+<h3 id="general">General</h3>
+<ul>
+<li><code>VM ID</code>: 예) <code>100</code></li>
+<li><code>Name</code>: 예) <code>vm-pbs</code></li>
+</ul>
+<h3 id="os">OS</h3>
+<ul>
+<li><code>ISO Image</code>: <code>proxmox-backup-server_4.x-x.iso</code></li>
+<li><code>Guest OS</code>: <code>Linux</code></li>
+</ul>
+<h3 id="system">System</h3>
+<ul>
+<li><code>Machine</code>: <code>q35</code></li>
+<li><code>BIOS</code>: <code>OVMF (UEFI)</code> 또는 기본값</li>
+<li><code>SCSI Controller</code>: <code>VirtIO SCSI single</code></li>
+</ul>
+<h3 id="disk-os">Disk (OS 디스크)</h3>
+<ul>
+<li><code>Bus/Device</code>: <code>SCSI</code></li>
+<li><code>Disk size</code>: <code>40GB</code></li>
+<li><code>Cache</code>: <code>writethrough</code></li>
+<li><code>Discard</code>: <code>on</code></li>
+<li><code>SSD emulation</code>: <code>on</code></li>
+<li><code>IO thread</code>: <code>on</code></li>
+</ul>
+<h3 id="cpu-memory">CPU / Memory</h3>
+<ul>
+<li>기본 권장: <code>2 vCPU</code>, <code>2GB RAM</code></li>
+<li>리소스 여유 시: <code>4 vCPU</code>, <code>8GB RAM</code>까지 확장</li>
+</ul>
+<h3 id="network">Network</h3>
+<ul>
+<li><code>Bridge</code>: <code>vmbr0</code></li>
+<li><code>Model</code>: <code>VirtIO</code></li>
+</ul>
+<h2 id="2-pbs-iso">2) PBS ISO 설치</h2>
+<p>VM 콘솔에서 부팅 후 설치를 진행합니다.</p>
+<ol>
+<li>부트 메뉴에서 <code>Install Proxmox Backup Server (Graphical)</code> 선택</li>
+<li>디스크 선택 화면에서 PBS OS 디스크(<code>/dev/sda</code>) 선택</li>
+<li><code>Location / Timezone / Keyboard</code> 설정</li>
+<li><code>root</code> 비밀번호 및 <code>email</code> 설정</li>
+<li>네트워크 설정</li>
+<li>설치 완료 후 재부팅</li>
+</ol>
+<p>권장 Locale:
+<code>Asia/Seoul</code>, <code>U.S. English</code></p>
+<p>예시 네트워크 설정:</p>
+<ul>
+<li><code>Management Interface</code>: <code>nic0 - bc:24:11:fc:70:3f (virtio_net)</code></li>
+<li><code>Hostname</code>: <code>pbs.internal.semtl.synology.me</code></li>
+<li><code>IP</code>: <code>192.168.0.253</code></li>
+<li><code>CIDR</code>: <code>24</code></li>
+<li><code>Gateway</code>: <code>192.168.0.1</code></li>
+<li><code>DNS</code>: <code>192.168.0.2</code></li>
+</ul>
+<p>입력 원칙:</p>
+<ul>
+<li><code>Hostname</code>은 설치 단계부터 FQDN으로 맞추는 것을 권장</li>
+<li>설치 화면상 NIC 이름은 <code>nic0</code>처럼 보일 수 있으며, OS 내부 이름은 설치 후
+  <code>ens18</code> 등으로 다르게 표시될 수 있음</li>
+<li><code>DNS</code>는 공유기보다 Synology DNS를 직접 지정</li>
+<li>짧은 이름을 별칭으로 계속 쓰고 싶다면 설치 후 <code>/etc/hosts</code>에서
+  <code>vm-pbs</code> 같은 alias를 추가</li>
+</ul>
+<h2 id="3-web-ui-apt">3) Web UI에서 APT 리포지토리 설정</h2>
+<p>초기 설치 직후에는 PBS Web UI에서 Enterprise 리포지토리 상태를 먼저 확인하고,
+구독이 없는 환경이면 <code>pbs-no-subscription</code> 리포지토리를 사용하도록 맞춥니다.</p>
+<p>Web UI 경로:</p>
+<ol>
+<li><code>관리</code></li>
+<li><code>리포지토리</code></li>
+<li><code>pbs-enterprise</code> 항목 선택</li>
+<li><code>비활성화</code></li>
+<li><code>추가</code> -&gt; <code>No-Subscription</code> 선택</li>
+</ol>
+<p>확인 기준:</p>
+<ul>
+<li><code>pbs-enterprise</code>가 비활성화 상태</li>
+<li><code>http://download.proxmox.com/debian/pbs</code> 저장소가 활성화 상태</li>
+<li>컴포넌트가 <code>pbs-no-subscription</code>으로 표시됨</li>
+</ul>
+<p>CLI로 함께 확인하려면 아래 파일을 점검합니다.</p>
+<pre><code class="language-bash">cat /etc/apt/sources.list.d/pbs-enterprise.sources
+cat /etc/apt/sources.list.d/proxmox.sources
+</code></pre>
+<p>운영 메모:</p>
+<ul>
+<li>구독이 없는 홈랩/테스트 환경에서는 <code>pbs-no-subscription</code> 구성이 일반적입니다.</li>
+<li>운영 환경에서 Enterprise 구독을 사용 중이면 이 단계를 건너뛰고
+  <code>pbs-enterprise</code>를 유지합니다.</li>
+</ul>
+<h2 id="4">4) 설치 후 초기 업데이트</h2>
+<p>PBS에 SSH 접속 후 업데이트를 수행합니다.</p>
+<pre><code class="language-bash">apt update
+apt dist-upgrade -y
+</code></pre>
+<h2 id="5-qemu-guest-agent">5) <code>qemu-guest-agent</code> 설치 및 활성화</h2>
+<p>Proxmox VM에서 IP 조회, shutdown 연동, 상태 확인을 안정적으로 사용하려면
+게스트 OS 안에 <code>qemu-guest-agent</code>를 설치합니다.</p>
+<pre><code class="language-bash">apt install -y qemu-guest-agent
+systemctl enable --now qemu-guest-agent
+systemctl status qemu-guest-agent
+</code></pre>
+<p>Proxmox Web UI에서도 VM 옵션을 함께 확인합니다.</p>
+<ol>
+<li>PBS VM 선택</li>
+<li><code>옵션</code></li>
+<li><code>QEMU Guest Agent</code> 항목 확인</li>
+<li>필요 시 <code>활성화(Enabled)</code>로 변경</li>
+</ol>
+<p>확인 기준:</p>
+<ul>
+<li>VM 내부에서 <code>qemu-guest-agent</code> 서비스가 <code>active (running)</code></li>
+<li>Proxmox Web UI에서 <code>QEMU Guest Agent</code>가 활성화 상태</li>
+</ul>
+<h2 id="6-sudo">6) 운영자 계정 및 sudo 초기 설정</h2>
+<p>기본 <code>root</code> 계정만 계속 사용하는 대신 운영자 계정을 추가하고 <code>sudo</code> 권한을
+부여하는 구성을 권장합니다.</p>
+<h3 id="6-1-sudo">6-1. sudo 설치</h3>
+<p>PBS 최소 설치 환경에서는 <code>sudo</code>가 기본 설치되어 있지 않을 수 있으므로 먼저
+패키지를 확인하고 설치합니다.</p>
+<pre><code class="language-bash">apt update
+apt install -y sudo
+</code></pre>
+<h3 id="6-2-semtl-sudo">6-2. <code>semtl</code> 계정 생성 및 sudo 권한 부여</h3>
+<pre><code class="language-bash">adduser semtl
+usermod -aG sudo semtl
+id semtl
+groups semtl
+</code></pre>
+<p>확인 기준:</p>
+<ul>
+<li><code>semtl</code> 계정이 생성됨</li>
+<li><code>sudo</code> 그룹에 <code>semtl</code>이 포함됨</li>
+</ul>
+<p>필요 시 실제 전환 테스트:</p>
+<pre><code class="language-bash">su - semtl
+sudo whoami
+</code></pre>
+<p>정상 결과는 <code>root</code>입니다.</p>
+<h3 id="6-3-root">6-3. root 비밀번호 변경</h3>
+<p>초기 설치 시 설정한 <code>root</code> 비밀번호를 재설정하려면 아래 명령을 사용합니다.</p>
+<pre><code class="language-bash">passwd root
+</code></pre>
+<p>운영 권장:</p>
+<ul>
+<li><code>root</code>와 일반 운영자 계정의 비밀번호를 동일하게 사용하지 않음</li>
+<li>가능하면 <code>semtl</code> 계정으로 <code>sudo</code>를 사용하고 <code>root</code> 직접 로그인은 최소화</li>
+<li>비밀번호 변경 후 SSH 세션과 Web UI 로그인 모두 재확인</li>
+</ul>
+<h3 id="6-4-ssh-semtl">6-4. SSH를 <code>semtl</code> 전용으로 제한</h3>
+<p><code>root</code> 비밀번호 변경이 끝나면 SSH는 <code>semtl</code> 계정만 허용하도록 제한합니다.</p>
+<p>이 저장소 기준 PBS SSH 운영 원칙은 아래와 같습니다.</p>
+<ul>
+<li>SSH 접속은 <code>semtl</code> 계정으로만 허용</li>
+<li><code>root</code>는 SSH 직접 접속 금지</li>
+<li>필요 작업은 <code>semtl</code> 로그인 후 <code>sudo</code>로 수행</li>
+</ul>
+<p>실행 권한:</p>
+<ul>
+<li>아래 명령은 <code>root</code> 쉘에서 실행하거나 <code>semtl</code> 계정으로 로그인한 뒤 <code>sudo</code>를 붙여 실행합니다.</li>
+</ul>
+<p>설정 파일 생성:</p>
+<pre><code class="language-bash">install -d -m 0755 /etc/ssh/sshd_config.d
+cat &lt;&lt;'EOF' &gt; /etc/ssh/sshd_config.d/90-semtl-access.conf
+PermitRootLogin no
+PasswordAuthentication yes
+PubkeyAuthentication yes
+AllowUsers semtl
+EOF
+</code></pre>
+<p>파일명 규칙 메모:</p>
+<ul>
+<li><code>sshd_config.d</code> 아래 <code>*.conf</code> 파일은 보통 이름순으로 읽습니다.</li>
+<li>그래서 <code>00-</code>, <code>10-</code>, <code>50-</code>, <code>90-</code>처럼 앞에 숫자를 붙여 적용 순서를 관리합니다.</li>
+<li><code>90-semtl-access.conf</code>는 기본 설정 뒤에서 운영 정책을 덮어쓰는 용도로 사용합니다.</li>
+</ul>
+<p>설정 검증 및 적용:</p>
+<pre><code class="language-bash">sshd -t
+systemctl restart ssh
+systemctl status ssh --no-pager
+</code></pre>
+<p>접속 검증:</p>
+<pre><code class="language-bash">ssh semtl@192.168.0.253
+ssh root@192.168.0.253
+</code></pre>
+<p>기대 결과:</p>
+<ul>
+<li><code>ssh semtl@192.168.0.253</code> 접속 성공</li>
+<li><code>ssh root@192.168.0.253</code> 접속 실패</li>
+<li>PBS Web UI 로그인은 계속 사용 가능</li>
+</ul>
+<p>추가 권장:</p>
+<ul>
+<li>SSH 키를 사용할 경우 <code>su - semtl</code> 후 <code>~/.ssh/authorized_keys</code>를 구성</li>
+<li>키 전환이 끝나면 <code>PasswordAuthentication no</code>를 추가로 검토</li>
+<li>평소 OS 작업은 <code>semtl</code>로 수행하고 <code>root</code>는 비상용으로만 유지</li>
+</ul>
+<h2 id="7-hostnamedns">7) 설치 후 hostname/DNS 확인 및 보정</h2>
+<h3 id="7-1-hostname">7-1. hostname 수정</h3>
+<p>현재 설치 기준으로 <code>hostname</code> 실행 시 <code>pbs</code>가 나올 수 있으므로,
+운영 기준 short hostname인 <code>vm-pbs</code>로 <code>hostnamectl</code>을 사용해 변경합니다.</p>
+<pre><code class="language-bash">hostnamectl set-hostname vm-pbs
+</code></pre>
+<p><code>pbs</code>를 <code>vm-pbs</code>로 변경하려면 아래 2가지를 함께 수정합니다.</p>
+<ul>
+<li><code>hostnamectl</code>: 시스템의 실제 hostname 변경</li>
+<li><code>/etc/hosts</code>: FQDN과 short hostname 매핑 정리</li>
+</ul>
+<p><code>/etc/hosts</code> 예시:</p>
+<pre><code class="language-text">127.0.0.1 localhost
+192.168.0.253 pbs.internal.semtl.synology.me vm-pbs
+</code></pre>
+<p>먼저 현재 설정이 의도한 값과 일치하는지 확인합니다.</p>
+<pre><code class="language-bash">hostname
+hostname -f
+hostnamectl status
+cat /etc/hosts
+cat /etc/resolv.conf
+</code></pre>
+<p>수정 후 정상 예시:</p>
+<ul>
+<li><code>hostname</code>: <code>vm-pbs</code></li>
+<li><code>hostname -f</code>: <code>pbs.internal.semtl.synology.me</code></li>
+<li><code>/etc/hosts</code>: <code>192.168.0.253 pbs.internal.semtl.synology.me vm-pbs</code></li>
+<li><code>/etc/resolv.conf</code>: <code>nameserver 192.168.0.2</code></li>
+</ul>
+<p>운영 메모:</p>
+<ul>
+<li><code>pbs.internal.semtl.synology.me</code>는 공식 FQDN</li>
+<li><code>vm-pbs</code>는 short hostname</li>
+<li><code>hostname</code>은 <code>vm-pbs</code>, <code>hostname -f</code>는 <code>pbs.internal.semtl.synology.me</code>가
+  되도록 유지</li>
+</ul>
+<h3 id="7-2-dns">7-2. DNS 수정</h3>
+<p>설치 중 DNS를 공유기(<code>192.168.0.1</code>)로 넣었다면 PBS에서 직접 보정합니다.</p>
+<p><code>/etc/network/interfaces</code> 예시:</p>
+<pre><code class="language-text">iface &lt;NIC&gt; inet static
+    address 192.168.0.253/24
+    gateway 192.168.0.1
+    dns-nameservers 192.168.0.2 1.1.1.1
+</code></pre>
+<p>즉시 반영 전 임시 확인이 필요하면 <code>/etc/resolv.conf</code>도 함께 점검합니다.</p>
+<pre><code class="language-text">nameserver 192.168.0.2
+nameserver 1.1.1.1
+</code></pre>
+<p>적용 후 검증:</p>
+<pre><code class="language-bash">hostname
+hostname -f
+nslookup pbs.internal.semtl.synology.me
+nslookup google.com
+ping -c 3 google.com
+</code></pre>
+<p>권장 기준:</p>
+<ul>
+<li>PBS와 주요 VM은 내부 도메인을 안정적으로 해석하기 위해 Synology DNS를
+  직접 바라보도록 설정</li>
+<li>공유기를 DNS로 둘 수는 있어도, 내부 Zone을 Synology가 관리하는 환경에서는
+  직접 지정이 더 단순하고 예측 가능</li>
+<li>DNS/hostname 운영 기준 상세:
+  <a href="../../proxmox/dns-and-hostname-guide/">DNS/Hostname 가이드</a></li>
+</ul>
+<h2 id="8-pbs-acl">8) PBS 로컬 사용자 ACL 추가</h2>
+<p>PBS 로컬 사용자에 관리자 권한을 부여할 때는 <code>--userid</code>가 아니라
+<code>--auth-id</code>를 사용합니다.</p>
+<p><code>admin@pbs</code> 계정을 생성하고 <code>Admin</code> 권한을 부여하는 예시는
+아래와 같습니다.</p>
+<pre><code class="language-bash"># admin@pbs 계정이 있을경우 삭제
+# proxmox-backup-manager user remove admin@pbs
+proxmox-backup-manager user create admin@pbs --password 'StrongPassword123!'
+proxmox-backup-manager acl update / Admin --auth-id admin@pbs
+</code></pre>
+<p>확인 명령:</p>
+<pre><code class="language-bash">proxmox-backup-manager user list
+proxmox-backup-manager acl list
+</code></pre>
+<h2 id="9-pbs-web-ui">9) PBS Web UI 접속 확인</h2>
+<p>PBS는 설치 후 브라우저에서 관리합니다.</p>
+<ul>
+<li>URL: <code>https://pbs.internal.semtl.synology.me:8007</code></li>
+<li>또는 <code>https://192.168.0.253:8007</code></li>
+<li>Username: <code>admin@pbs</code></li>
+<li>Password: <code>admin@pbs</code> 생성 시 설정한 비밀번호</li>
+</ul>
+<p>CLI 점검:</p>
+<pre><code class="language-bash">systemctl status proxmox-backup-proxy
+ss -tulpen | grep ':8007'
+</code></pre>
+<h2 id="10">10) 초기 설치 완료 후 스냅샷 생성</h2>
+<p>기본 설치, 업데이트, 계정 설정, hostname/DNS 보정이 끝났으면 PBS VM의
+초기 기준점을 남기기 위해 Proxmox에서 스냅샷을 생성합니다.</p>
+<p>스냅샷은 반드시 불필요 파일(찌꺼기) 정리 후 생성합니다.</p>
+<h3 id="10-1-semtl">10-1. 불필요 파일 정리 (semtl 실행)</h3>
+<pre><code class="language-bash"># /tmp 전체 삭제
+sudo rm -rf /tmp/*
+
+# /var/tmp 전체 삭제
+sudo rm -rf /var/tmp/*
+
+# 미사용 패키지 정리
+sudo apt autoremove -y
+
+# APT 캐시 정리
+sudo apt clean
+
+# journal 로그 전체 정리
+sudo journalctl --vacuum-time=1s
+
+# root / semtl bash 히스토리 비우기
+su -
+cat /dev/null &gt; /root/.bash_history &amp;&amp; history -c
+exit
+cat /dev/null &gt; /home/semtl/.bash_history &amp;&amp; history -c
+</code></pre>
+<p>권장 시점:</p>
+<ul>
+<li><code>admin@pbs</code> 계정 생성 및 Web UI 접속 확인 완료 후</li>
+<li><code>sudo</code> 설치 및 <code>semtl</code> 계정 생성 완료 후</li>
+<li><code>6-4. SSH를 semtl 전용으로 제한</code> 적용 및 접속 확인 완료 후</li>
+<li><code>hostname</code>, <code>/etc/hosts</code>, DNS 보정 완료 후</li>
+<li>Datastore 연결 및 실제 백업 작업 생성 전</li>
+</ul>
+<p>Proxmox Web UI 절차:</p>
+<ol>
+<li>PBS VM 선택</li>
+<li><code>스냅샷</code></li>
+<li><code>스냅샷 생성</code></li>
+<li>이름과 설명 입력 후 생성</li>
+</ol>
+<p>권장 예시:</p>
+<ul>
+<li><code>Name</code>: <code>BASELINE</code></li>
+<li><code>Description</code> 예시:</li>
+</ul>
+<pre><code class="language-text">- PBS 4.x 초기 설치 완료
+- pbs-enterprise 비활성화 및 no-subscription 추가
+- 시스템 업데이트 완료
+- qemu-guest-agent 설치 및 활성화
+- sudo 설치
+- semtl 계정 생성 및 sudo 권한 부여
+- root 비밀번호 변경
+- ssh를 semtl 전용으로 제한 적용 및 접속 확인 완료
+- hostname vm-pbs로 변경
+- /etc/hosts 및 DNS 설정 보정
+- admin@pbs 계정 생성 및 Admin ACL 부여
+- Web UI 접속 확인 완료
+</code></pre>
+<p>운영 메모:</p>
+<ul>
+<li>이 스냅샷은 초기 문제 발생 시 되돌아가기 위한 기준점으로 사용합니다.</li>
+<li>실제 백업 데이터가 쌓이기 시작한 뒤에는 장기 보관용으로 스냅샷을 남발하지
+  않고, 변경 작업 직전에만 짧게 사용하는 편이 좋습니다.</li>
+<li>PBS를 운영 중인 상태에서 오래된 스냅샷을 유지하면 스토리지 사용량이 커질 수
+  있습니다.</li>
+</ul>
+<h2 id="_4">참고</h2>
+<ul>
+<li>Proxmox 다운로드: <code>https://www.proxmox.com/en/downloads</code></li>
+<li><a href="../../synology/installation/">시놀로지 설치 가이드</a></li>
+<li><a href="../../proxmox/operation-guide/">Proxmox 운영 가이드</a></li>
+<li>PBS 연동/백업/문제 해결은 <a href="../operation-guide/">PBS 운영 가이드</a> 참고</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

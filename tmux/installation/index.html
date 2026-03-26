@@ -1,0 +1,3787 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Platform engineering documentation for Proxmox, Kubernetes, and related components.">
+      
+      
+      
+        <link rel="canonical" href="https://hyunsu00.github.io/semtl-platform-engineering-playbook/tmux/installation/">
+      
+      
+        <link rel="prev" href="../../upsnap/installation/">
+      
+      
+        <link rel="next" href="../../pbs/installation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>설치 및 사용법 - SEMTL Platform Engineering Playbook</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#tmux-installation-and-usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SEMTL Platform Engineering Playbook" class="md-header__button md-logo" aria-label="SEMTL Platform Engineering Playbook" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SEMTL Platform Engineering Playbook
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              설치 및 사용법
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hyunsu00/semtl-platform-engineering-playbook" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hyunsu00/semtl-platform-engineering-playbook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SEMTL Platform Engineering Playbook" class="md-nav__button md-logo" aria-label="SEMTL Platform Engineering Playbook" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SEMTL Platform Engineering Playbook
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hyunsu00/semtl-platform-engineering-playbook" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hyunsu00/semtl-platform-engineering-playbook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    홈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Synology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Synology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/tailscale-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tailscale 설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/wireguard-zigbee2mqtt-ha-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard + Zigbee2MQTT + HA 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AdGuard Home
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    AdGuard Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adguardhome/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Proxmox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/vm-template-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM 템플릿 등록
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/storage-and-network-expansion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    스토리지/네트워크 확장
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/dns-and-hostname-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DNS/Hostname 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/config-backup-and-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    로컬 설정 백업/복구
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/amt-watchdog-and-alerting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intel AMT 감시/알림
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ttyd
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ttyd
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ttyd/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upsnap
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Upsnap
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../upsnap/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tmux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    tmux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치 및 사용법
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치 및 사용법
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        개요
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        핵심 개념
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 설치
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 설치">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ubuntu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ubuntu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alpine-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alpine Linux
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        설치 확인
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 가장 많이 쓰는 명령
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 세션 분리와 재접속
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 핵심 단축키
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 핵심 단축키">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-1. 세션 관련
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-2. 창(window)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-3-pane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-3. 화면 분할(pane)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-4. 스크롤과 복사
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 실전 사용 예시
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 실전 사용 예시">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        예시 1: 서버 운영
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        예시 2: 배포 작업
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 가장 많이 쓰는 패턴
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 가장 많이 쓰는 패턴">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-1. 기본 소켓 방식
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-2. 커스텀 소켓 방식
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-3. 커스텀 소켓 확인 방법
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-4. 커스텀 소켓 다시 붙기와 종료
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-5. 로그 전용 윈도우
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-6. 장시간 실행 작업 유지
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-tmuxconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 추천 설정 (~/.tmux.conf)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 검증
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. 트러블슈팅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. 트러블슈팅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-server-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        no server running 메시지
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        이미 다른 클라이언트가 붙어 있는 세션에 접속하고 싶음
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 엔지니어 기준 팁
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 한 줄 정리
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. 운영 권장사항
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PBS
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    PBS
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pbs/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pbs/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MinIO
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MinIO
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../minio/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Kubernetes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitLab
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    GitLab
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/minio-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MinIO 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/harbor-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jenkins
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Jenkins
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/kubernetes-agent-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Agent 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    n8n
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    n8n
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../n8n/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Harbor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../harbor/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Keycloak
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Keycloak
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../keycloak/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prometheus
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Prometheus
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" >
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grafana
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Grafana
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Argo CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        개요
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        핵심 개념
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 설치
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 설치">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ubuntu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ubuntu
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alpine-linux" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alpine Linux
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        설치 확인
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 가장 많이 쓰는 명령
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 세션 분리와 재접속
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 핵심 단축키
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. 핵심 단축키">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-1. 세션 관련
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-window" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-2. 창(window)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-3-pane" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-3. 화면 분할(pane)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4-4. 스크롤과 복사
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 실전 사용 예시
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. 실전 사용 예시">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        예시 1: 서버 운영
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        예시 2: 배포 작업
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. 가장 많이 쓰는 패턴
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. 가장 많이 쓰는 패턴">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-1. 기본 소켓 방식
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-2. 커스텀 소켓 방식
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-3. 커스텀 소켓 확인 방법
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-4. 커스텀 소켓 다시 붙기와 종료
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-5. 로그 전용 윈도우
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6-6. 장시간 실행 작업 유지
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-tmuxconf" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. 추천 설정 (~/.tmux.conf)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. 검증
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. 트러블슈팅
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. 트러블슈팅">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#no-server-running" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        no server running 메시지
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        이미 다른 클라이언트가 붙어 있는 세션에 접속하고 싶음
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 엔지니어 기준 팁
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 한 줄 정리
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. 운영 권장사항
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="tmux-installation-and-usage">tmux Installation And Usage</h1>
+<h2 id="_1">개요</h2>
+<p>이 문서는 <code>tmux</code> 설치 방법과, 원격 서버 운영에 바로 사용할 수 있는 기본 사용법을
+정리합니다.</p>
+<p><code>tmux</code>는 터미널 멀티플렉서입니다.
+하나의 터미널 화면 안에서 여러 세션, 윈도우, 패인을 관리할 수 있고, SSH가 끊겨도
+세션을 유지한 뒤 다시 붙을 수 있습니다.</p>
+<p>이 저장소 기준으로는 다음과 같은 상황에서 사용합니다.</p>
+<ul>
+<li>SSH 접속 중 작업 세션 유지</li>
+<li>장시간 실행 작업(<code>backup</code>, <code>restore</code>, <code>tail</code>, <code>docker logs</code>) 유지</li>
+<li>한 서버에서 여러 셸 화면 분할 운영</li>
+</ul>
+<h2 id="_2">핵심 개념</h2>
+<ul>
+<li><code>session</code>: 작업 전체 묶음</li>
+<li><code>window</code>: 세션 안의 탭</li>
+<li><code>pane</code>: 한 윈도우 안의 분할 터미널</li>
+</ul>
+<p>운영 메모:</p>
+<ul>
+<li>SSH 연결이 끊겨도 <code>tmux</code> 세션은 서버에 남아 있습니다.</li>
+<li>다시 접속한 뒤 같은 세션에 붙어서 이어서 작업할 수 있습니다.</li>
+<li>기본 prefix 키는 <code>Ctrl+b</code>입니다.</li>
+<li><code>Ctrl+b</code>는 <code>tmux</code> 명령 시작 키(prefix key)입니다.
+  먼저 <code>Ctrl+b</code>를 누르고, 그다음에 <code>d</code>, <code>c</code>, <code>n</code> 같은 실제 명령 키를 입력합니다.</li>
+</ul>
+<h2 id="1">1. 설치</h2>
+<h3 id="ubuntu">Ubuntu</h3>
+<pre><code class="language-bash">sudo apt update
+sudo apt install -y tmux
+</code></pre>
+<h3 id="alpine-linux">Alpine Linux</h3>
+<pre><code class="language-sh">apk update
+apk add tmux
+</code></pre>
+<h3 id="_3">설치 확인</h3>
+<pre><code class="language-bash">tmux -V
+</code></pre>
+<p>정상 예시:</p>
+<ul>
+<li><code>tmux 3.x</code></li>
+</ul>
+<h2 id="2">2. 가장 많이 쓰는 명령</h2>
+<p>새 세션 시작:</p>
+<pre><code class="language-bash">tmux
+</code></pre>
+<p>이 명령은 새 세션을 만들고 바로 접속합니다.</p>
+<p>이름을 지정해서 시작:</p>
+<pre><code class="language-bash">tmux new -s work
+</code></pre>
+<p>운영 팁:</p>
+<ul>
+<li>세션 이름을 붙이면 재접속 시 구분이 쉬워집니다.</li>
+<li>운영용 서버에서는 <code>work</code>, <code>main</code>, <code>logs</code>, <code>restore</code>처럼 목적별 이름을 권장합니다.</li>
+</ul>
+<h2 id="3">3. 세션 분리와 재접속</h2>
+<p>현재 세션에서 빠져나오기:</p>
+<pre><code class="language-text">Ctrl+b, d
+</code></pre>
+<p>설명:</p>
+<ul>
+<li><code>Ctrl+b</code>를 누른 뒤 손을 떼고 <code>d</code></li>
+<li>세션은 종료되지 않고 백그라운드에 유지됨</li>
+<li>뜻: <code>d = detach</code>
+  현재 화면에서만 빠져나오고 세션은 남겨둔다는 의미로 기억하면 쉽습니다.</li>
+</ul>
+<p>현재 세션 목록 확인:</p>
+<pre><code class="language-bash">tmux ls
+</code></pre>
+<p>세션 다시 붙기:</p>
+<pre><code class="language-bash">tmux attach
+</code></pre>
+<p>특정 세션에 다시 붙기:</p>
+<pre><code class="language-bash">tmux attach -t work
+</code></pre>
+<h2 id="4">4. 핵심 단축키</h2>
+<p>기본 prefix:</p>
+<pre><code class="language-text">Ctrl+b
+</code></pre>
+<p>뜻:</p>
+<ul>
+<li><code>tmux</code> 명령 시작 키(prefix key)</li>
+<li>먼저 <code>Ctrl+b</code>를 누르고, 그다음에 실제 명령 키를 입력합니다.</li>
+</ul>
+<h3 id="4-1">4-1. 세션 관련</h3>
+<table>
+<thead>
+<tr>
+<th>기능</th>
+<th>단축키</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>detach</td>
+<td><code>Ctrl+b, d</code></td>
+<td><code>d = detach</code>, 현재 화면에서 빠져나오기</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-2-window">4-2. 창(window)</h3>
+<table>
+<thead>
+<tr>
+<th>기능</th>
+<th>단축키</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>새 창</td>
+<td><code>Ctrl+b, c</code></td>
+<td><code>c = create</code></td>
+</tr>
+<tr>
+<td>창 이동</td>
+<td><code>Ctrl+b, 0~9</code></td>
+<td>보이는 번호의 창으로 이동</td>
+</tr>
+<tr>
+<td>창 이름 변경</td>
+<td><code>Ctrl+b, ,</code></td>
+<td>현재 창 이름 변경</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-3-pane">4-3. 화면 분할(pane)</h3>
+<table>
+<thead>
+<tr>
+<th>기능</th>
+<th>단축키</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>좌우 분할</td>
+<td><code>Ctrl+b, %</code></td>
+<td><code>%</code> 모양처럼 좌우 분할</td>
+</tr>
+<tr>
+<td>상하 분할</td>
+<td><code>Ctrl+b, "</code></td>
+<td><code>"</code> 모양처럼 상하 분할</td>
+</tr>
+<tr>
+<td>pane 이동</td>
+<td><code>Ctrl+b, 방향키</code></td>
+<td>원하는 방향의 pane으로 이동</td>
+</tr>
+<tr>
+<td>pane 닫기</td>
+<td><code>exit</code></td>
+<td>현재 pane 종료</td>
+</tr>
+<tr>
+<td>pane 최대화/복귀</td>
+<td><code>Ctrl+b, z</code></td>
+<td><code>z = zoom</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-4">4-4. 스크롤과 복사</h3>
+<table>
+<thead>
+<tr>
+<th>기능</th>
+<th>단축키</th>
+<th>뜻</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>스크롤 모드</td>
+<td><code>Ctrl+b, [</code></td>
+<td>과거 로그 보기 시작</td>
+</tr>
+<tr>
+<td>종료</td>
+<td><code>q</code></td>
+<td><code>q = quit</code></td>
+</tr>
+<tr>
+<td>복사/선택</td>
+<td><code>vi</code> 모드 사용</td>
+<td><code>mode-keys vi</code> 설정 시 더 편리</td>
+</tr>
+</tbody>
+</table>
+<p>운영 메모:</p>
+<ul>
+<li>긴 로그를 볼 때 일반 터미널 스크롤보다 <code>tmux</code> 복사 모드가 더 안정적입니다.</li>
+</ul>
+<h2 id="5">5. 실전 사용 예시</h2>
+<h3 id="1_1">예시 1: 서버 운영</h3>
+<ul>
+<li>pane1: app 로그</li>
+<li>pane2: DB 상태</li>
+<li>pane3: shell 작업</li>
+</ul>
+<p>운영 흐름 예시:</p>
+<ol>
+<li>새 창 생성: <code>Ctrl+b, c</code></li>
+<li>세로/가로 분할: <code>Ctrl+b, %</code> 또는 <code>Ctrl+b, "</code></li>
+<li>각 pane에서 필요한 명령 실행</li>
+</ol>
+<h3 id="2_1">예시 2: 배포 작업</h3>
+<ul>
+<li>window1: 빌드</li>
+<li>window2: 로그 모니터링</li>
+<li>window3: <code>kubectl</code></li>
+</ul>
+<p>운영 흐름 예시:</p>
+<ol>
+<li>새 창 생성: <code>Ctrl+b, c</code></li>
+<li>창 이름 변경: <code>Ctrl+b, ,</code></li>
+<li>역할별로 창 이름을 <code>build</code>, <code>logs</code>, <code>k8s</code>처럼 설정</li>
+</ol>
+<h2 id="6">6. 가장 많이 쓰는 패턴</h2>
+<p>이 섹션은 <code>tmux</code>를 쓰는 두 가지 방식을 구분해서 설명합니다.</p>
+<ul>
+<li>기본 소켓 방식: <code>default</code> 소켓 하나만 사용</li>
+<li>커스텀 소켓 방식: <code>-L</code>로 소켓을 나눠서 사용</li>
+</ul>
+<h3 id="6-1">6-1. 기본 소켓 방식</h3>
+<p>가장 단순한 기본 방식입니다.
+보통 SSH에서만 <code>tmux</code>를 쓴다면 이 방식이 가장 이해하기 쉽습니다.</p>
+<p>세션 생성:</p>
+<pre><code class="language-bash">tmux new -s main
+</code></pre>
+<p>이미 있으면 붙고, 없으면 새로 만들기:</p>
+<pre><code class="language-bash">tmux new -A -s main
+</code></pre>
+<p>뜻:</p>
+<ul>
+<li><code>new</code>: 새 세션 생성</li>
+<li><code>-s main</code>: 세션 이름을 <code>main</code>으로 지정</li>
+<li><code>-A</code>: 같은 이름의 세션이 이미 있으면 새로 만들지 않고 그 세션에 붙기</li>
+</ul>
+<p>쉽게 기억하면:</p>
+<ul>
+<li><code>A = attach if exists</code></li>
+</ul>
+<p>이 패턴은 운영 서버에서 가장 자주 쓰는 방식입니다.</p>
+<p>기본 소켓 방식에서는 아래 명령들이 모두 같은 <code>default</code> 소켓을 봅니다.</p>
+<pre><code class="language-bash">tmux ls
+tmux attach -t main
+tmux kill-server
+</code></pre>
+<p>의미:</p>
+<ul>
+<li><code>tmux ls</code>: 기본 소켓 <code>default</code>의 세션 목록 확인</li>
+<li><code>tmux attach -t main</code>: 기본 소켓 <code>default</code>의 <code>main</code> 세션에 붙기</li>
+<li><code>tmux kill-server</code>: 기본 소켓 <code>default</code> 서버 종료</li>
+</ul>
+<h3 id="6-2">6-2. 커스텀 소켓 방식</h3>
+<p>기본적으로는 <code>default</code> 소켓 방식이면 충분합니다.
+다만 <code>SSH</code>와 <code>ttyd</code>처럼 서로 다른 터미널 환경을 함께 쓰면서 충돌이 있으면,
+그때 <code>-L</code>로 소켓을 나눠 쓰는 편이 안전합니다.</p>
+<p>권장 예시:</p>
+<pre><code class="language-bash">tmux -L ssh new -A -s main
+tmux -L web new -A -s main
+</code></pre>
+<p>뜻:</p>
+<ul>
+<li><code>-L ssh</code>: <code>ssh</code>라는 이름의 tmux 소켓 사용</li>
+<li><code>-L web</code>: <code>web</code>이라는 이름의 tmux 소켓 사용</li>
+<li><code>new</code>: 새 세션 생성</li>
+<li><code>-A</code>: 같은 이름의 세션이 있으면 그 세션에 붙기</li>
+<li><code>-s main</code>: SSH용/웹용 기본 세션 이름을 <code>main</code>으로 지정</li>
+</ul>
+<p>쉽게 기억하면:</p>
+<ul>
+<li><code>L = socket Label</code>
+  tmux 서버를 이름표로 구분한다고 생각하면 쉽습니다.</li>
+</ul>
+<p>운영 권장:</p>
+<ul>
+<li>먼저는 기본 소켓 방식으로 단순하게 사용</li>
+<li><code>ttyd</code>에서만 쓸 세션이라면 <code>tmux new -A -s webmain</code></li>
+<li>SSH와 <code>ttyd</code>가 같은 <code>tmux</code> 서버를 공유하면서 문제가 생길 때만 <code>-L</code>로 분리</li>
+</ul>
+<p>즉, <code>ttyd</code>에서 굳이 커스텀 소켓이 꼭 필요한 것은 아닙니다.
+문제가 없다면 <code>default</code> 소켓 + 세션 이름 분리만으로도 충분합니다.</p>
+<h3 id="6-3">6-3. 커스텀 소켓 확인 방법</h3>
+<p>커스텀 소켓 방식에서는 소켓 이름까지 같이 써서 확인해야 합니다.</p>
+<pre><code class="language-bash">tmux -L ssh ls
+tmux -L web ls
+</code></pre>
+<p>뜻:</p>
+<ul>
+<li><code>tmux -L ssh ls</code>: <code>ssh</code> 소켓의 세션 목록 확인</li>
+<li><code>tmux -L web ls</code>: <code>web</code> 소켓의 세션 목록 확인</li>
+</ul>
+<p>주의:</p>
+<ul>
+<li>그냥 <code>tmux ls</code>를 실행하면 기본 소켓 <code>default</code>만 확인합니다.</li>
+<li><code>-L ssh</code>, <code>-L web</code>로 만든 세션은 같은 이름의 소켓으로 확인해야 합니다.</li>
+</ul>
+<p>예:</p>
+<pre><code class="language-bash">tmux ls
+</code></pre>
+<p>결과:</p>
+<pre><code class="language-text">no server running on /tmp/tmux-1000/default
+</code></pre>
+<p>이 경우 <code>tmux</code>가 없는 것이 아니라, <code>default</code> 소켓에 서버가 없다는 뜻입니다.
+실제로는 아래처럼 확인해야 합니다.</p>
+<pre><code class="language-bash">tmux -L ssh ls
+tmux -L web ls
+</code></pre>
+<h3 id="6-4">6-4. 커스텀 소켓 다시 붙기와 종료</h3>
+<p>다시 붙을 때도 같은 소켓 이름을 써야 합니다.</p>
+<pre><code class="language-bash">tmux -L ssh attach -t main
+tmux -L web attach -t main
+</code></pre>
+<p>종료도 같은 방식입니다.</p>
+<pre><code class="language-bash">tmux -L ssh kill-server
+tmux -L web kill-server
+</code></pre>
+<p>주의:</p>
+<ul>
+<li><code>tmux kill-server</code>만 실행하면 기본 소켓 <code>default</code> 서버만 종료합니다.</li>
+<li><code>ssh</code>, <code>web</code>처럼 <code>-L</code>로 나눈 tmux 서버는 같은 <code>-L</code> 옵션을 붙여서 종료해야
+  합니다.</li>
+</ul>
+<h3 id="6-5">6-5. 로그 전용 윈도우</h3>
+<p>먼저 새 윈도우를 하나 만든 뒤:</p>
+<pre><code class="language-text">Ctrl+b, c
+</code></pre>
+<p>이름을 <code>logs</code>처럼 바꾸면 관리가 더 쉽습니다.</p>
+<pre><code class="language-text">Ctrl+b, ,
+</code></pre>
+<p>뜻:</p>
+<ul>
+<li>현재 윈도우 이름을 바꾸는 키</li>
+</ul>
+<p>그 윈도우에서 아래처럼 로그를 실행합니다.</p>
+<p>예:</p>
+<pre><code class="language-bash">docker logs -f upsnap
+</code></pre>
+<p>또는:</p>
+<pre><code class="language-bash">tail -f /var/log/syslog
+</code></pre>
+<h3 id="6-6">6-6. 장시간 실행 작업 유지</h3>
+<p>필요하면 작업 전용 윈도우를 하나 더 만든 뒤:</p>
+<pre><code class="language-text">Ctrl+b, c
+</code></pre>
+<p>이름을 <code>backup</code>, <code>restore</code>, <code>sync</code>처럼 작업 목적에 맞게 바꿔두는 것을 권장합니다.</p>
+<pre><code class="language-text">Ctrl+b, ,
+</code></pre>
+<p>그 윈도우에서 아래 작업을 실행합니다.</p>
+<p>예:</p>
+<pre><code class="language-bash">rsync -avh /src /dst
+</code></pre>
+<p>또는:</p>
+<pre><code class="language-bash">restic backup /data
+</code></pre>
+<p>SSH가 끊겨도 <code>tmux</code> 세션에 작업이 남아 있어 다시 붙어서 진행 상황을 볼 수
+있습니다.</p>
+<h2 id="7-tmuxconf">7. 추천 설정 (<code>~/.tmux.conf</code>)</h2>
+<p>개인 사용자 설정 파일:</p>
+<pre><code class="language-bash">vi ~/.tmux.conf
+</code></pre>
+<p>예시:</p>
+<pre><code class="language-conf">set -g mouse on
+set -g prefix C-a
+unbind C-b
+bind C-a send-prefix
+bind | split-window -h
+bind - split-window -v
+set -g history-limit 100000
+setw -g mode-keys vi
+</code></pre>
+<p>설정 의미:</p>
+<ul>
+<li><code>mouse on</code>: 마우스 선택, 스크롤, 패인 선택 활성화</li>
+<li><code>prefix C-a</code>: prefix를 <code>Ctrl+a</code>로 변경</li>
+<li><code>unbind C-b</code>: 기존 기본 prefix 해제</li>
+<li><code>bind C-a send-prefix</code>: 새 prefix 전달</li>
+<li><code>bind | split-window -h</code>: <code>|</code>로 좌우 분할</li>
+<li><code>bind - split-window -v</code>: <code>-</code>로 상하 분할</li>
+<li><code>history-limit</code>: 스크롤백 확장</li>
+<li><code>mode-keys vi</code>: 복사 모드에서 vi 스타일 키 사용</li>
+</ul>
+<p>설정 다시 불러오기:</p>
+<pre><code class="language-bash">tmux source-file ~/.tmux.conf
+</code></pre>
+<h2 id="8">8. 검증</h2>
+<p>세션 생성:</p>
+<pre><code class="language-bash">tmux new -s test
+</code></pre>
+<p>분리:</p>
+<pre><code class="language-text">Ctrl+b, d
+</code></pre>
+<p>목록 확인:</p>
+<pre><code class="language-bash">tmux ls
+</code></pre>
+<p>재접속:</p>
+<pre><code class="language-bash">tmux attach -t test
+</code></pre>
+<p>기대 결과:</p>
+<ul>
+<li><code>test</code> 세션이 유지됨</li>
+<li>분리 후 다시 접속 가능</li>
+<li>SSH 재접속 후에도 작업이 이어짐</li>
+</ul>
+<h2 id="9">9. 트러블슈팅</h2>
+<h3 id="no-server-running"><code>no server running</code> 메시지</h3>
+<p>원인:</p>
+<ul>
+<li>활성 세션이 없음</li>
+</ul>
+<p>해결:</p>
+<pre><code class="language-bash">tmux new -s work
+</code></pre>
+<h3 id="_4">이미 다른 클라이언트가 붙어 있는 세션에 접속하고 싶음</h3>
+<pre><code class="language-bash">tmux attach -t work
+</code></pre>
+<p>필요 시 기존 클라이언트를 떼고 붙기:</p>
+<pre><code class="language-bash">tmux attach -d -t work
+</code></pre>
+<h2 id="10">10. 엔지니어 기준 팁</h2>
+<ul>
+<li><code>kubectl logs</code>와 <code>tmux</code>는 함께 쓰면 매우 편합니다.</li>
+<li>long-running job(빌드, 백업, 복구, 데이터 이동)은 <code>tmux</code>에서 실행하는 것을 권장합니다.</li>
+<li>CI 디버깅 시 pane을 분할해 로그와 셸을 동시에 확인하면 편합니다.</li>
+<li>HA 환경 점검 시 노드별 창 또는 pane을 나눠서 보면 비교가 쉽습니다.</li>
+</ul>
+<h2 id="11">11. 한 줄 정리</h2>
+<p><code>tmux</code>는 SSH가 끊겨도 작업이 살아 있는 멀티 터미널 환경입니다.</p>
+<h2 id="12">12. 운영 권장사항</h2>
+<ul>
+<li>서버에 SSH로 들어가서 장시간 작업할 때는 먼저 <code>tmux new -A -s main</code>으로 시작합니다.</li>
+<li>로그 확인용 윈도우와 작업용 윈도우를 분리합니다.</li>
+<li>세션 이름은 역할 기준으로 짧게 통일합니다.</li>
+<li>복구 작업이나 데이터 이동 작업은 <code>tmux</code> 없이 직접 실행하지 않는 편이 안전합니다.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

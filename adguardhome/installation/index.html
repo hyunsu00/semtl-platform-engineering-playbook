@@ -1,0 +1,3567 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Platform engineering documentation for Proxmox, Kubernetes, and related components.">
+      
+      
+      
+        <link rel="canonical" href="https://hyunsu00.github.io/semtl-platform-engineering-playbook/adguardhome/installation/">
+      
+      
+        <link rel="prev" href="../../synology/wireguard-zigbee2mqtt-ha-integration/">
+      
+      
+        <link rel="next" href="../../proxmox/overview/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>설치 - SEMTL Platform Engineering Playbook</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adguard-home-installation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SEMTL Platform Engineering Playbook" class="md-header__button md-logo" aria-label="SEMTL Platform Engineering Playbook" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SEMTL Platform Engineering Playbook
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              설치
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/hyunsu00/semtl-platform-engineering-playbook" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hyunsu00/semtl-platform-engineering-playbook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SEMTL Platform Engineering Playbook" class="md-nav__button md-logo" aria-label="SEMTL Platform Engineering Playbook" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SEMTL Platform Engineering Playbook
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/hyunsu00/semtl-platform-engineering-playbook" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    hyunsu00/semtl-platform-engineering-playbook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    홈
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Synology
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Synology
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/tailscale-installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tailscale 설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../synology/wireguard-zigbee2mqtt-ha-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WireGuard + Zigbee2MQTT + HA 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AdGuard Home
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    AdGuard Home
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        개요
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        최신 UI 메뉴 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        사전 조건
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        포트와 네트워크 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 사전 점검
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 사전 점검">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 53 포트 사용 여부 확인
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-synology-dns-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Synology DNS Server 패키지 중지
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-adguard-home" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. AdGuard Home 디렉터리 준비
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-container-manager-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Container Manager Project 생성
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 초기 마법사 완료
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-settings-dns-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Settings -&gt; DNS settings 초기 최적화
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Settings -&gt; DNS settings 초기 최적화">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 업스트림 DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-fallback-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Fallback DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-bootstrap-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Bootstrap DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 권장 옵션
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 캐시 권장값
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-ipv6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 IPv6 운영 기준
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-filters-dns-blocklists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Filters -&gt; DNS blocklists 필터 구성
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-filters-dns-rewrites-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Filters -&gt; DNS rewrites 내부 DNS 등록
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-filters-custom-filtering-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Filters -&gt; Custom filtering rules 최소 규칙
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-asus-dhcp-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. ASUS 공유기 DHCP DNS 변경
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 검증
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 문제 발생 시 점검 포인트
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. 문제 발생 시 점검 포인트">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-adguard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 클라이언트가 AdGuard를 우회하는 경우
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 내부 도메인 변경이 바로 반영되지 않는 경우
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 53 포트 바인드 실패
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proxmox
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Proxmox
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/vm-template-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM 템플릿 등록
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/storage-and-network-expansion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    스토리지/네트워크 확장
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/dns-and-hostname-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DNS/Hostname 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/config-backup-and-restore/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    로컬 설정 백업/복구
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/amt-watchdog-and-alerting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Intel AMT 감시/알림
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../proxmox/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ttyd
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    ttyd
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../ttyd/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Upsnap
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Upsnap
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../upsnap/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    tmux
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    tmux
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tmux/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치 및 사용법
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PBS
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    PBS
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pbs/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pbs/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MinIO
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    MinIO
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../minio/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Kubernetes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../k8s/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitLab
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_11">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    GitLab
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/minio-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MinIO 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../gitlab/harbor-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_12" id="__nav_12_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Jenkins
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_12">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Jenkins
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/kubernetes-agent-integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kubernetes Agent 연동
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../jenkins/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_13" id="__nav_13_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    n8n
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_13">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    n8n
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../n8n/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_14" id="__nav_14_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harbor
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_14">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Harbor
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../harbor/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_15" >
+        
+          
+          <label class="md-nav__link" for="__nav_15" id="__nav_15_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Keycloak
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_15_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_15">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Keycloak
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../keycloak/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_16" >
+        
+          
+          <label class="md-nav__link" for="__nav_16" id="__nav_16_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prometheus
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_16_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_16">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Prometheus
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prometheus/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_17" >
+        
+          
+          <label class="md-nav__link" for="__nav_17" id="__nav_17_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Grafana
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_17_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_17">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Grafana
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../grafana/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_18" >
+        
+          
+          <label class="md-nav__link" for="__nav_18" id="__nav_18_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_18_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_18">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Argo CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    개요
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    설치
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/operation-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    운영 가이드
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    트러블슈팅
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        개요
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        최신 UI 메뉴 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        사전 조건
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        포트와 네트워크 기준
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 사전 점검
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 사전 점검">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 53 포트 사용 여부 확인
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-synology-dns-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Synology DNS Server 패키지 중지
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-adguard-home" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. AdGuard Home 디렉터리 준비
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-container-manager-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Container Manager Project 생성
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 초기 마법사 완료
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-settings-dns-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Settings -&gt; DNS settings 초기 최적화
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Settings -&gt; DNS settings 초기 최적화">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 업스트림 DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-fallback-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Fallback DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-bootstrap-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Bootstrap DNS
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 권장 옵션
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 캐시 권장값
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#56-ipv6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.6 IPv6 운영 기준
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-filters-dns-blocklists" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Filters -&gt; DNS blocklists 필터 구성
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-filters-dns-rewrites-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Filters -&gt; DNS rewrites 내부 DNS 등록
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-filters-custom-filtering-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Filters -&gt; Custom filtering rules 최소 규칙
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-asus-dhcp-dns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. ASUS 공유기 DHCP DNS 변경
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. 검증
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. 문제 발생 시 점검 포인트
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. 문제 발생 시 점검 포인트">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-adguard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 클라이언트가 AdGuard를 우회하는 경우
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#112" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.2 내부 도메인 변경이 바로 반영되지 않는 경우
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#113-53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.3 53 포트 바인드 실패
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        참고
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adguard-home-installation">AdGuard Home Installation</h1>
+<h2 id="_1">개요</h2>
+<p>이 문서는 Synology DSM의 <code>Container Manager</code>에서 <code>AdGuard Home</code>을 설치하고,
+내부 DNS와 광고 차단을 함께 운영하는 기준 절차를 정리합니다.</p>
+<p>기준 환경:</p>
+<ul>
+<li>Synology NAS 단일 IP 운영</li>
+<li>DSM이 <code>80/443</code> 포트를 이미 사용 중</li>
+<li>AdGuard Home은 <code>53/tcp</code>, <code>53/udp</code>, <code>3000/tcp</code>만 사용</li>
+<li>Docker <code>bridge</code> 네트워크 모드 사용</li>
+</ul>
+<p>중요:</p>
+<ul>
+<li>이 문서는 <strong>동일 NAS/IP에서 Synology <code>DNS Server</code> 패키지를 중지하고</strong>
+  <code>AdGuard Home</code>이 DNS 역할을 넘겨받는 기준입니다.</li>
+<li>Synology <code>DNS Server</code>를 계속 유지해야 하면 <code>AdGuard Home</code>은
+  <strong>다른 VM 또는 다른 IP</strong>에 설치해야 합니다.</li>
+</ul>
+<h2 id="ui">최신 UI 메뉴 기준</h2>
+<p>최신 AdGuard Home UI 기준 주요 메뉴 경로:</p>
+<ul>
+<li><code>Settings -&gt; DNS settings</code></li>
+<li><code>Filters -&gt; DNS blocklists</code></li>
+<li><code>Filters -&gt; DNS rewrites</code></li>
+<li><code>Filters -&gt; Custom filtering rules</code></li>
+</ul>
+<p>이 문서는 위 메뉴명을 기준으로 작성합니다.</p>
+<h2 id="_2">사전 조건</h2>
+<ul>
+<li>DSM 관리자 권한</li>
+<li><code>Container Manager</code> 설치 가능 상태</li>
+<li>NAS SSH 접속 가능 상태</li>
+<li>ASUS 공유기 DHCP DNS 변경 권한</li>
+<li>AdGuard에 할당할 NAS IP 확보</li>
+<li>예시: <code>192.168.0.2</code></li>
+</ul>
+<h2 id="_3">포트와 네트워크 기준</h2>
+<ul>
+<li>DSM: <code>80</code>, <code>443</code></li>
+<li>AdGuard DNS: <code>53/tcp</code>, <code>53/udp</code></li>
+<li>AdGuard 관리 UI: <code>3000/tcp</code></li>
+<li>Docker network: <code>bridge</code></li>
+</ul>
+<p>중요:</p>
+<ul>
+<li>초기 마법사 이후에도 관리 UI는 <code>3000</code>을 유지합니다.</li>
+<li>동일 NAS에서 DSM이 <code>80/443</code>을 사용 중이면 AdGuard 관리 UI를
+  <code>80/443</code>으로 바꾸지 않습니다.</li>
+</ul>
+<h2 id="1">1. 사전 점검</h2>
+<h3 id="11-53">1.1 <code>53</code> 포트 사용 여부 확인</h3>
+<pre><code class="language-bash">sudo ss -lntup | grep ':53'
+</code></pre>
+<p>확인 포인트:</p>
+<ul>
+<li><code>53</code> 포트를 이미 사용하는 프로세스가 없거나</li>
+<li>Synology <code>DNS Server</code> 패키지뿐인지 확인</li>
+</ul>
+<h3 id="12-synology-dns-server">1.2 Synology <code>DNS Server</code> 패키지 중지</h3>
+<p>동일 NAS/IP에서 AdGuard Home을 DNS 서버로 운영할 경우
+Synology <code>DNS Server</code> 패키지는 중지합니다.</p>
+<p>운영 기준:</p>
+<ul>
+<li><code>패키지 센터 -&gt; DNS Server -&gt; 중지</code></li>
+<li>또는 DSM에서 DNS 관련 서비스가 <code>53</code>을 점유하지 않도록 정리</li>
+</ul>
+<h2 id="2-adguard-home">2. AdGuard Home 디렉터리 준비</h2>
+<pre><code class="language-bash">sudo mkdir -p /volume1/docker/adguardhome/work
+sudo mkdir -p /volume1/docker/adguardhome/conf
+</code></pre>
+<h2 id="3-container-manager-project">3. Container Manager Project 생성</h2>
+<p><code>Container Manager -&gt; Project -&gt; Create</code>에서 아래 <code>compose</code>를 사용합니다.</p>
+<pre><code class="language-yaml">version: &quot;3&quot;
+
+services:
+  adguardhome:
+    # 최신 안정화 버전을 명시 (v0.107.73)
+    image: adguard/adguardhome:v0.107.73
+    container_name: adguardhome
+    restart: unless-stopped
+    network_mode: &quot;bridge&quot;
+    ports:
+      - &quot;53:53/tcp&quot;
+      - &quot;53:53/udp&quot;
+      - &quot;3000:3000&quot;
+    environment:
+      - TZ=Asia/Seoul
+    volumes:
+      - /volume1/docker/adguardhome/work:/opt/adguardhome/work
+      - /volume1/docker/adguardhome/conf:/opt/adguardhome/conf
+</code></pre>
+<p>이 구성을 사용하는 이유:</p>
+<ul>
+<li>DSM <code>80/443</code> 포트와 충돌하지 않음</li>
+<li>NAS <code>53</code> 포트와 <code>3000</code> 포트만 외부에 노출</li>
+<li>Docker <code>bridge</code> 네트워크에서 격리해 운영 가능</li>
+</ul>
+<p>배포 후 확인:</p>
+<pre><code class="language-bash">docker ps | grep adguardhome
+docker inspect adguardhome | grep -A3 '&quot;NetworkMode&quot;'
+</code></pre>
+<p>정상 기준:</p>
+<ul>
+<li>컨테이너 상태가 <code>Up</code></li>
+<li><code>NetworkMode</code>가 <code>bridge</code></li>
+</ul>
+<h2 id="4">4. 초기 마법사 완료</h2>
+<p>브라우저에서 아래 주소로 접속합니다.</p>
+<pre><code class="language-text">http://192.168.0.2:3000
+</code></pre>
+<p>초기 마법사 권장값:</p>
+<ul>
+<li><code>Web interface port</code>: <code>3000</code></li>
+<li><code>DNS server port</code>: <code>53</code></li>
+<li>관리자 계정: 운영 표준 계정/비밀번호 사용</li>
+</ul>
+<p>주의:</p>
+<ul>
+<li>마법사 완료 후에도 관리 UI 포트는 <code>3000</code> 유지</li>
+<li>DSM과 충돌하므로 <code>80/443</code>으로 변경하지 않음</li>
+</ul>
+<h2 id="5-settings-dns-settings">5. <code>Settings -&gt; DNS settings</code> 초기 최적화</h2>
+<h3 id="51-dns">5.1 업스트림 DNS</h3>
+<p>권장값:</p>
+<pre><code class="language-text">https://dns.cloudflare.com/dns-query
+https://dns.quad9.net/dns-query
+https://dns.google/dns-query
+</code></pre>
+<p>운영 메모:</p>
+<ul>
+<li><code>Cloudflare</code>: 속도</li>
+<li><code>Quad9</code>: 악성 도메인 차단</li>
+<li><code>Google</code>: 호환성 보완용 보조 업스트림</li>
+<li>3개를 함께 등록하고 <code>Parallel requests</code>를 활성화하면 응답 안정성이 좋아짐</li>
+</ul>
+<h3 id="52-fallback-dns">5.2 Fallback DNS</h3>
+<p>업스트림 DNS 서버가 응답하지 않을 때 사용할 폴백 DNS 서버를 등록합니다.</p>
+<p>권장값:</p>
+<pre><code class="language-text">1.1.1.1
+9.9.9.9
+8.8.8.8
+</code></pre>
+<p>운영 메모:</p>
+<ul>
+<li>평소에는 DoH 업스트림을 우선 사용하고, 장애 시에만 폴백 DNS로 우회</li>
+<li>폴백 DNS는 최소 2~3개만 유지해 장애 대응과 관리 복잡도의 균형을 맞춤</li>
+</ul>
+<h3 id="53-bootstrap-dns">5.3 Bootstrap DNS</h3>
+<p>권장값:</p>
+<pre><code class="language-text">1.1.1.1
+9.9.9.10
+8.8.8.8
+2620:fe::10
+2620:fe::fe:10
+</code></pre>
+<p>운영 메모:</p>
+<ul>
+<li>IPv4 중심 환경이면 Bootstrap DNS도 IPv4만 등록해 단순하게 운영</li>
+<li><code>Disable IPv6</code>를 활성화했다면 IPv6 Bootstrap DNS는 넣지 않음</li>
+</ul>
+<h3 id="54">5.4 권장 옵션</h3>
+<ul>
+<li><code>Parallel requests</code>: 활성화</li>
+<li><code>Upstream timeout</code>: <code>3</code></li>
+<li><code>Rate limit</code>: <code>50</code></li>
+<li><code>Subnet prefix length for IPv4 addresses</code> : <code>24</code></li>
+<li><code>Subnet prefix length for IPv6 addresses</code> : <code>56</code></li>
+<li><code>Blocked response TTL</code>: <code>600</code></li>
+<li><code>DNSSEC</code>: 활성화</li>
+<li><code>Blocking mode</code>: <code>NXDOMAIN</code></li>
+<li><code>Blocked response TTL</code> : <code>600</code></li>
+<li><code>Enable Cache</code>: 활성화</li>
+<li><code>Optimistic caching</code>: 활성화</li>
+</ul>
+<h3 id="55">5.5 캐시 권장값</h3>
+<p>최신 UI에서 <code>Cache size</code>가 바이트 기준으로 보이면 아래 값을 사용합니다.</p>
+<pre><code class="language-text">Cache size: 67108864
+Minimum TTL: 300
+Maximum TTL: 86400
+</code></pre>
+<p>설명:</p>
+<ul>
+<li><code>67108864</code> = <code>64MiB</code></li>
+<li><code>Minimum TTL 300</code> = 5분</li>
+<li><code>Maximum TTL 86400</code> = 1일</li>
+</ul>
+<h3 id="56-ipv6">5.6 IPv6 운영 기준</h3>
+<p>가정/홈랩이 IPv4 중심이면 아래 기준을 권장합니다.</p>
+<ul>
+<li><code>Disable IPv6</code>: 활성화</li>
+</ul>
+<p>주의:</p>
+<ul>
+<li>ISP/공유기에서 IPv6가 안정적으로 운영 중이면 이 항목은 환경에 맞게 조정</li>
+</ul>
+<h2 id="6-filters-dns-blocklists">6. <code>Filters -&gt; DNS blocklists</code> 필터 구성</h2>
+<p>한국 환경 기준 권장 필터:</p>
+<ul>
+<li><code>AdGuard DNS filter</code></li>
+<li>URL: <code>https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt</code></li>
+<li><code>OISD</code></li>
+<li>URL: <code>https://big.oisd.nl</code></li>
+<li><code>KOR: List-KR DNS</code></li>
+<li>URL: <code>https://adguardteam.github.io/HostlistsRegistry/assets/filter_kr.txt</code></li>
+<li><code>KOR: YousList</code></li>
+<li>URL: <code>https://adguardteam.github.io/HostlistsRegistry/assets/filter_kr_youslist.txt</code></li>
+<li><code>HaGeZi Pro</code></li>
+<li>URL: <code>https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt</code></li>
+<li><code>URLhaus Malware List</code></li>
+<li>URL: <code>https://malware-filter.gitlab.io/malware-filter/urlhaus-filter-agh-online.txt</code></li>
+</ul>
+<p>운영 메모:</p>
+<ul>
+<li><code>OISD Small</code>, <code>OISD Big</code>, <code>AdAway</code>, <code>StevenBlack</code>를 중복으로 같이 넣지 않습니다.</li>
+<li>필터는 많이 넣는 것보다 <strong>중복 없는 3~4개 조합</strong>이 안정적입니다.</li>
+</ul>
+<p>권장하지 않는 조합 예시:</p>
+<ul>
+<li><code>OISD</code></li>
+<li><code>OISD Blocklist Small</code></li>
+<li><code>OISD Blocklist Big</code></li>
+</ul>
+<p>위 3개는 데이터 중복이 커서 응답 지연과 관리 복잡도를 키웁니다.</p>
+<h2 id="7-filters-dns-rewrites-dns">7. <code>Filters -&gt; DNS rewrites</code> 내부 DNS 등록</h2>
+<p>동일 NAS에서 Synology <code>DNS Server</code>를 내리고 AdGuard Home으로 전환한 경우,
+내부 서비스 도메인은 <code>DNS rewrites</code>로 직접 관리합니다.</p>
+<p>예시:</p>
+<pre><code class="language-text">외부 서비스
+*.semtl.synology.me                 -&gt; 192.168.0.2
+
+내부 서비스
+admin.internal.semtl.synology.me    -&gt; 192.168.0.41
+auth.internal.semtl.synology.me     -&gt; 192.168.0.31
+proxmox.internal.semtl.synology.me  -&gt; 192.168.0.254
+pbs.internal.semtl.synology.me      -&gt; 192.168.0.253
+haos.internal.semtl.synology.me     -&gt; 192.168.0.21
+nas.internal.semtl.synology.me      -&gt; 192.168.0.2
+n8n.internal.semtl.synology.me      -&gt; 192.168.0.175
+jenkins.internal.semtl.synology.me  -&gt; 192.168.0.174
+harbor.internal.semtl.synology.me   -&gt; 192.168.0.173
+gitlab.internal.semtl.synology.me   -&gt; 192.168.0.172
+minio.internal.semtl.synology.me    -&gt; 192.168.0.171
+vm-win11.internal.semtl.synology.me -&gt; 192.168.0.11
+k8s-cp1.internal.semtl.synology.me  -&gt; 192.168.0.181
+k8s-cp2.internal.semtl.synology.me  -&gt; 192.168.0.182
+k8s-cp3.internal.semtl.synology.me  -&gt; 192.168.0.183
+k8s-w1.internal.semtl.synology.me   -&gt; 192.168.0.191
+k8s-w2.internal.semtl.synology.me   -&gt; 192.168.0.192
+k8s-cp.internal.semtl.synology.me   -&gt; 192.168.0.180
+router.internal.semtl.synology.me   -&gt; 192.168.0.1
+adguard.internal.semtl.synology.me  -&gt; 192.168.0.2
+</code></pre>
+<p>권장 기준:</p>
+<ul>
+<li>외부 서비스는 wildcard 한 건으로 reverse proxy 진입점을 단순화할 수 있음</li>
+<li>내부 서비스는 wildcard보다 <strong>서비스별 개별 레코드</strong>를 우선 사용</li>
+</ul>
+<h2 id="8-filters-custom-filtering-rules">8. <code>Filters -&gt; Custom filtering rules</code> 최소 규칙</h2>
+<p>커스텀 규칙은 과하게 넣지 말고 최소 구성만 사용합니다.</p>
+<p>권장 최소 규칙:</p>
+<pre><code class="language-text">||version.bind^
+||id.server^
+||hostname.bind^
+||whoami.cloudflare^
+||resolver.arpa^
+||settings-win.data.microsoft.com^
+||v10.events.data.microsoft.com^
+||watson.telemetry.microsoft.com^
+||device-metrics-us.amazon.com^
+||data.mistat.xiaomi.com^
+||tracking.miui.com^
+||log-ingestion.samsungacr.com^
+</code></pre>
+<p>효과:</p>
+<ul>
+<li>DNS fingerprint 정보 노출 감소</li>
+<li>외부 DNS 식별/조회용 도메인 차단</li>
+</ul>
+<h2 id="9-asus-dhcp-dns">9. ASUS 공유기 DHCP DNS 변경</h2>
+<p>ASUS 공유기 기준 메뉴 경로:</p>
+<ul>
+<li><code>LAN -&gt; DHCP Server</code></li>
+</ul>
+<p>권장값:</p>
+<ul>
+<li><code>DNS Server1</code>: <code>192.168.0.2</code></li>
+<li><code>DNS Server2</code>: <code>1.1.1.1</code></li>
+<li><code>Advertise router's IP in addition to user-specified DNS</code>: <code>OFF</code></li>
+</ul>
+<p>적용 방법:</p>
+<ul>
+<li>공유기 설정 저장</li>
+<li>클라이언트 Wi-Fi 재연결 또는 DHCP 갱신</li>
+</ul>
+<h2 id="10">10. 검증</h2>
+<p>DNS 응답 검증:</p>
+<pre><code class="language-bash">nslookup google.com 192.168.0.2
+nslookup github.com 192.168.0.2
+nslookup gitlab.internal.semtl.synology.me 192.168.0.2
+</code></pre>
+<p>정상 기준:</p>
+<ul>
+<li>외부 도메인이 정상 조회됨</li>
+<li>내부 도메인이 의도한 IP로 응답</li>
+</ul>
+<p>AdGuard 기능 검증:</p>
+<ul>
+<li>대시보드에서 <code>Queries</code>, <code>Blocked domains</code>, <code>Clients</code> 증가 확인</li>
+<li><code>https://adguard.com/test.html</code></li>
+<li><code>https://d3ward.github.io/toolz/adblock.html</code></li>
+</ul>
+<h2 id="11">11. 문제 발생 시 점검 포인트</h2>
+<h3 id="111-adguard">11.1 클라이언트가 AdGuard를 우회하는 경우</h3>
+<ul>
+<li>공유기 DHCP DNS가 NAS IP로 적용됐는지 확인</li>
+<li><code>DNS Server2</code>를 비워 두었는지 확인</li>
+<li>ASUS의 router DNS 광고 옵션이 꺼져 있는지 확인</li>
+</ul>
+<h3 id="112">11.2 내부 도메인 변경이 바로 반영되지 않는 경우</h3>
+<ul>
+<li>AdGuard DNS cache flush</li>
+<li>클라이언트 DNS 캐시 삭제</li>
+<li>브라우저 DNS 캐시 삭제</li>
+</ul>
+<h3 id="113-53">11.3 <code>53</code> 포트 바인드 실패</h3>
+<ul>
+<li>Synology <code>DNS Server</code> 패키지 중지 여부 확인</li>
+<li>다른 DNS 컨테이너/Pi-hole 사용 여부 확인</li>
+</ul>
+<h2 id="_4">참고</h2>
+<ul>
+<li><a href="../../synology/installation/">Synology Installation</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
