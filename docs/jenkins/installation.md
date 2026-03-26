@@ -4,6 +4,9 @@
 
 이 문서는 VM 기반 Jenkins 네이티브 설치(`apt` + `systemd`) 절차를 정의합니다.
 
+설치가 가장 중요한 기준 문서이므로, 구축 직후 필요한 검증, 초기 스냅샷,
+기본 운영 기준, Kubernetes Agent 연동, 자주 발생하는 이슈까지 이 문서에 포함합니다.
+
 ## 사전 조건
 
 - OS: Ubuntu 22.04 LTS
@@ -24,8 +27,8 @@
 ## 배치 원칙
 
 - Jenkins Controller는 VM에 단독 배치
-- Jenkins Agent는 Kubernetes에서 실행(향후 연동)
-- Artifact/Backup/Object Storage는 MinIO 연동(향후 연동)
+- Jenkins Agent는 Kubernetes에서 실행
+- Artifact, Backup, Object Storage는 MinIO 연동
 - 메모리는 `4GB`를 기본 할당으로 두고 필요 시 `8GB`까지 확장
 
 ## 설치 절차
@@ -59,7 +62,6 @@ gpg --no-default-keyring --keyring ./jenkins-extra.gpg --export \
   | sudo tee -a /etc/apt/keyrings/jenkins-keyring.gpg >/dev/null
 rm -f ./jenkins-extra.gpg
 sudo chmod a+r /etc/apt/keyrings/jenkins-keyring.gpg
-
 ```
 
 ### 2. Jenkins 2.516.1 설치
@@ -79,13 +81,13 @@ sudo systemctl enable jenkins
 sudo systemctl stop jenkins || true
 ```
 
-### 3. 초기 관리자 계정/비밀번호 사전 지정(필수)
+### 3. 초기 관리자 계정 및 비밀번호 사전 지정
 
 ```bash
 # 초기 관리자 계정 정보 파일 생성(이후 단계에서 동일 값 재사용)
 sudo tee /var/lib/jenkins/jenkins-admin.env >/dev/null <<'EOF'
 JENKINS_ADMIN_ID='admin'
-JENKINS_ADMIN_PASSWORD='패스워드입력'
+JENKINS_ADMIN_PASSWORD='<change-required>'
 JENKINS_URL='https://jenkins.semtl.synology.me/'
 EOF
 sudo chown jenkins:jenkins /var/lib/jenkins/jenkins-admin.env
@@ -144,14 +146,14 @@ sudo chown jenkins:jenkins \
 
 주의:
 
-- 여기서 지정한 `JENKINS_ADMIN_ID`, `JENKINS_ADMIN_PASSWORD` 값을 이후 CLI/검증 명령에서도 동일하게 사용합니다.
+- 여기서 지정한 `JENKINS_ADMIN_ID`, `JENKINS_ADMIN_PASSWORD` 값은
+  이후 CLI와 검증 명령에서도 동일하게 사용합니다.
 - 비밀번호에 `#`가 포함되면 작은따옴표로 감싸서 지정합니다.
-  - 예: `JENKINS_ADMIN_PASSWORD='패스워드입력'`
 
 ### 4. 플러그인 목록 준비
 
 기본 설치에서는 Kubernetes 관련 플러그인을 포함하지 않습니다.
-Kubernetes 플러그인은 Agent 연동 시점(7장)에서 추가 설치합니다.
+Kubernetes 플러그인은 Agent 연동 시점에 추가 설치합니다.
 
 ```bash
 # Jenkins 플러그인 목록 생성
@@ -177,14 +179,15 @@ sudo chown jenkins:jenkins /var/lib/jenkins/plugins.txt
 
 플러그인 구성 기준:
 
-- 기본 CI/CD: `workflow-aggregator`, `git`, `configuration-as-code`,
+- 기본 CI/CD:
+  `workflow-aggregator`, `git`, `configuration-as-code`,
   `docker-workflow`, `blueocean`, `oic-auth`, `matrix-auth`,
   `role-strategy`, `credentials-binding`
 - GitLab 연동 보강: `gitlab-plugin`, `gitlab-api`
-- MinIO(S3)/향후 연동 보강: `aws-credentials`, `artifact-manager-s3`,
-  `pipeline-utility-steps`
+- MinIO(S3) 연동 보강:
+  `aws-credentials`, `artifact-manager-s3`, `pipeline-utility-steps`
 
-### 5. 플러그인 설치 적용(Jenkins CLI)
+### 5. 플러그인 설치 적용
 
 ```bash
 # Jenkins 기동
@@ -222,7 +225,7 @@ java -jar /tmp/jenkins-cli.jar -http \
   install-plugin ${PLUGINS} -restart
 ```
 
-## 방화벽/포트 체크
+## 방화벽 / 포트 체크
 
 - VM 내부 포트: `8080`, `50000`
 - Reverse Proxy 경유 시 외부 공개는 `443`만 사용
@@ -257,24 +260,17 @@ if [ -f /var/lib/jenkins/jenkins.model.JenkinsLocationConfiguration.xml ]; then
 else
   sudo grep -E "${JENKINS_URL_PATTERN}" /var/lib/jenkins/config.xml
 fi
-
 ```
 
 검증 기준:
 
 - Jenkins 로그인 페이지 응답
 - Jenkins 버전 헤더(`X-Jenkins`) 응답 확인
-- OIDC/MinIO/GitLab 관련 주요 플러그인 설치 확인
+- OIDC, MinIO, GitLab 관련 주요 플러그인 설치 확인
 - `Jenkins URL`이 비어 있지 않음
 - Reverse Proxy 도메인 접속 가능
 
-## 7. Kubernetes 연동 문서
-
-Kubernetes Agent 연동 절차는 별도 문서에서 관리합니다.
-
-- [Jenkins Kubernetes Agent Integration](./kubernetes-agent-integration.md)
-
-## 8. 기본 설치 스냅샷
+## 초기 스냅샷
 
 스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
 
@@ -305,12 +301,151 @@ cat /dev/null > ~/.bash_history && history -c
     - oic-auth, matrix-auth, role-strategy, credentials-binding
     - aws-credentials, artifact-manager-s3, pipeline-utility-steps
   - id : admin
-  - pw : 패스워드(설치 시 지정값)
+  - pw : <change-required>
   ```
 
-- `Include RAM`은 비활성화(권장)
+- `Include RAM`은 비활성화 권장
 
-## 참고
+## 설치 직후 운영 기준
 
-- MinIO 연동은 별도 문서로 분리 예정
-- Kubernetes Agent 연동은 별도 문서로 분리 예정
+- Jenkins Controller는 VM에 단독 배치
+- Controller의 executor는 `0`으로 유지
+- 실제 빌드는 Kubernetes Agent에서 수행
+- 계정, 권한, 구성 변경은 변경 이력과 함께 관리
+
+### 일일 / 주간 점검
+
+- 리소스 사용량(CPU, 메모리, 디스크)
+- 서비스 상태 및 로그
+- 백업 성공 여부
+
+### 운영 표준
+
+- 계정 및 권한 관리 정책 준수
+- 구성 변경 전 백업 또는 스냅샷 확보
+- 버전 업그레이드는 검증 환경에서 선행 테스트
+
+### 보안 경고 배너 안내
+
+Jenkins UI 상단에 보안 경고 배너가 표시될 수 있습니다.
+이 문서 기준의 `2.516.1` 설치에서는 알려진 보안 공지 배너가 노출될 수 있으나,
+운영 표준상 즉시 버전 업그레이드를 수행하지 않을 수 있습니다.
+
+운영 기준:
+
+- 현재 표준 버전은 유지하고, 업그레이드는 별도 검증 창구에서만 수행합니다.
+- 보안 경고 배너 노출 자체를 즉시 장애로 판단하지 않습니다.
+- 대신 외부 직접 노출 금지, Reverse Proxy 경유 노출, 관리자 계정 최소화,
+  강한 비밀번호 또는 SSO 적용, 정기 백업 및 스냅샷 유지로 보완 통제를 적용합니다.
+- Controller executor는 `0`으로 유지하고 실제 빌드는 Kubernetes Agent에서 수행합니다.
+
+### 백업 및 복구
+
+- 백업 대상
+  - `/var/lib/jenkins`
+  - systemd 및 reverse proxy 관련 설정
+- 백업 주기
+  - 변경 직전 백업
+  - 정기 백업 정책 포함
+- 복구 검증
+  - 로그인 가능 여부
+  - 주요 플러그인 및 Job 설정 복원 여부
+
+## Kubernetes Agent 연동
+
+기본 설치 단계에서는 Kubernetes 플러그인을 설치하지 않고,
+아래 절차에서 추가합니다.
+
+### 연동 사전 조건
+
+- Jenkins 기본 설치 완료
+- Jenkins 관리자 계정 준비
+- Kubernetes API 접근 가능한 `kubeconfig` 준비
+
+### 1. Kubernetes 플러그인 목록 준비
+
+```bash
+sudo tee /var/lib/jenkins/plugins-k8s.txt >/dev/null <<'EOF'
+kubernetes
+kubernetes-credentials
+kubernetes-credentials-provider
+EOF
+
+sudo chown jenkins:jenkins /var/lib/jenkins/plugins-k8s.txt
+```
+
+### 2. kubeconfig 배치
+
+```bash
+sudo install -d -m 700 -o jenkins -g jenkins /var/lib/jenkins/.kube
+sudo cp ~/.kube/config /var/lib/jenkins/.kube/config
+sudo chown jenkins:jenkins /var/lib/jenkins/.kube/config
+sudo chmod 600 /var/lib/jenkins/.kube/config
+```
+
+### 3. Kubernetes 플러그인 설치
+
+```bash
+JENKINS_ADMIN_ID=$(sudo sed -n "s/^JENKINS_ADMIN_ID='\\(.*\\)'$/\\1/p" \
+  /var/lib/jenkins/jenkins-admin.env)
+JENKINS_ADMIN_PASSWORD=$(
+  sudo sed -n "s/^JENKINS_ADMIN_PASSWORD='\\(.*\\)'$/\\1/p" \
+  /var/lib/jenkins/jenkins-admin.env
+)
+
+PLUGINS_K8S="$(tr '\n' ' ' </var/lib/jenkins/plugins-k8s.txt)"
+java -jar /tmp/jenkins-cli.jar -http \
+  -s http://127.0.0.1:8080/ \
+  -auth "${JENKINS_ADMIN_ID}:${JENKINS_ADMIN_PASSWORD}" \
+  install-plugin ${PLUGINS_K8S} -restart
+```
+
+### 검증
+
+```bash
+curl -fsSL --user "${JENKINS_ADMIN_ID}:${JENKINS_ADMIN_PASSWORD}" \
+  "http://127.0.0.1:8080/pluginManager/api/json?depth=1" \
+  | grep -E '"shortName":"(kubernetes|kubernetes-credentials|kubernetes-credentials-provider)"'
+```
+
+## 자주 발생하는 이슈
+
+### 1. 서비스 시작 실패
+
+증상:
+
+- 프로세스가 재시작 반복
+
+주요 원인:
+
+- 설정 오류
+- 포트 충돌
+
+조치:
+
+- 설정 검증 후 재시작
+
+### 2. 접속 불가
+
+증상:
+
+- UI 또는 API 타임아웃
+
+주요 원인:
+
+- 네트워크, DNS, 방화벽 설정 이슈
+
+조치:
+
+- 경로별 네트워크 확인 후 정책 수정
+
+## 에스컬레이션 기준
+
+- 15분 이상 서비스 영향 지속
+- 데이터 손실 가능성 존재
+
+## 보안 주의사항
+
+- 관리자 계정과 비밀번호를 문서에 직접 남기지 않습니다.
+- 예시 비밀번호는 모두 placeholder로 유지합니다.
+- 운영 자격 증명은 별도 비밀 관리 수단으로 분리합니다.

@@ -46,10 +46,7 @@
 - MinIO:
   [Installation](./minio/installation.md)
 - Jenkins:
-  [Overview](./jenkins/overview.md) |
-  [Installation](./jenkins/installation.md) |
-  [Operation Guide](./jenkins/operation-guide.md) |
-  [Troubleshooting](./jenkins/troubleshooting.md)
+  [Installation](./jenkins/installation.md)
 - n8n:
   [Installation](./n8n/installation.md)
 - Harbor:

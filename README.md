@@ -70,7 +70,6 @@ make link-check
   (Proxmox VE 연동, 백업 작업, PBS 트러블슈팅)
 - `docs/minio/installation.md`
 - `docs/jenkins/installation.md`
-- `docs/jenkins/kubernetes-agent-integration.md` (Jenkins-Kubernetes Agent 연동)
 - `docs/n8n/installation.md`
 - `docs/harbor/installation.md`
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)
