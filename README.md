@@ -69,8 +69,6 @@ make link-check
 - `docs/pbs/operation-guide.md`
   (Proxmox VE 연동, 백업 작업, PBS 트러블슈팅)
 - `docs/minio/installation.md`
-- `docs/minio/operation-guide.md`
-- `docs/minio/oidc-integration.md` (MinIO-Keycloak OIDC 전용)
 - `docs/jenkins/installation.md`
 - `docs/jenkins/kubernetes-agent-integration.md` (Jenkins-Kubernetes Agent 연동)
 - `docs/n8n/installation.md`
