@@ -375,7 +375,7 @@ Last login: ... from 127.0.0.1
 
 예시 화면:
 
-![Synology Reverse Proxy websocket header settings](../assets/images/ttyd-synology-reverse-proxy-websocket-headers.png)
+![Synology Reverse Proxy websocket header settings](../assets/images/ttyd/ttyd-synology-reverse-proxy-websocket-headers.png)
 
 고급 설정 권장값:
 
@@ -386,7 +386,7 @@ Last login: ... from 127.0.0.1
 
 예시 화면:
 
-![Synology Reverse Proxy advanced timeout settings](../assets/images/ttyd-synology-reverse-proxy-advanced-settings.png)
+![Synology Reverse Proxy advanced timeout settings](../assets/images/ttyd/ttyd-synology-reverse-proxy-advanced-settings.png)
 
 운영 메모:
 
