@@ -78,7 +78,6 @@ make link-check
 - `docs/harbor/oidc-integration.md` (Harbor-Keycloak OIDC 전용)
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)
 - `docs/gitlab/minio-integration.md` (GitLab-MinIO Object Storage 연동)
-- `docs/gitlab/oidc-integration.md` (GitLab-Keycloak OIDC 전용)
 - `docs/gitlab/backup-and-restore.md`
 - `docs/k8s/cluster-bootstrap.md`
 - `docs/keycloak/sso-integration.md`
