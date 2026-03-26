@@ -53,11 +53,7 @@
 - n8n:
   [Installation](./n8n/installation.md)
 - Harbor:
-  [Overview](./harbor/overview.md) |
-  [Installation](./harbor/installation.md) |
-  [Operation Guide](./harbor/operation-guide.md) |
-  [OIDC Integration](./harbor/oidc-integration.md) |
-  [Troubleshooting](./harbor/troubleshooting.md)
+  [Installation](./harbor/installation.md)
 - GitLab:
   [Installation](./gitlab/installation.md)
 - Kubernetes:

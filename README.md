@@ -73,9 +73,6 @@ make link-check
 - `docs/jenkins/kubernetes-agent-integration.md` (Jenkins-Kubernetes Agent 연동)
 - `docs/n8n/installation.md`
 - `docs/harbor/installation.md`
-- `docs/harbor/minio-integration.md` (Harbor-MinIO S3 backend 연동)
-- `docs/harbor/operation-guide.md`
-- `docs/harbor/oidc-integration.md` (Harbor-Keycloak OIDC 전용)
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)
 - `docs/gitlab/minio-integration.md` (GitLab-MinIO Object Storage 연동)
 - `docs/gitlab/backup-and-restore.md`
