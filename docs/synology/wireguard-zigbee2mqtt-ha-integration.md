@@ -276,7 +276,7 @@ sudo ./cleanup.sh
 - MAC 주소 : 02:11:32:29:7D:6D
 - 컴퓨터이름 : vm-wg
 - ID : root / semtl
-- PW : 127001 / 127001
+- PW : <change-required> / <change-required>
 - QEMU 게스트 에이전트 설치
 - /etc/hosts, /etc/resolv.conf 수정
 - 스냅샷전 정리

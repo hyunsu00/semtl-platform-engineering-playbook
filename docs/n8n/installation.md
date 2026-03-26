@@ -117,7 +117,7 @@ TZ=Asia/Seoul
 # PostgreSQL 연결 정보
 POSTGRES_DB=n8n
 POSTGRES_USER=n8n
-POSTGRES_PASSWORD=127001
+POSTGRES_PASSWORD=<change-required>
 EOF
 
 # .env 접근 권한 제한
@@ -290,8 +290,7 @@ cat /dev/null > ~/.bash_history && history -c
 
 ### 7.2 Proxmox 스냅샷 생성
 
-- n8n 첫 로그인 및 `Owner` 계정 생성 후 생성
-- 운영 워크플로/크리덴셜 등록 전 생성
+- n8n `Owner` 계정 생성, 라이선스 등록 완료 후 운영 워크플로/크리덴셜 등록 전 생성
 - Proxmox에서 n8n VM 선택
 - `Snapshots > Take Snapshot` 실행
 - 이름 예시: `n8n-install-clean-v1`
@@ -306,7 +305,7 @@ cat /dev/null > ~/.bash_history && history -c
   - files path : ~/n8n/n8n-files
   - postgres path : ~/n8n/postgres-data
   - id : admin@semtl.synology.me
-  - pw : 패스워드
+  - pw : <change-required>
   ```
 
 - `Include RAM`은 비활성화(권장)
