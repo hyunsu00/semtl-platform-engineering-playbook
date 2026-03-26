@@ -59,12 +59,12 @@ command -v ttyd
 - 사용 중인 Ubuntu 릴리스에서 `ttyd` 패키지 제공 여부
 
 `apt install ttyd`가 불가능한 환경이면 아래의
-[공식 바이너리 설치](#3-공식-바이너리-설치)를 사용합니다.
+[공식 바이너리 설치](#공식-바이너리-설치)를 사용합니다.
 
 ## 2. Alpine Linux 설치
 
 Alpine은 이 문서 기준으로 패키지 설치 대신 아래
-[공식 바이너리 설치](#3-공식-바이너리-설치) 절차를 사용합니다.
+[공식 바이너리 설치](#공식-바이너리-설치) 절차를 사용합니다.
 
 운영 메모:
 
@@ -375,7 +375,7 @@ Last login: ... from 127.0.0.1
 
 예시 화면:
 
-![Synology Reverse Proxy websocket header settings](../../assets/images/ttyd-synology-reverse-proxy-websocket-headers.png)
+![Synology Reverse Proxy websocket header settings](../assets/images/ttyd-synology-reverse-proxy-websocket-headers.png)
 
 고급 설정 권장값:
 
@@ -386,7 +386,7 @@ Last login: ... from 127.0.0.1
 
 예시 화면:
 
-![Synology Reverse Proxy advanced timeout settings](../../assets/images/ttyd-synology-reverse-proxy-advanced-settings.png)
+![Synology Reverse Proxy advanced timeout settings](../assets/images/ttyd-synology-reverse-proxy-advanced-settings.png)
 
 운영 메모:
 
