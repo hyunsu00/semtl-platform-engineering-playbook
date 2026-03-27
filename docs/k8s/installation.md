@@ -344,9 +344,9 @@ kubectl get nodes
 
 실행 위치:
 
-- 위 `kubectl` 설정과 검증은 `cp1`에서만 수행합니다.
+- 위 `kubectl` 설정과 검증은 `cp1`에서 먼저 수행합니다.
 - `cp2`, `cp3`, `w1`, `w2`에서는 기본 상태로 `kubectl` 실행 시
-  `localhost:8080` 연결 오류가 날 수 있으며, 이는 kubeconfig 미설정 상태이므로 정상입니다.
+  `localhost:8080` 연결 오류가 날 수 있으며, 이는 kubeconfig 미설정 상태를 의미합니다.
 
 주의:
 
@@ -424,6 +424,23 @@ sudo kubeadm join --config /root/join-cp2.yaml
 ```
 
 `cp3`도 동일 절차로 `10.10.10.13` 값만 바꿔서 진행합니다.
+
+`cp2`, `cp3`에서도 `kubectl`을 사용하려면 각 노드에서 kubeconfig를 설정합니다
+(`cp2`, `cp3` 각각에서 실행).
+
+```bash
+mkdir -p $HOME/.kube
+sudo cp /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+kubectl get nodes -o wide
+```
+
+설명:
+
+- control-plane 노드는 `/etc/kubernetes/admin.conf`가 존재하므로
+  위 절차로 `cp2`, `cp3`에서도 `kubectl`을 바로 사용할 수 있습니다.
+- 이 설정을 하지 않으면 `kubectl`이 기본값인 `localhost:8080`으로 접속을 시도해
+  연결 오류를 출력할 수 있습니다.
 
 조인 직후 확인 (`[cp1에서 실행]`):
 
@@ -694,9 +711,10 @@ kubectl -n kube-system get cm kubeadm-config -o yaml | grep controlPlaneEndpoint
 kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.5/config/manifests/metallb-native.yaml
 ```
 
-IP 풀 생성 (`metallb-pool.yaml`):
+`cp1`에서 IP 풀 파일 `/tmp/metallb-pool.yaml` 생성:
 
-```yaml
+```bash
+cat >/tmp/metallb-pool.yaml <<'EOF'
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
@@ -714,12 +732,13 @@ metadata:
 spec:
   ipAddressPools:
   - default-pool
+EOF
 ```
 
 적용:
 
 ```bash
-kubectl apply -f metallb-pool.yaml
+kubectl apply -f /tmp/metallb-pool.yaml
 kubectl -n metallb-system get pods
 ```
 
@@ -798,7 +817,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now etcd-backup.timer
 systemctl list-timers | grep etcd-backup
 sudo systemctl start etcd-backup.service
-ls -lh /var/backups/etcd
+sudo ls -lh /var/backups/etcd
 ```
 
 ## 설치 검증
@@ -827,6 +846,24 @@ sudo ETCDCTL_API=3 etcdctl \
   --endpoints=https://127.0.0.1:2379 \
   endpoint health
 ```
+
+판단 기준:
+
+- `kubectl get nodes -o wide`에서 5노드 모두 `Ready`
+- `kubectl get pods -A`에서 핵심 파드가 현재 시점 기준 `Running`
+  - `cilium`
+  - `coredns`
+  - `etcd`
+  - `kube-apiserver`
+  - `kube-controller-manager`
+  - `kube-scheduler`
+  - `kube-vip`
+  - `metallb`
+  - `ingress-nginx-controller`
+- `etcdctl endpoint health`는 `cp1` 로컬 etcd endpoint(`127.0.0.1:2379`)가
+  정상 응답하는지 확인하는 용도입니다.
+- `kubectl get events -A`에는 설치 중 일시 경고가 남아 있을 수 있으므로,
+  현재 파드 상태가 `Running`인지와 함께 판단합니다.
 
 ### 스냅샷 베이스라인
 
@@ -901,7 +938,7 @@ kubectl get nodes -o wide
 
 ```bash
 systemctl list-timers | grep etcd-backup
-ls -lh /var/backups/etcd | tail -n 10
+sudo ls -lh /var/backups/etcd | tail -n 10
 ```
 
 #### 용량 및 압력 점검
@@ -955,7 +992,7 @@ sudo systemctl restart kubelet
 
 ```bash
 sudo systemctl start etcd-backup.service
-ls -lh /var/backups/etcd | tail -n 5
+sudo ls -lh /var/backups/etcd | tail -n 5
 ```
 
 ### 노드 유지보수 절차
