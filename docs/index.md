@@ -15,7 +15,7 @@
 1. Harbor 설치:
    [Harbor Installation](./harbor/installation.md)
 1. Runner/Jenkins 운영 기반:
-   [Kubernetes Operation Guide](./k8s/operation-guide.md)
+   [Kubernetes Installation](./k8s/installation.md)
 1. Jenkins 설치:
    [Jenkins Installation](./jenkins/installation.md)
 
