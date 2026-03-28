@@ -307,6 +307,10 @@ kind: ClusterConfiguration
 controlPlaneEndpoint: "10.10.10.11:6443"
 apiServer:
   certSANs:
+  - 192.168.0.180
+  - 192.168.0.181
+  - 192.168.0.182
+  - 192.168.0.183
   - 10.10.10.11
   - 10.10.10.12
   - 10.10.10.13
@@ -356,7 +360,11 @@ kubectl get nodes
 주의:
 
 - 초기 bootstrap 단계에서는 `controlPlaneEndpoint`를 `cp1`(`10.10.10.11:6443`)로 둡니다.
-- `certSANs`에는 VIP(`10.10.10.100`)를 반드시 포함해야 이후 VIP 전환 시 TLS 에러를 방지합니다.
+- `certSANs`에는 내부망 VIP(`10.10.10.100`)를 반드시 포함해야 합니다.
+- 외부망 `vm-admin`에서 API를 직접 접근할 계획이면 외부망 IP 또는 외부망 VIP도 `certSANs`에 포함해야 합니다.
+- 예를 들어 `192.168.0.181`로 직접 접속하거나
+  `192.168.0.180` VIP를 둘 계획이면 해당 주소를 모두
+  `certSANs`에 포함해야 TLS 에러를 방지할 수 있습니다.
 - 이 시점의 `NotReady`는 정상입니다. 아직 CNI를 설치하지 않았기 때문입니다.
 - `kubeadm init` 중 또는 직후에 `https://10.10.10.100:6443`로 붙는 설정을 먼저 넣지 않습니다.
 - 아래 조건을 만족하기 전에는 다음 단계로 진행하지 않습니다.
@@ -977,7 +985,10 @@ kubectl describe node vm-k8s-w1 | egrep -i 'MemoryPressure|DiskPressure|PIDPress
 
 - 이 환경에서는 kubelet 인증서의 IP SAN 이슈를 피하기 위해 `--kubelet-insecure-tls`를 함께 적용합니다.
 - `metrics-server`는 Kubernetes Metrics API용 경량 컴포넌트이고, Prometheus를 대체하지 않습니다.
-- Prometheus는 장기 보관, 시계열 조회, Alertmanager 연동, Grafana 시각화용이고, `metrics-server`는 실시간에 가까운 리소스 사용량 조회와 HPA용입니다.
+- Prometheus는 장기 보관, 시계열 조회, Alertmanager 연동,
+  Grafana 시각화용입니다.
+- `metrics-server`는 실시간에 가까운 리소스 사용량 조회와
+  HPA용입니다.
 
 ### 스냅샷 베이스라인
 
@@ -1157,6 +1168,218 @@ sudo kubeadm certs check-expiration
 sudo kubeadm certs renew all
 sudo systemctl restart kubelet
 ```
+
+#### apiserver SAN 변경 반영
+
+외부망 `vm-admin`에서 `192.168.0.x` 대역으로 API에 직접 접근해야 한다면
+apiserver 인증서 SAN에 외부망 IP 또는 외부망 VIP를 포함해야 합니다.
+
+예를 들어 아래와 같은 오류가 발생하면 SAN 재발급이 필요합니다.
+
+```text
+tls: failed to verify certificate: x509: certificate is valid for
+10.96.0.1, 10.10.10.11, 10.10.10.12, 10.10.10.13, 10.10.10.100,
+not 192.168.0.181
+```
+
+적용 순서는 다음과 같이 진행해야 합니다.
+
+1. `cp1`에서 새 `ClusterConfiguration` 기준 파일을 준비해야 합니다.
+2. `kubeadm-config` ConfigMap을 새 설정으로 업로드해야 합니다.
+3. 각 control-plane 노드에서 `apiserver` 인증서를 다시 생성해야 합니다.
+4. 각 노드에서 SAN 반영 여부를 확인해야 합니다.
+
+##### 1) `cp1` 재발급용 설정 파일
+
+`cp1`에서 `/root/kubeadm-san-update-cp1.yaml` 생성:
+
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+controlPlaneEndpoint: "10.10.10.11:6443"
+apiServer:
+  certSANs:
+  - 192.168.0.180
+  - 192.168.0.181
+  - 192.168.0.182
+  - 192.168.0.183
+  - 10.10.10.11
+  - 10.10.10.12
+  - 10.10.10.13
+  - 10.10.10.100
+networking:
+  podSubnet: "10.244.0.0/16"
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: "10.10.10.11"
+  bindPort: 6443
+nodeRegistration:
+  kubeletExtraArgs:
+    node-ip: "10.10.10.11"
+```
+
+##### 2) `cp2` 재발급용 설정 파일
+
+`cp2`에서 `/root/kubeadm-san-update-cp2.yaml` 생성:
+
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+controlPlaneEndpoint: "10.10.10.11:6443"
+apiServer:
+  certSANs:
+  - 192.168.0.180
+  - 192.168.0.181
+  - 192.168.0.182
+  - 192.168.0.183
+  - 10.10.10.11
+  - 10.10.10.12
+  - 10.10.10.13
+  - 10.10.10.100
+networking:
+  podSubnet: "10.244.0.0/16"
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: "10.10.10.12"
+  bindPort: 6443
+nodeRegistration:
+  kubeletExtraArgs:
+    node-ip: "10.10.10.12"
+```
+
+##### 3) `cp3` 재발급용 설정 파일
+
+`cp3`에서 `/root/kubeadm-san-update-cp3.yaml` 생성:
+
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+controlPlaneEndpoint: "10.10.10.11:6443"
+apiServer:
+  certSANs:
+  - 192.168.0.180
+  - 192.168.0.181
+  - 192.168.0.182
+  - 192.168.0.183
+  - 10.10.10.11
+  - 10.10.10.12
+  - 10.10.10.13
+  - 10.10.10.100
+networking:
+  podSubnet: "10.244.0.0/16"
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localAPIEndpoint:
+  advertiseAddress: "10.10.10.13"
+  bindPort: 6443
+nodeRegistration:
+  kubeletExtraArgs:
+    node-ip: "10.10.10.13"
+```
+
+##### 4) `kubeadm-config` 업로드
+
+`cp1`에서 실행:
+
+```bash
+sudo kubeadm init phase upload-config kubeadm \
+  --config /root/kubeadm-san-update-cp1.yaml
+```
+
+##### 5) 각 control-plane에서 `apiserver` 인증서 재생성
+
+주의:
+
+- `sudo kubeadm certs renew apiserver --config ...`만으로는
+  새 `certSANs`가 반영되지 않을 수 있습니다.
+- 실제 검증에서는 `renew` 후에도 SAN이 기존 값으로 유지되었습니다.
+- 따라서 기존 `apiserver.crt`와 `apiserver.key`를 백업한 뒤
+  `init phase certs apiserver --config ...`로 다시 생성해야 합니다.
+
+작업 전 백업:
+
+```bash
+sudo cp /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver.crt.bak
+sudo cp /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.key.bak
+```
+
+`cp1`:
+
+```bash
+sudo mv /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver.crt.old
+sudo mv /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.key.old
+
+sudo kubeadm init phase certs apiserver \
+  --config /root/kubeadm-san-update-cp1.yaml
+sudo systemctl restart kubelet
+```
+
+`cp2`:
+
+```bash
+sudo mv /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver.crt.old
+sudo mv /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.key.old
+
+sudo kubeadm init phase certs apiserver \
+  --config /root/kubeadm-san-update-cp2.yaml
+sudo systemctl restart kubelet
+```
+
+`cp3`:
+
+```bash
+sudo mv /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver.crt.old
+sudo mv /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.key.old
+
+sudo kubeadm init phase certs apiserver \
+  --config /root/kubeadm-san-update-cp3.yaml
+sudo systemctl restart kubelet
+```
+
+##### 6) SAN 반영 확인
+
+각 control-plane 노드에서 확인:
+
+```bash
+sudo openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text \
+  | grep -A1 "Subject Alternative Name"
+```
+
+최소 아래 주소가 보여야 합니다.
+
+- `192.168.0.180`
+- `192.168.0.181`
+- `192.168.0.182`
+- `192.168.0.183`
+- `10.10.10.11`
+- `10.10.10.12`
+- `10.10.10.13`
+- `10.10.10.100`
+
+만약 아래 주소가 보이지 않으면 SAN 반영이 실패한 것입니다.
+
+- `192.168.0.180`
+- `192.168.0.181`
+- `192.168.0.182`
+- `192.168.0.183`
+
+##### 7) `vm-admin`에서 최종 확인
+
+```bash
+kubectl get nodes -o wide
+```
+
+참고:
+
+- `controlPlaneEndpoint`는 기존 bootstrap 기준을 유지해도 됩니다.
+- 외부망 운영 접속이 목적이라면 핵심은 `certSANs` 반영입니다.
+- 최종적으로는 `192.168.0.180` 같은 외부망 VIP를 구성하고
+  해당 VIP로 운영 접근을 통일하는 편이 좋습니다.
 
 ## 유지보수 및 변경 표준
 

@@ -16,6 +16,8 @@
    [Harbor Installation](./harbor/installation.md)
 1. Runner/Jenkins 운영 기반:
    [Kubernetes Installation](./k8s/installation.md)
+1. 원격 운영 관리 노드 구성:
+   [VM-ADMIN Installation](./vm-admin/installation.md)
 1. Jenkins 설치:
    [Jenkins Installation](./jenkins/installation.md)
 
@@ -58,6 +60,8 @@
   [Installation](./k8s/installation.md) |
   [Operation Guide](./k8s/operation-guide.md) |
   [Troubleshooting](./k8s/troubleshooting.md)
+- VM-ADMIN:
+  [Installation](./vm-admin/installation.md)
 - Keycloak:
   [Installation](./keycloak/installation.md)
 - Prometheus:

@@ -1,7 +1,7 @@
 # SEMTL Platform Engineering Playbook
 
 Synology, AdGuard Home, Proxmox, MinIO, Jenkins, n8n, Harbor, GitLab,
-Kubernetes, Keycloak, Prometheus, Grafana, Argo CD 등 플랫폼 엔지니어링 영역의
+Kubernetes, VM-ADMIN, Keycloak, Prometheus, Grafana, Argo CD 등 플랫폼 엔지니어링 영역의
 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
 
 ## 목적
@@ -69,6 +69,8 @@ make link-check
 - `docs/pbs/operation-guide.md`
   (Proxmox VE 연동, 백업 작업, PBS 트러블슈팅)
 - `docs/minio/installation.md`
+- `docs/vm-admin/installation.md`
+  (운영 전용 관리 노드 구성, kubectl 원격 제어, MinIO mc 관리, snap 정리)
 - `docs/jenkins/installation.md`
 - `docs/n8n/installation.md`
 - `docs/harbor/installation.md`

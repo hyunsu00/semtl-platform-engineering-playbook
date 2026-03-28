@@ -43,6 +43,8 @@ nav:
       - 설치: k8s/installation.md
       - 운영 가이드: k8s/operation-guide.md
       - 트러블슈팅: k8s/troubleshooting.md
+  - VM-ADMIN:
+      - 설치: vm-admin/installation.md
   - GitLab:
       - 설치: gitlab/installation.md
       - MinIO 연동: gitlab/minio-integration.md
