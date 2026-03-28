@@ -315,6 +315,7 @@ apiServer:
   - 10.10.10.12
   - 10.10.10.13
   - 10.10.10.100
+  - 10.96.0.1
 networking:
   podSubnet: "10.244.0.0/16"
 ---
@@ -762,7 +763,327 @@ kubectl -n kube-system get cm kubeadm-config -o yaml | grep controlPlaneEndpoint
 - `kubectl cluster-info`가 VIP 기준으로 응답
 - `kubeadm-config`의 `controlPlaneEndpoint`가 `10.10.10.100:6443`
 
-### 14. MetalLB 설치 `[cp1 전용]`
+### 14. 외부 API Endpoint HA 구성 `[ct-lb1/lb2 전용]`
+
+내부 control-plane HA는 `kube-vip`(`10.10.10.100`)로 유지하고,
+외부 운영 접속은 별도 LB CT 2대로 분리해야 합니다.
+
+권장 구조:
+
+```text
+VM-ADMIN (192.168.0.41)
+        |
+        v
+K8s API VIP (192.168.0.180:6443)
+        |
+   +----+----+
+   |         |
+CT-LB1    CT-LB2
+192.168.0.161
+192.168.0.162
+(HAProxy + Keepalived)
+        |
+        v
+CP1 192.168.0.181:6443
+CP2 192.168.0.182:6443
+CP3 192.168.0.183:6443
+```
+
+구성 원칙:
+
+- `kube-vip`는 control-plane 내부 API HA용입니다.
+- `CT-LB1/CT-LB2 + Keepalived + HAProxy`는 외부 운영 접속용입니다.
+- `vm-admin`의 kubeconfig는 최종적으로 `192.168.0.180:6443`를 사용해야 합니다.
+- 외부망 VIP `192.168.0.180`은 apiserver `certSANs`에 포함되어 있어야 합니다.
+
+#### 14.1 CT 권장 리소스
+
+- OS: `Ubuntu 22.04`
+- vCPU: `1`
+- RAM: `512MB`
+- Disk: `8GB`
+- NIC: 외부망 `192.168.0.x`
+
+예시:
+
+- `ct-lb1`: `192.168.0.161`
+- `ct-lb2`: `192.168.0.162`
+- API VIP: `192.168.0.180`
+
+#### 14.2 Proxmox CT 생성
+
+Proxmox에서 Ubuntu 22.04 LXC 템플릿을 준비한 뒤 CT 2개를 생성해야 합니다.
+
+예시:
+
+- `ct-lb1`
+  - CT ID: `121`
+  - Hostname: `ct-lb1`
+  - IP: `192.168.0.161/24`
+  - Gateway: 외부망 기본 게이트웨이
+- `ct-lb2`
+  - CT ID: `122`
+  - Hostname: `ct-lb2`
+  - IP: `192.168.0.162/24`
+  - Gateway: 외부망 기본 게이트웨이
+
+권장 옵션:
+
+- Unprivileged CT 사용
+- `nesting=1` 불필요
+- 방화벽 사용 시 `6443`, VRRP, 관리 SSH 경로 확인
+- 두 CT 모두 같은 브리지(`vmbr0`)에 연결
+
+생성 후 공통 확인:
+
+```bash
+hostnamectl
+ip -br a
+ip route
+ping -c 2 192.168.0.181
+ping -c 2 192.168.0.182
+ping -c 2 192.168.0.183
+```
+
+#### 14.3 CT 공통 초기 설정
+
+Proxmox CT는 기본 상태에서 `root` SSH 접근이 제한될 수 있습니다.
+따라서 콘솔로 먼저 접속한 뒤 운영 계정 `semtl`을 만들고 `sudo` 권한을 부여해야 합니다.
+
+운영 계정 생성:
+
+```bash
+apt update
+apt install -y sudo openssh-server
+adduser semtl
+usermod -aG sudo semtl
+id semtl
+```
+
+운영 기준:
+
+- 이후 SSH 접속과 운영 명령은 `semtl` 계정 기준으로 진행해야 합니다.
+- `root` 직접 SSH 접속을 열기보다 `semtl` + `sudo` 조합으로 운영해야 합니다.
+
+필요 시 SSH 서비스 확인:
+
+```bash
+systemctl enable --now ssh
+systemctl status ssh --no-pager
+```
+
+접속 확인 예시:
+
+```bash
+ssh semtl@192.168.0.161
+ssh semtl@192.168.0.162
+sudo whoami
+```
+
+두 CT 모두 아래 패키지를 설치해야 합니다.
+
+```bash
+sudo apt update
+sudo apt install -y haproxy keepalived curl netcat-openbsd
+```
+
+권장 추가 확인:
+
+```bash
+haproxy -v
+keepalived --version
+nc -vz 192.168.0.181 6443
+nc -vz 192.168.0.182 6443
+nc -vz 192.168.0.183 6443
+```
+
+정상 기준:
+
+- 세 control-plane의 `6443` 포트가 두 CT에서 모두 열려 있어야 합니다.
+- 이 단계에서 연결이 안 되면 HAProxy/Keepalived 설정 전 네트워크를 먼저 수정해야 합니다.
+
+#### 14.4 HAProxy 설정
+
+두 CT 모두 `/etc/haproxy/haproxy.cfg`에 맨 아래에 추가해야 합니다.
+
+```cfg
+ ...
+
+frontend k8s_api
+  bind *:6443
+  mode tcp
+  option tcplog
+  default_backend k8s_api_back
+
+backend k8s_api_back
+  mode tcp
+  option tcp-check
+  balance roundrobin
+  default-server inter 2s fall 2 rise 2
+  server cp1 192.168.0.181:6443 check
+  server cp2 192.168.0.182:6443 check
+  server cp3 192.168.0.183:6443 check
+```
+
+적용:
+
+```bash
+sudo systemctl enable --now haproxy
+sudo systemctl restart haproxy
+sudo systemctl status haproxy --no-pager
+```
+
+백엔드 연결 확인:
+
+```bash
+nc -vz 192.168.0.181 6443
+nc -vz 192.168.0.182 6443
+nc -vz 192.168.0.183 6443
+```
+
+세 개 모두 `succeeded`가 나와야 정상입니다.
+
+#### 14.5 Keepalived 설정
+
+`ct-lb1`는 `MASTER`, `ct-lb2`는 `BACKUP`으로 구성해야 합니다.
+
+인터페이스 확인:
+
+```bash
+ip -br a
+```
+
+아래 예시에서는 `eth0`를 사용합니다. 실제 인터페이스 이름이 다르면 해당 이름으로 바꿔야 합니다.
+
+헬스체크 스크립트는 두 CT에 동일하게 배치해야 합니다.
+
+```bash
+sudo tee /usr/local/bin/check_haproxy.sh >/dev/null <<'EOF'
+#!/bin/sh
+systemctl is-active --quiet haproxy
+EOF
+sudo chmod +x /usr/local/bin/check_haproxy.sh
+```
+
+`ct-lb1` 예시 `/etc/keepalived/keepalived.conf`:
+
+```cfg
+vrrp_script chk_haproxy {
+  script "/usr/local/bin/check_haproxy.sh"
+  interval 2
+  fall 2
+  rise 2
+}
+
+vrrp_instance VI_K8S_API {
+  state MASTER
+  interface eth0
+  virtual_router_id 51
+  priority 120
+  advert_int 1
+  unicast_src_ip 192.168.0.161
+  unicast_peer {
+    192.168.0.162
+  }
+  authentication {
+    auth_type PASS
+    auth_pass K8sVip51!
+  }
+  virtual_ipaddress {
+    192.168.0.180/24
+  }
+  track_script {
+    chk_haproxy
+  }
+}
+```
+
+`ct-lb2` 예시 `/etc/keepalived/keepalived.conf`:
+
+```cfg
+vrrp_script chk_haproxy {
+  script "/usr/local/bin/check_haproxy.sh"
+  interval 2
+  fall 2
+  rise 2
+}
+
+vrrp_instance VI_K8S_API {
+  state BACKUP
+  interface eth0
+  virtual_router_id 51
+  priority 110
+  advert_int 1
+  unicast_src_ip 192.168.0.162
+  unicast_peer {
+    192.168.0.161
+  }
+  authentication {
+    auth_type PASS
+    auth_pass K8sVip51!
+  }
+  virtual_ipaddress {
+    192.168.0.180/24
+  }
+  track_script {
+    chk_haproxy
+  }
+}
+```
+
+적용:
+
+```bash
+sudo systemctl enable --now keepalived
+sudo systemctl restart keepalived
+sudo systemctl status keepalived --no-pager
+```
+
+#### 14.6 외부 API VIP 확인
+
+VIP는 두 CT 중 한 대에만 보여야 합니다.
+
+```bash
+ip a | grep 192.168.0.180
+```
+
+`vm-admin`에서 VIP 포트 확인:
+
+```bash
+nc -vz 192.168.0.180 6443
+```
+
+정상 기준:
+
+- `192.168.0.180` VIP가 `ct-lb1` 또는 `ct-lb2` 한 대에만 바인딩됨
+- `nc -vz 192.168.0.180 6443` 연결 성공
+
+#### 14.7 `vm-admin` kubeconfig 전환
+
+외부 운영 접속은 VIP 기준으로 통일해야 합니다.
+
+```bash
+cp ~/.kube/config ~/.kube/config.bak
+sed -i \
+  's#server: https://.*:6443#server: https://192.168.0.180:6443#g' \
+  ~/.kube/config
+grep server ~/.kube/config
+kubectl get nodes -o wide
+```
+
+`x509` 오류가 발생하면 apiserver 인증서 SAN에 `192.168.0.180`이 포함되어 있는지 확인해야 합니다.
+상세 절차는 이 문서의 `apiserver SAN 변경 반영` 섹션을 따라야 합니다.
+
+#### 14.8 장애 시 기대 동작
+
+- `ct-lb1` 장애:
+  VIP가 `ct-lb2`로 이동해야 합니다.
+- `cp1` 장애:
+  HAProxy가 `cp2/cp3`로 트래픽을 전달해야 합니다.
+- `ct-lb1/ct-lb2` 동시 장애:
+  클러스터는 계속 동작하지만 외부 `kubectl` 접속은 불가합니다.
+
+### 15. MetalLB 설치 `[cp1 전용]`
 
 설치:
 
@@ -1189,6 +1510,13 @@ not 192.168.0.181
 3. 각 control-plane 노드에서 `apiserver` 인증서를 다시 생성해야 합니다.
 4. 각 노드에서 SAN 반영 여부를 확인해야 합니다.
 
+참고:
+
+- `10.96.0.1`은 기본 Kubernetes Service IP이므로 실제 인증서 SAN에 포함될 수 있습니다.
+- 이 값은 `kubeadm`이 `serviceSubnet` 기준으로 자동 포함하는 항목이므로
+  `certSANs`에 직접 적지 않아도 됩니다.
+- 문서의 `certSANs`에는 운영자가 추가로 보장해야 하는 내부망/외부망/VIP 주소를 중심으로 정리합니다.
+
 ##### 1) `cp1` 재발급용 설정 파일
 
 `cp1`에서 `/root/kubeadm-san-update-cp1.yaml` 생성:
@@ -1238,6 +1566,7 @@ apiServer:
   - 10.10.10.12
   - 10.10.10.13
   - 10.10.10.100
+  - 10.96.0.1
 networking:
   podSubnet: "10.244.0.0/16"
 ---

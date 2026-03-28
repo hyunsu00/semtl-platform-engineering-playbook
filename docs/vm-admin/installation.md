@@ -115,21 +115,20 @@ Control Plane API에 접근해야 합니다.
 API 접근 경로 또는 apiserver SAN을 먼저 재설정해야 합니다.
 
 재설정이 끝나면 `vm-admin`의 kubeconfig를 먼저 백업한 뒤
-`server:` 값을 외부망 Control Plane 주소로 변경해야 합니다.
+`server:` 값을 외부 운영 접속 VIP로 변경해야 합니다.
 
 ### 3.1 kubeconfig 백업 및 server 변경
 
 ```bash
 cp ~/.kube/config ~/.kube/config.bak
 sed -i \
-  's#server: https://10\.10\.10\.11:6443#server: https://192.168.0.181:6443#g' \
+  's#server: https://10\.10\.10\.11:6443#server: https://192.168.0.180:6443#g' \
   ~/.kube/config
 grep server ~/.kube/config
 kubectl get nodes -o wide
 ```
 
-향후 HA 구성을 적용하면 `192.168.0.181` 대신
-외부망 VIP 또는 LB 주소로 다시 변경해야 합니다.
+운영 기준으로는 `192.168.0.180:6443` 같은 외부망 VIP를 사용해야 합니다.
 
 ## 4. kubectl 동작 검증
 
