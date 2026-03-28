@@ -95,13 +95,13 @@
 | 7. `kubeadm`/`kubelet`/`kubectl` 설치 | `[모든 노드]` |
 | 8. `cp1` 초기화 | `[cp1 전용]` |
 | 9. Control Plane Join | `[cp1 전용]` + `[cp2/cp3 전용]` |
-| 10. etcd 3멤버 확인 + `etcdctl` 설치 | `[cp1 전용]` |
+| 10. etcd 3멤버 확인 + `etcdctl` 설치 | `[control-plane 공통]` |
 | 11. Worker Join | `[cp1 전용]` + `[worker 공통]` |
 | 12. Cilium 설치 | `[cp1 전용]` |
 | 13. `kube-vip` 배포 | `[cp1 전용]` + `[control-plane 공통]` |
 | 14. MetalLB 설치 | `[cp1 전용]` |
 | 15. `ingress-nginx` 설치 | `[cp1 전용]` |
-| 16. etcd 자동 백업 설정 | `[cp1 전용]` |
+| 16. etcd 자동 백업 설정(운영 권장) | `[cp1 전용]` |
 
 ### 1. Proxmox 사전 준비
 
@@ -139,24 +139,29 @@
 
 - vm-k8s-cp1
   ![Proxmox VM Hardware - vm-k8s-cp1](../assets/images/k8s/proxmox-vm-hw-k8s-cp1.png)
-  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
-  `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
+  캡션: `VM ID 201`, `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
+  `q35`, `OVMF (UEFI)`, `VirtIO SCSI single`, `cache=writeback`, `discard=on`,
+  `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 - vm-k8s-cp2
   ![Proxmox VM Hardware - vm-k8s-cp2](../assets/images/k8s/proxmox-vm-hw-k8s-cp2.png)
-  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
-  `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
+  캡션: `VM ID 202`, `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
+  `q35`, `OVMF (UEFI)`, `VirtIO SCSI single`, `cache=writeback`, `discard=on`,
+  `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 - vm-k8s-cp3
   ![Proxmox VM Hardware - vm-k8s-cp3](../assets/images/k8s/proxmox-vm-hw-k8s-cp3.png)
-  캡션: `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
-  `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
+  캡션: `VM ID 203`, `2 vCPU`, `6GB RAM`, `60GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
+  `q35`, `OVMF (UEFI)`, `VirtIO SCSI single`, `cache=writeback`, `discard=on`,
+  `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 - vm-k8s-w1
   ![Proxmox VM Hardware - vm-k8s-w1](../assets/images/k8s/proxmox-vm-hw-k8s-w1.png)
-  캡션: `4 vCPU`, `8GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
-  `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
+  캡션: `VM ID 211`, `4 vCPU`, `8GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
+  `q35`, `OVMF (UEFI)`, `VirtIO SCSI single`, `cache=writeback`, `discard=on`,
+  `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 - vm-k8s-w2
   ![Proxmox VM Hardware - vm-k8s-w2](../assets/images/k8s/proxmox-vm-hw-k8s-w2.png)
-  캡션: `4 vCPU`, `8GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
-  `q35`, `OVMF (UEFI)`, `balloon=0`, `allow-ksm=0`
+  캡션: `VM ID 212`, `4 vCPU`, `8GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
+  `q35`, `OVMF (UEFI)`, `VirtIO SCSI single`, `cache=writeback`, `discard=on`,
+  `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 
 ### 3. Ubuntu 22.04 설치 `[모든 노드]`
 
@@ -423,7 +428,41 @@ nodeRegistration:
 sudo kubeadm join --config /root/join-cp2.yaml
 ```
 
-`cp3`도 동일 절차로 `10.10.10.13` 값만 바꿔서 진행합니다.
+`cp3` 설정 (`[cp2/cp3 전용]`):
+
+```bash
+echo 'KUBELET_EXTRA_ARGS=--node-ip=10.10.10.13' | sudo tee /etc/default/kubelet
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+```
+
+`cp3` `/root/join-cp3.yaml`:
+
+```yaml
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: "10.10.10.11:6443"
+    token: "<TOKEN>"
+    caCertHashes:
+      - "sha256:<HASH>"
+controlPlane:
+  certificateKey: "<CERT_KEY>"
+  localAPIEndpoint:
+    advertiseAddress: "10.10.10.13"
+    bindPort: 6443
+nodeRegistration:
+  name: "vm-k8s-cp3"
+  kubeletExtraArgs:
+    node-ip: "10.10.10.13"
+```
+
+`cp3` join:
+
+```bash
+sudo kubeadm join --config /root/join-cp3.yaml
+```
 
 `cp2`, `cp3`에서도 `kubectl`을 사용하려면 각 노드에서 kubeconfig를 설정합니다
 (`cp2`, `cp3` 각각에서 실행).
@@ -454,9 +493,12 @@ kubectl get nodes -o wide
 - `INTERNAL-IP`가 `10.10.10.x`
 - CNI 설치 전이라 `NotReady`여도 정상
 
-### 10. etcd 3멤버 확인 + `etcdctl` 설치 `[cp1 전용]`
+### 10. etcd 3멤버 확인 + `etcdctl` 설치 `[control-plane 공통]`
 
-`cp1`에서 `etcdctl` 설치:
+운영 표준화를 위해 `cp1`, `cp2`, `cp3` 모두에 같은 버전의 `etcdctl`을 설치합니다.
+아래 절차는 각 control-plane 노드에서 동일하게 실행합니다.
+
+`etcdctl` 설치 (`[control-plane 공통]`):
 
 ```bash
 ETCD_VER=v3.5.10
@@ -467,7 +509,9 @@ rm -rf etcd-${ETCD_VER}-linux-amd64 etcd-${ETCD_VER}-linux-amd64.tar.gz
 etcdctl version
 ```
 
-멤버 확인:
+설치 후 멤버 확인은 우선 `cp1`에서 진행합니다.
+
+멤버 확인 (`[cp1 전용]`):
 
 ```bash
 sudo ETCDCTL_API=3 etcdctl \
@@ -479,6 +523,13 @@ sudo ETCDCTL_API=3 etcdctl \
 ```
 
 `started` 멤버가 3개여야 합니다.
+
+운영 기준:
+
+- `cp1`, `cp2`, `cp3` 어디서든 로컬 etcd endpoint(`127.0.0.1:2379`) 기준으로
+  `endpoint health`, `member list`, `snapshot save`를 바로 실행할 수 있어야 합니다.
+- 장애 시 특정 control-plane 노드에 접속 가능한 상황만으로도 즉시 etcd 점검을 시작할 수 있도록
+  세 노드 모두 동일 버전으로 유지합니다.
 
 ### 11. Worker Join (`w1`, `w2`) `[cp1 전용]` + `[worker 공통]`
 
@@ -749,7 +800,22 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 kubectl -n ingress-nginx get pods
 ```
 
-### 16. etcd 자동 백업 설정 `[cp1 전용]`
+정상 기준:
+
+- `ingress-nginx-controller` 파드는 `Running`
+- `ingress-nginx-admission-create`, `ingress-nginx-admission-patch` Job 파드는
+  1회 실행 후 `Completed` 상태로 남아 있어도 정상
+
+### 16. etcd 자동 백업 설정(운영 권장) `[cp1 전용]`
+
+이 단계는 랩/테스트 클러스터에서는 선택 사항이지만, 실제 운영 클러스터에서는 기본 적용을 권장합니다.
+
+위치는 현재 순서가 적절합니다.
+
+- 최소한 control-plane 구성, CNI, `kube-vip`, `ingress-nginx`까지 설치가 끝난 뒤
+  클러스터가 안정화된 상태에서 백업 자동화를 거는 편이 운영상 안전합니다.
+- 다만 etcd snapshot 자체는 더 이른 시점에도 가능하므로, 운영 환경에서는 이 단계 전이라도
+  수동 백업 1회를 먼저 수행해 두면 더 안전합니다.
 
 백업 디렉터리:
 
@@ -782,6 +848,8 @@ ls -1t ${BACKUP_DIR}/etcd-*.db | tail -n +31 | xargs -r rm -f
 ```bash
 sudo chmod 700 /usr/local/bin/etcd-backup.sh
 ```
+
+- `700`은 스크립트 소유자만 읽기/쓰기/실행 가능하고, 그룹/기타 사용자는 접근할 수 없다는 뜻입니다.
 
 서비스 `/etc/systemd/system/etcd-backup.service`:
 
@@ -827,7 +895,7 @@ sudo ls -lh /var/backups/etcd
 필수 검증 항목:
 
 1. `kubectl get nodes -o wide`에서 5노드 모두 `Ready`
-2. `cp1`에서 `etcdctl member list` 결과 `started` 3개
+2. `control-plane` 노드 중 1대 이상에서 `etcdctl member list` 결과 `started` 3개
 3. `kubectl -n kube-system get pods`에서 `cilium`/`coredns`/`kube-vip` 정상
 4. `ip -br a | grep 10.10.10.100`로 VIP 확인
 5. MetalLB와 `ingress-nginx` 파드가 `Running`
@@ -860,14 +928,66 @@ sudo ETCDCTL_API=3 etcdctl \
   - `kube-vip`
   - `metallb`
   - `ingress-nginx-controller`
-- `etcdctl endpoint health`는 `cp1` 로컬 etcd endpoint(`127.0.0.1:2379`)가
-  정상 응답하는지 확인하는 용도입니다.
+- `etcdctl endpoint health`는 각 control-plane 노드의 로컬 etcd endpoint
+  (`127.0.0.1:2379`)가 정상 응답하는지 확인하는 용도입니다.
 - `kubectl get events -A`에는 설치 중 일시 경고가 남아 있을 수 있으므로,
-  현재 파드 상태가 `Running`인지와 함께 판단합니다.
+  현재 파드/서비스 상태와 함께 판단합니다.
+- 예를 들어 초기 설치 직후의 `FailedMount`, `BackOff pulling image`,
+  `ImagePullBackOff`, `FailedToStartServiceHealthcheck` 이벤트는 뒤이어
+  `Pulled`, `Started`, `Completed`, `Assigned IP`가 확인되면 일시 경고로 볼 수 있습니다.
+- 반대로 동일 경고가 계속 누적되거나 현재 시점에도 파드가 `Pending`,
+  `CrashLoopBackOff`, `ImagePullBackOff`이면 원인 분석이 필요합니다.
+
+## 스냅샷 전 권장 추가 구성
+
+### metrics-server 설치 `[cp1 전용]`
+
+`metrics-server`는 클러스터 기본 기동에 필수는 아니지만, 운영 편의상 설치를 권장합니다.
+
+- `kubectl top nodes`
+- `kubectl top pods -A`
+- HPA 사용
+
+설치 시점:
+
+- `cp1/cp2/cp3`, `w1/w2` 조인 완료 후
+- CNI, `kube-vip`, MetalLB, `ingress-nginx`까지 안정화된 뒤
+- 베이스라인 스냅샷 전에 포함하면 복원 직후 운영 점검이 더 편리함
+
+설치:
+
+```bash
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+kubectl -n kube-system patch deployment metrics-server \
+  --type='json' \
+  -p='[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]'
+kubectl -n kube-system rollout status deployment/metrics-server
+kubectl -n kube-system get pods | grep metrics-server
+```
+
+확인:
+
+```bash
+kubectl top nodes
+kubectl top pods -A | head -n 30
+kubectl describe node vm-k8s-w1 | egrep -i 'MemoryPressure|DiskPressure|PIDPressure|Ready'
+```
+
+참고:
+
+- 이 환경에서는 kubelet 인증서의 IP SAN 이슈를 피하기 위해 `--kubelet-insecure-tls`를 함께 적용합니다.
+- `metrics-server`는 Kubernetes Metrics API용 경량 컴포넌트이고, Prometheus를 대체하지 않습니다.
+- Prometheus는 장기 보관, 시계열 조회, Alertmanager 연동, Grafana 시각화용이고, `metrics-server`는 실시간에 가까운 리소스 사용량 조회와 HPA용입니다.
 
 ### 스냅샷 베이스라인
 
-최종 검증 완료 후 VM 5대 종료 상태에서 Proxmox 스냅샷을 생성합니다.
+최종 검증과 `metrics-server` 설치까지 완료한 뒤 VM 5대 종료 상태에서 Proxmox 스냅샷을 생성합니다.
+
+권장 사항:
+
+- 운영용 베이스라인 스냅샷은 `metrics-server` 포함 상태로 생성하는 것을 권장합니다.
+- 이렇게 하면 스냅샷 복원 직후 `kubectl top nodes`, `kubectl top pods -A`로 기본 리소스 점검이 가능합니다.
+- 최소 설치 상태만 보존하려는 목적이면 `metrics-server` 없이 스냅샷을 생성해도 됩니다.
 
 스냅샷 생성 전 아래 정리 작업을 먼저 수행합니다.
 
@@ -882,8 +1002,67 @@ cat /dev/null > ~/.bash_history && history -c
 
 권장 스냅샷 이름:
 
-- `baseline-ha-k8s-22.04`
-- `baseline-ha-k8s-3cp-vip-metallb-ingress-utc-swapfixed`
+- `k8s-ha-install-clean-v1`
+
+권장 적용 방식:
+
+- 스냅샷 이름은 5대 VM 모두 동일하게 `k8s-ha-install-clean-v1`로 맞춥니다.
+- 설명(description)은 노드 역할이 드러나도록 VM별로 다르게 기록합니다.
+
+VM별 권장 설명:
+
+- `vm-k8s-cp1`:
+  `[설치]`
+  `- k8s : v1.29.15`
+  `- role : control-plane-1`
+  `- hostname : vm-k8s-cp1`
+  `- internal ip : 10.10.10.11`
+  `- bootstrap : kubeadm init 완료`
+  `- vip : 10.10.10.100:6443`
+  `- addons : cilium, metallb, ingress-nginx, kube-vip, metrics-server`
+  `- etcd : backup configured`
+- `vm-k8s-cp2`:
+  `[설치]`
+  `- k8s : v1.29.15`
+  `- role : control-plane-2`
+  `- hostname : vm-k8s-cp2`
+  `- internal ip : 10.10.10.12`
+  `- join : control-plane join 완료`
+  `- kubeconfig : configured`
+  `- etcdctl : installed`
+  `- metrics : metrics-server available`
+  `- kube-vip : static manifest applied`
+- `vm-k8s-cp3`:
+  `[설치]`
+  `- k8s : v1.29.15`
+  `- role : control-plane-3`
+  `- hostname : vm-k8s-cp3`
+  `- internal ip : 10.10.10.13`
+  `- join : control-plane join 완료`
+  `- kubeconfig : configured`
+  `- etcdctl : installed`
+  `- metrics : metrics-server available`
+  `- kube-vip : static manifest applied`
+- `vm-k8s-w1`:
+  `[설치]`
+  `- k8s : v1.29.15`
+  `- role : worker-1`
+  `- hostname : vm-k8s-w1`
+  `- internal ip : 10.10.10.21`
+  `- join : worker join 완료`
+  `- cni : cilium ready`
+  `- metrics : metrics-server available`
+  `- ingress : traffic ready`
+- `vm-k8s-w2`:
+  `[설치]`
+  `- k8s : v1.29.15`
+  `- role : worker-2`
+  `- hostname : vm-k8s-w2`
+  `- internal ip : 10.10.10.22`
+  `- join : worker join 완료`
+  `- cni : cilium ready`
+  `- metrics : metrics-server available`
+  `- ingress : traffic ready`
 
 ## 설치 직후 운영 기준
 
@@ -946,7 +1125,7 @@ sudo ls -lh /var/backups/etcd | tail -n 10
 ```bash
 kubectl top nodes
 kubectl top pods -A | head -n 30
-kubectl describe node k8s-w1 | egrep -i 'MemoryPressure|DiskPressure|PIDPressure|Ready'
+kubectl describe node vm-k8s-w1 | egrep -i 'MemoryPressure|DiskPressure|PIDPressure|Ready'
 ```
 
 ### 월간 점검
