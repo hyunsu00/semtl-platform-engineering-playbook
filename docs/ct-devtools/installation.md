@@ -12,8 +12,9 @@
 - CT ID 예시: `131`
 - 운영 계정: `semtl`
 - 접속 방식: `semtl` 계정 + `sudo`
-- Docker 운영 경로: `~/docker/stacks`
-- 기본 관리 도구: `Homepage`, `Uptime Kuma`, `Portainer`, `Dozzle`, `Watchtower`
+- Docker 운영 경로: `~/docker/devtools`
+- 기본 관리 도구: `Homepage`, `Uptime Kuma`, `Dozzle`, `Watchtower`
+- 외부 관리 UI: 별도 Portainer 서버 사용
 
 이 문서는 실사용 중 최종적으로 성공한 흐름만 남기고,
 중간 시행착오는 제외합니다.
@@ -40,7 +41,7 @@
 
 - CT ID: `131`
 - hostname: `ct-devtools`
-- IP: `192.168.0.161`
+- IP: `192.168.0.163`
 
 ## 사전 조건
 
@@ -68,14 +69,25 @@ Proxmox Web UI에서 Ubuntu 22.04 LXC 템플릿으로 CT를 생성합니다.
 권장 리소스:
 
 - vCPU: `2`
-- RAM: `2GB`
-- Swap: `512MB`
+- RAM: `4GB`
+- Swap: `1GB`
 - Root Disk: `32GB` 이상
 
 운영 메모:
 
 - 홈랩 관리 도구만 올릴 목적이라면 VM보다 CT가 가볍고 관리가 쉽습니다.
 - 네트워크는 먼저 `DHCP`로 검증한 뒤 필요 시 고정 IP로 바꾸는 편이 안전합니다.
+- `RAM 4GB`는 CT가 부팅 직후 항상 `4GB`를 즉시 점유한다는 의미가 아니라,
+  사용할 수 있는 최대 메모리 한도를 의미합니다.
+- Docker 엔진 자체 메모리 요구량은 크지 않지만, `Homepage`, `Uptime Kuma`,
+  `Dozzle`, `Watchtower` 같은 관리 도구를 함께 올릴 계획이면
+  `4GB`가 `2GB`보다 훨씬 여유롭습니다.
+- `2GB RAM + 512MB Swap`으로도 설치와 가벼운 실습은 가능하지만,
+  이후 컨테이너 수가 늘어날 가능성을 생각하면 처음부터 `4GB + 1GB Swap`
+  구성을 권장합니다.
+- Swap은 RAM이 부족할 때 디스크 일부를 임시 메모리처럼 사용하는 공간입니다.
+  메모리 부족 시 즉시 장애가 나는 것을 완화하는 데 도움은 되지만,
+  디스크 기반이라 RAM보다 훨씬 느리므로 보조 용도로만 봅니다.
 
 ## 2. CT Features 설정
 
@@ -140,7 +152,7 @@ systemctl enable --now ssh
 다른 PC에서 접속을 확인합니다.
 
 ```bash
-ssh semtl@192.168.0.161
+ssh semtl@192.168.0.163
 ```
 
 로그인 후 `sudo` 권한을 확인합니다.
@@ -321,7 +333,7 @@ Docker 설치와 `docker ps` 확인까지 끝났으면,
 이 단계의 목적은 아래와 같습니다.
 
 - Docker 엔진까지 정상 동작하는 최소 기준점 보존
-- 이후 `Homepage`, `Uptime Kuma`, `Portainer`, `Dozzle` 구성 실패 시 빠른 롤백
+- 이후 `Homepage`, `Uptime Kuma`, `Dozzle` 구성 실패 시 빠른 롤백
 - 설치 직후 찌꺼기를 정리한 깨끗한 상태 유지
 
 스냅샷은 반드시 불필요 파일 정리 후 생성합니다.
@@ -400,22 +412,20 @@ Proxmox Web UI 절차:
 운영 기준 디렉터리를 먼저 만듭니다.
 
 ```bash
-mkdir -p ~/docker/stacks/devtools-stack
-cd ~/docker/stacks/devtools-stack
+mkdir -p ~/docker/devtools
+cd ~/docker/devtools
 mkdir -p homepage/config
 mkdir -p uptime-kuma
-mkdir -p portainer
 ```
 
 예상 구조:
 
 ```text
-~/docker/stacks/devtools-stack/
+~/docker/devtools/
 ├── docker-compose.yml
 ├── homepage/
 │   └── config/
-├── uptime-kuma/
-└── portainer/
+└── uptime-kuma/
 ```
 
 ## 11. Devtools 스택 작성
@@ -428,16 +438,17 @@ services:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
     ports:
-      - "3000:3000"
+      - "192.168.0.163:3000:3000"
     volumes:
       - ./homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
 
   uptime-kuma:
     image: louislam/uptime-kuma:latest
     container_name: uptime-kuma
     ports:
-      - "3001:3001"
+      - "192.168.0.163:3001:3001"
     volumes:
       - ./uptime-kuma:/app/data
     restart: unless-stopped
@@ -446,18 +457,8 @@ services:
     image: amir20/dozzle:latest
     container_name: dozzle
     ports:
-      - "3002:8080"
+      - "192.168.0.163:3002:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
-
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./portainer:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
@@ -475,13 +476,99 @@ services:
 - `Homepage`는 대시보드
 - `Uptime Kuma`는 모니터링
 - `Dozzle`은 로그 확인
-- `Portainer`는 Docker 관리 UI
 - `Watchtower`는 자동 이미지 갱신 보조
+- Docker 관리 UI는 `ct-devtools` 내부에 설치하지 않고
+  별도 Portainer 서버에서 원격 Environment로 등록해 사용합니다.
+
+### 11-1. Homepage 서비스 바로가기 추가
+
+`Homepage`에서 `Uptime Kuma`, `Dozzle` 상태를 Docker 기준으로 자동 연동하고
+`Proxmox`를 같이 표시하려면 먼저 `homepage/config/docker.yaml`을 작성합니다.
+
+```bash
+cd ~/docker/devtools
+cat > ~/docker/devtools/homepage/config/docker.yaml <<'EOF'
+devtools-docker:
+  socket: /var/run/docker.sock
+EOF
+```
+
+그다음 `homepage/config/services.yaml`에 아래 내용을 작성합니다.
+
+```bash
+cd ~/docker/devtools
+cat > ~/docker/devtools/homepage/config/services.yaml <<'EOF'
+- Devtools:
+  - Uptime Kuma:
+      href: http://192.168.0.163:3001
+      description: Service monitoring dashboard
+      icon: uptime-kuma.png
+      server: devtools-docker
+      container: uptime-kuma
+  - Dozzle:
+      href: http://192.168.0.163:3002
+      description: Container log viewer
+      icon: dozzle.png
+      server: devtools-docker
+      container: dozzle
+- Infra:
+  - Proxmox:
+      href: https://192.168.0.254:8006
+      description: Proxmox VE management
+      icon: proxmox.png
+      widget:
+        type: proxmox
+        url: https://192.168.0.254:8006
+        username: root@pam!homepage
+        password: <change-required>
+EOF
+```
+
+적용 후 `http://192.168.0.163:3000`에 접속하면
+`Devtools` 그룹 아래에 `Uptime Kuma`, `Dozzle` 카드가,
+`Infra` 그룹 아래에 `Proxmox` 카드가 보이고 클릭 시 각 서비스로 이동합니다.
+`Uptime Kuma`, `Dozzle`는 Docker 컨테이너 상태도 함께 표시할 수 있습니다.
+
+### 11-2. Proxmox API Token 준비
+
+`Homepage`에서 Proxmox 위젯까지 표시하려면 Proxmox API Token이 필요합니다.
+
+Proxmox Web UI 기준 예시 절차:
+
+1. `Datacenter`
+1. `Permissions`
+1. `API Tokens`
+1. 사용자 선택
+1. `Add`
+1. Token ID 입력
+1. Secret 저장
+
+예시:
+
+- Proxmox URL: `https://192.168.0.254:8006`
+- 사용자: `root@pam`
+- Token ID: `homepage`
+- Homepage 입력값: `root@pam!homepage`
+
+운영 메모:
+
+- `services.yaml`의 `username`에는 `root@pam!homepage` 형식 값을 넣습니다.
+- `services.yaml`의 `password`에는 API Token secret 값을 넣습니다.
+- 운영 환경에서는 `root@pam` 대신 읽기 전용 전용 계정을 따로 만드는 편이 더 안전합니다.
+- self-signed 인증서를 쓰는 Proxmox에서는 최초 접속 시 브라우저 경고가 있을 수 있습니다.
+
+운영 메모:
+
+- `href`에는 실제 접속 가능한 서버 IP 또는 도메인을 사용합니다.
+- 아이콘이 없어도 링크 동작에는 문제 없습니다.
+- `docker.yaml`의 `devtools-docker` 이름은 `services.yaml`의 `server` 값과 같아야 합니다.
+- `container`에는 `docker ps`에 보이는 컨테이너 이름을 사용합니다.
+- 설정 변경 후 반영이 늦으면 `docker compose restart homepage`로 다시 올립니다.
 
 ## 12. 스택 기동
 
 ```bash
-cd ~/docker/stacks/devtools-stack
+cd ~/docker/devtools
 docker compose up -d
 docker compose ps
 ```
@@ -494,12 +581,11 @@ docker compose logs --tail=100
 
 ## 13. 접속 확인
 
-예시 IP가 `192.168.0.161`이면 접속 URL은 아래와 같습니다.
+예시 IP가 `192.168.0.163`이면 접속 URL은 아래와 같습니다.
 
-- Homepage: `http://192.168.0.161:3000`
-- Uptime Kuma: `http://192.168.0.161:3001`
-- Dozzle: `http://192.168.0.161:3002`
-- Portainer: `http://192.168.0.161:9000`
+- Homepage: `http://192.168.0.163:3000`
+- Uptime Kuma: `http://192.168.0.163:3001`
+- Dozzle: `http://192.168.0.163:3002`
 
 검증 명령:
 
@@ -513,8 +599,124 @@ docker ps
 - 관리 도구 컨테이너가 `Up` 상태
 - 각 포트가 LISTEN 상태
 - 브라우저에서 첫 화면 접속 가능
+- Portainer 관리는 별도 서버 UI에서 수행
 
-## 14. 트러블슈팅
+## 14. Portainer에서 다른 서버 Docker Engine 등록
+
+다른 서버의 Docker Engine을 Portainer에 등록할 때는
+Docker API를 직접 외부에 여는 방식보다 `Portainer Agent` 방식을 권장합니다.
+
+이 방식의 장점은 아래와 같습니다.
+
+- 대상 서버마다 표준 절차로 붙일 수 있음
+- Docker 소켓을 원격 TCP로 직접 노출하지 않아도 됨
+- Portainer UI에서 여러 Docker 호스트를 일관되게 관리 가능
+
+예시:
+
+- Portainer 서버: `192.168.0.2`
+- 등록 대상 Docker 서버: `192.168.0.163`
+- Agent 포트: `9001/tcp`
+
+### 14-1. 대상 서버 사전 조건
+
+등록 대상 서버에는 아래 조건이 먼저 충족되어야 합니다.
+
+- Docker 설치 완료
+- `docker ps` 정상 동작
+- Portainer 서버에서 대상 서버 `9001/tcp`로 접근 가능
+
+방화벽 사용 중이면 `9001/tcp` 허용도 함께 확인합니다.
+
+### 14-2. 대상 서버에 Portainer Agent 실행
+
+대상 서버에서 작업 디렉터리를 만든 뒤 `docker compose`로 실행합니다.
+
+```bash
+mkdir -p ~/docker/portainer-agent
+cd ~/docker/portainer-agent
+```
+
+`docker-compose.yml` 예시:
+
+```yaml
+services:
+  portainer-agent:
+    image: portainer/agent:latest
+    container_name: portainer-agent
+    restart: unless-stopped
+    ports:
+      - "192.168.0.163:9001:9001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+      - portainer_agent_data:/data
+
+volumes:
+  portainer_agent_data:
+```
+
+기동:
+
+```bash
+cd ~/docker/portainer-agent
+docker compose up -d
+```
+
+검증:
+
+```bash
+docker ps
+ss -lntp | grep 9001
+```
+
+기대 결과:
+
+- `portainer_agent` 컨테이너가 `Up` 상태
+- 대상 서버에서 `9001` 포트가 LISTEN 상태
+
+운영 메모:
+
+- Agent는 등록 대상 서버마다 1개씩 실행합니다.
+- 대상 서버가 여러 대라면 동일한 방식으로 각 서버에 Agent를 배치합니다.
+
+### 14-3. Portainer UI에서 Environment 추가
+
+Portainer UI에서 아래 순서로 등록합니다.
+
+1. `Environments`
+1. `Add environment`
+1. `Docker Standalone` 선택
+1. `Agent` 선택
+1. `Name` 입력
+1. `Environment URL` 입력
+1. `Connect`
+
+입력 예시:
+
+- Name: `ct-devtools`
+- Environment URL: `192.168.0.163:9001`
+
+등록이 성공하면 Portainer 좌측 환경 목록에서
+새 Docker 호스트가 별도 Environment로 보입니다.
+
+### 14-4. 연결 실패 시 우선 점검
+
+아래 항목을 순서대로 확인합니다.
+
+- 대상 서버에서 `docker ps`가 정상인지 확인
+- 대상 서버에서 `portainer_agent` 컨테이너가 실행 중인지 확인
+- 대상 서버에서 `9001/tcp`가 LISTEN 상태인지 확인
+- Portainer 서버에서 대상 서버 `9001/tcp`로 라우팅 가능한지 확인
+- 중간 방화벽 또는 보안 그룹에서 `9001/tcp`가 차단되지 않았는지 확인
+
+주의:
+
+- `2375/tcp`로 Docker API를 평문 개방하는 방식은 권장하지 않습니다.
+- 원격 서버가 인터넷 구간이나 비신뢰 네트워크를 지나면
+  Agent 연결 경로를 내부망으로 제한하는 것을 권장합니다.
+
+## 15. 트러블슈팅
 
 ### root SSH 로그인은 되는데 비밀번호 인증이 실패함
 
