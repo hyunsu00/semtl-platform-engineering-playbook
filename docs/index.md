@@ -38,6 +38,8 @@
   [DNS And Hostname Guide](./proxmox/dns-and-hostname-guide.md) |
   [Operation Guide](./proxmox/operation-guide.md) |
   [Troubleshooting](./proxmox/troubleshooting.md)
+- CT-DEVTOOLS:
+  [Installation](./ct-devtools/installation.md)
 - ttyd:
   [Installation](./ttyd/installation.md)
 - Upsnap:

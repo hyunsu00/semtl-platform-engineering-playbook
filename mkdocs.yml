@@ -28,6 +28,8 @@ nav:
       - Intel AMT 감시/알림: proxmox/amt-watchdog-and-alerting.md
       - 운영 가이드: proxmox/operation-guide.md
       - 트러블슈팅: proxmox/troubleshooting.md
+  - CT-DEVTOOLS:
+      - 설치: ct-devtools/installation.md
   - ttyd:
       - 설치: ttyd/installation.md
   - Upsnap:
