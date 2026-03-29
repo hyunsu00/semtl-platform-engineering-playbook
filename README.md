@@ -48,6 +48,8 @@ make link-check
 - `docs/adguardhome/installation.md`
   (Synology Container Manager 기반 AdGuard Home 설치, DNS/필터 최적화)
 - `docs/proxmox/overview.md`
+- `docs/proxmox/ct-template-guide.md`
+  (Proxmox CT 템플릿 등록, 운영 계정 포함 표준 LXC 복제 절차)
 - `docs/proxmox/vm-template-guide.md`
   (Proxmox VM 템플릿 등록, Cloud-Init 기반 복제 절차)
 - `docs/proxmox/storage-and-network-expansion.md`
@@ -78,6 +80,8 @@ make link-check
 - `docs/gitlab/minio-integration.md` (GitLab-MinIO Object Storage 연동)
 - `docs/gitlab/backup-and-restore.md`
 - `docs/k8s/cluster-bootstrap.md`
+- `docs/k8s/external-api-ha.md`
+  (CT-LB1/CT-LB2, HAProxy, Keepalived 기반 외부 API VIP 구성)
 - `docs/keycloak/sso-integration.md`
 - `docs/prometheus/monitoring-basics.md`
 - `docs/grafana/dashboard-guide.md`

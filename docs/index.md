@@ -32,6 +32,8 @@
 - Proxmox:
   [Overview](./proxmox/overview.md) |
   [Installation](./proxmox/installation.md) |
+  [CT Template Guide](./proxmox/ct-template-guide.md) |
+  [VM Template Guide](./proxmox/vm-template-guide.md) |
   [Storage And Network Expansion](./proxmox/storage-and-network-expansion.md) |
   [DNS And Hostname Guide](./proxmox/dns-and-hostname-guide.md) |
   [Operation Guide](./proxmox/operation-guide.md) |
@@ -58,6 +60,7 @@
 - Kubernetes:
   [Overview](./k8s/overview.md) |
   [Installation](./k8s/installation.md) |
+  [External API HA](./k8s/external-api-ha.md) |
   [Operation Guide](./k8s/operation-guide.md) |
   [Troubleshooting](./k8s/troubleshooting.md)
 - VM-ADMIN:
