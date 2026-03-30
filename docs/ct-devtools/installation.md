@@ -652,7 +652,7 @@ cat > ~/docker/devtools/homepage/config/services.yaml <<'EOF'
       server: devtools-docker
       container: dozzle
 - Infra:
-  - Proxmox:
+  - proxmox:
       href: https://proxmox.semtl.synology.me
       description: Proxmox VE management
       icon: proxmox.png
@@ -661,11 +661,21 @@ cat > ~/docker/devtools/homepage/config/services.yaml <<'EOF'
         url: https://proxmox.semtl.synology.me
         username: root@pam!homepage
         password: <change-required>
+  - SEMTL-NAS Volume 2:
+      href: https://nas.semtl.synology.me
+      description: DSM dashboard
+      icon: synology.png
+      widget:
+        type: diskstation
+        url: https://192.168.0.2:5001
+        username: semtl
+        password: <change-required>
+        volume: volume_2
 - Kubernetes:
   - ArgoCD:
       href: https://argocd.semtl.synology.me
       description: GitOps dashboard
-      icon: argocd.png
+      icon: argo-cd.png
       namespace: argocd
       app: argocd-server
 EOF
@@ -673,12 +683,13 @@ EOF
 
 적용 후 `http://192.168.0.163:3000`에 접속하면
 `DevTools` 그룹 아래에 `Uptime Kuma`, `Dozzle` 카드가,
-`Infra` 그룹 아래에 `Proxmox` 카드가,
+`Infra` 그룹 아래에 `Proxmox`, `Synology` 카드가,
 `Kubernetes` 그룹 아래에 `ArgoCD` 카드가 보이고 클릭 시 각 서비스로 이동합니다.
 상단 정보 위젯 영역에는 `Kubernetes` 클러스터 및 노드 리소스가 표시됩니다.
 `Uptime Kuma`, `Dozzle`는 Docker 컨테이너 상태를 함께 표시할 수 있습니다.
 `Argo CD`처럼 Kubernetes 위에 올라간 앱은 `namespace`, `app` 기준으로
 pod 상태를 서비스 카드에 함께 표시할 수 있습니다.
+`Synology` 카드는 DSM API를 이용해 NAS 상태를 함께 표시할 수 있습니다.
 
 설정 파일을 모두 준비한 뒤에는 `Homepage`를 다시 올립니다.
 
@@ -741,6 +752,11 @@ Proxmox Web UI 기준 예시 절차:
 - `container`에는 `docker ps`에 보이는 컨테이너 이름을 사용합니다.
 - `homepage/config/kubeconfig`가 없으면 Kubernetes 위젯은 `Offline`으로 표시될 수 있습니다.
 - 운영 기준 kubeconfig `server:` 값은 `192.168.0.180:6443`를 사용합니다.
+- Synology DSM 위젯은 전용 계정을 따로 만들고 필요한 최소 권한만 부여하는 편이 안전합니다.
+- Synology 계정에 `2FA`가 강제되어 있으면 위젯 인증이 실패할 수 있습니다.
+- Synology `diskstation` 위젯의 `volume` 값은 한 번에 하나만 지정할 수 있습니다.
+- 여러 볼륨(`volume_1`, `volume_2`, `volume_3`)을 각각 보려면 카드를 분리해야 합니다.
+- Synology 위젯은 기본적으로 CPU, 메모리, 업타임, 선택한 볼륨의 여유 공간을 표시합니다.
 - 설정 변경 후 반영이 늦으면 `docker compose restart homepage`로 다시 올립니다.
 
 ## 12. 스택 기동
