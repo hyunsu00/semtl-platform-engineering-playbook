@@ -589,9 +589,17 @@ cat > ~/docker/devtools/homepage/config/widgets.yaml <<'EOF'
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/info-widgets/
 
+- datetime:
+    text_size: xl
+    format:
+      dateStyle: short
+      timeStyle: short
+      hour12: false
+
 - resources:
+    label: ct-devtools
     cpu: true
-    memory: true
+    memory: false
     disk: /
 
 - search:
@@ -710,6 +718,8 @@ docker compose logs --tail=100 homepage
 - `Homepage`의 Kubernetes 연결은 `kubernetes.yaml`,
   클러스터 정보 표시 자체는 `widgets.yaml` 기준으로 관리합니다.
 - 이 문서 기준에서는 `services.yaml`에 `type: kubernetes` 블록을 직접 넣지 않습니다.
+- `resources` 위젯의 메모리 값은 LXC 안의 Docker 환경에서 CT 제한 메모리와 다르게 보일 수 있습니다.
+- 예를 들어 CT에 `4GB`를 할당했더라도 상위 시스템 기준 값이 `22.4GiB`처럼 표시될 수 있습니다.
 - 노드별 위젯은 화면 폭을 많이 차지할 수 있으므로 운영 화면에 맞게 조정합니다.
 - `widgets.yaml`의 `nodes:` 블록을 수정할 때는 들여쓰기와 `show` 값을 함께 확인합니다.
 - Kubernetes 앱을 서비스 카드로 보이려면 `namespace`, `app` 또는 `podSelector`
