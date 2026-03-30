@@ -430,6 +430,9 @@ mkdir -p uptime-kuma
 
 ## 11. Devtools 스택 작성
 
+이 문서 기준 관리 도구는 `ct-devtools` 내부에서 각 포트를 직접 열어
+같은 네트워크 대역에서 접속하는 구조입니다.
+
 아래 `docker-compose.yml`을 기준으로 관리 도구를 한 번에 올립니다.
 
 ```yaml
@@ -442,6 +445,9 @@ services:
     volumes:
       - ./homepage/config:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: 192.168.0.163:3000,localhost:3000,devtools.semtl.synology.me
+      KUBECONFIG: /app/config/kubeconfig
     restart: unless-stopped
 
   uptime-kuma:
@@ -469,6 +475,21 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --cleanup --interval 300
     restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: devtools
+    depends_on:
+      - homepage
+      - uptime-kuma
+      - dozzle
+    ports:
+      - "192.168.0.163:80:80"
+      - "192.168.0.163:443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/certs:/etc/nginx/certs:ro
+    restart: unless-stopped
 ```
 
 운영 메모:
@@ -480,10 +501,11 @@ services:
 - Docker 관리 UI는 `ct-devtools` 내부에 설치하지 않고
   별도 Portainer 서버에서 원격 Environment로 등록해 사용합니다.
 
-### 11-1. Homepage 서비스 바로가기 추가
+### 11-1. Homepage 서비스 및 Kubernetes 위젯 설정
 
 `Homepage`에서 `Uptime Kuma`, `Dozzle` 상태를 Docker 기준으로 자동 연동하고
-`Proxmox`를 같이 표시하려면 먼저 `homepage/config/docker.yaml`을 작성합니다.
+`Proxmox`와 Kubernetes 기반 앱을 같이 표시하려면 먼저
+`homepage/config/docker.yaml`을 작성합니다.
 
 ```bash
 cd ~/docker/devtools
@@ -493,12 +515,130 @@ devtools-docker:
 EOF
 ```
 
+Kubernetes 연동은 `services.yaml`만으로는 동작하지 않습니다.
+`Homepage` 컨테이너가 실제로 Kubernetes API에 인증할 수 있도록
+`homepage/config/kubeconfig`도 함께 준비해야 합니다.
+
+`vm-admin`에서 이미 동작 확인된 kubeconfig가 있으면 그 파일을 복사하는 편이 가장 안전합니다.
+
+예시:
+
+```bash
+cd ~/docker/devtools
+scp semtl@192.168.0.41:/home/semtl/.kube/config \
+  ~/docker/devtools/homepage/config/kubeconfig
+chmod 600 ~/docker/devtools/homepage/config/kubeconfig
+```
+
+`vm-admin`가 아니라 `cp1`에서 직접 가져오려면
+[`docs/vm-admin/installation.md`](/home/semtl/playground/semtl-platform-engineering-playbook/docs/vm-admin/installation.md)
+기준과 동일하게 임시 파일을 만든 뒤 복사합니다.
+
+```bash
+# cp1(192.168.0.181)에서 1회 실행
+sudo -i
+install -m 600 /etc/kubernetes/admin.conf /home/semtl/admin.conf
+chown semtl:semtl /home/semtl/admin.conf
+exit
+
+# ct-devtools에서 실행
+scp semtl@192.168.0.181:/home/semtl/admin.conf \
+  ~/docker/devtools/homepage/config/kubeconfig
+chmod 600 ~/docker/devtools/homepage/config/kubeconfig
+```
+
+복사한 kubeconfig의 `server:` 값은 외부 API VIP 기준으로 맞춥니다.
+
+```bash
+sed -i \
+  's#server: https://10\\.10\\.10\\.11:6443#server: https://192.168.0.180:6443#g' \
+  ~/docker/devtools/homepage/config/kubeconfig
+
+grep server ~/docker/devtools/homepage/config/kubeconfig
+```
+
+기대 결과:
+
+```text
+server: https://192.168.0.180:6443
+```
+
+Kubernetes 연결용 `homepage/config/kubernetes.yaml`도 함께 작성합니다.
+이 문서 기준 `Homepage`는 Docker 컨테이너에서 외부 kubeconfig로 붙으므로
+`mode: default`를 사용합니다.
+`ingress: true`를 쓰려면 클러스터에 Ingress controller가 먼저 설치되어 있어야 합니다.
+
+```bash
+cd ~/docker/devtools
+cat > ~/docker/devtools/homepage/config/kubernetes.yaml <<'EOF'
+mode: default
+ingress: true
+traefik: true
+gateway: false
+EOF
+```
+
+클러스터 CPU/메모리 상태는 `widgets.yaml`의 Kubernetes 정보 위젯으로 표시합니다.
+현재 예시는 `cluster`와 `nodes`를 함께 표시하는 형태이며,
+환경에 따라 상단 폭을 많이 차지할 수 있습니다.
+
+```bash
+cd ~/docker/devtools
+cat > ~/docker/devtools/homepage/config/widgets.yaml <<'EOF'
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/info-widgets/
+
+- resources:
+    cpu: true
+    memory: true
+    disk: /
+
+- search:
+    provider: duckduckgo
+    target: _blank
+
+- openmeteo:
+    label: 성남시
+    latitude: 37.4044180
+    longitude: 127.1224071
+    units: metric
+    cache: 5
+
+#- openweathermap:
+#    label: 성남시
+#    latitude: 37.4044180
+#    longitude: 127.1224071
+#    units: metric
+#    provider: openweathermap
+#    cache: 5
+
+- kubernetes:
+    cluster:
+      show: true
+      cpu: true
+      memory: true
+      showLabel: true
+      label: "cluster"
+    nodes:
+      show: true
+      cpu: true
+      memory: true
+      showLabel: tru
+EOF
+```
+
+`services.yaml`에는 Docker 기반 로컬 서비스와,
+필요하면 Kubernetes 위에 올라간 개별 앱 카드도 함께 둘 수 있습니다.
+
+예시에서는 `Argo CD`를 Kubernetes 앱 카드로 추가합니다.
+
 그다음 `homepage/config/services.yaml`에 아래 내용을 작성합니다.
 
 ```bash
 cd ~/docker/devtools
 cat > ~/docker/devtools/homepage/config/services.yaml <<'EOF'
-- Devtools:
+- DevTools:
   - Uptime Kuma:
       href: http://192.168.0.163:3001
       description: Service monitoring dashboard
@@ -513,21 +653,57 @@ cat > ~/docker/devtools/homepage/config/services.yaml <<'EOF'
       container: dozzle
 - Infra:
   - Proxmox:
-      href: https://192.168.0.254:8006
+      href: https://proxmox.semtl.synology.me
       description: Proxmox VE management
       icon: proxmox.png
       widget:
         type: proxmox
-        url: https://192.168.0.254:8006
+        url: https://proxmox.semtl.synology.me
         username: root@pam!homepage
         password: <change-required>
+- Kubernetes:
+  - ArgoCD:
+      href: https://argocd.semtl.synology.me
+      description: GitOps dashboard
+      icon: argocd.png
+      namespace: argocd
+      app: argocd-server
 EOF
 ```
 
 적용 후 `http://192.168.0.163:3000`에 접속하면
-`Devtools` 그룹 아래에 `Uptime Kuma`, `Dozzle` 카드가,
-`Infra` 그룹 아래에 `Proxmox` 카드가 보이고 클릭 시 각 서비스로 이동합니다.
-`Uptime Kuma`, `Dozzle`는 Docker 컨테이너 상태도 함께 표시할 수 있습니다.
+`DevTools` 그룹 아래에 `Uptime Kuma`, `Dozzle` 카드가,
+`Infra` 그룹 아래에 `Proxmox` 카드가,
+`Kubernetes` 그룹 아래에 `ArgoCD` 카드가 보이고 클릭 시 각 서비스로 이동합니다.
+상단 정보 위젯 영역에는 `Kubernetes` 클러스터 및 노드 리소스가 표시됩니다.
+`Uptime Kuma`, `Dozzle`는 Docker 컨테이너 상태를 함께 표시할 수 있습니다.
+`Argo CD`처럼 Kubernetes 위에 올라간 앱은 `namespace`, `app` 기준으로
+pod 상태를 서비스 카드에 함께 표시할 수 있습니다.
+
+설정 파일을 모두 준비한 뒤에는 `Homepage`를 다시 올립니다.
+
+```bash
+cd ~/docker/devtools
+docker compose up -d homepage
+docker compose logs --tail=100 homepage
+```
+
+운영 메모:
+
+- `curl -k https://192.168.0.180:6443/version`가 정상이라면 네트워크 경로는 열린 상태입니다.
+- 이 상태에서 `Offline`이 보이면 대부분 `Homepage` 컨테이너의 kubeconfig 부재,
+  `server:` 값 불일치, `kubernetes.yaml`/`widgets.yaml` 구성 오류,
+  또는 API 인증서 SAN 불일치 문제입니다.
+- VIP `192.168.0.180`이 apiserver 인증서 SAN에 포함되지 않았다면
+  `Homepage` 위젯은 TLS 검증 실패로 `Offline`이 될 수 있습니다.
+- `Homepage`의 Kubernetes 연결은 `kubernetes.yaml`,
+  클러스터 정보 표시 자체는 `widgets.yaml` 기준으로 관리합니다.
+- 이 문서 기준에서는 `services.yaml`에 `type: kubernetes` 블록을 직접 넣지 않습니다.
+- 노드별 위젯은 화면 폭을 많이 차지할 수 있으므로 운영 화면에 맞게 조정합니다.
+- `widgets.yaml`의 `nodes:` 블록을 수정할 때는 들여쓰기와 `show` 값을 함께 확인합니다.
+- Kubernetes 앱을 서비스 카드로 보이려면 `namespace`, `app` 또는 `podSelector`
+  기준으로 각 앱 카드를 별도로 정의합니다.
+- kubeconfig를 수정한 뒤 반영이 늦으면 `docker compose restart homepage`로 다시 올립니다.
 
 ### 11-2. Proxmox API Token 준비
 
@@ -563,6 +739,8 @@ Proxmox Web UI 기준 예시 절차:
 - 아이콘이 없어도 링크 동작에는 문제 없습니다.
 - `docker.yaml`의 `devtools-docker` 이름은 `services.yaml`의 `server` 값과 같아야 합니다.
 - `container`에는 `docker ps`에 보이는 컨테이너 이름을 사용합니다.
+- `homepage/config/kubeconfig`가 없으면 Kubernetes 위젯은 `Offline`으로 표시될 수 있습니다.
+- 운영 기준 kubeconfig `server:` 값은 `192.168.0.180:6443`를 사용합니다.
 - 설정 변경 후 반영이 늦으면 `docker compose restart homepage`로 다시 올립니다.
 
 ## 12. 스택 기동
@@ -581,7 +759,7 @@ docker compose logs --tail=100
 
 ## 13. 접속 확인
 
-예시 IP가 `192.168.0.163`이면 접속 URL은 아래와 같습니다.
+예시 접속 URL은 아래와 같습니다.
 
 - Homepage: `http://192.168.0.163:3000`
 - Uptime Kuma: `http://192.168.0.163:3001`
@@ -592,12 +770,13 @@ docker compose logs --tail=100
 ```bash
 ss -lntp
 docker ps
+docker compose logs --tail=100 homepage
 ```
 
 기대 결과:
 
 - 관리 도구 컨테이너가 `Up` 상태
-- 각 포트가 LISTEN 상태
+- `3000/tcp`, `3001/tcp`, `3002/tcp`가 LISTEN 상태
 - 브라우저에서 첫 화면 접속 가능
 - Portainer 관리는 별도 서버 UI에서 수행
 

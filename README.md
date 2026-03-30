@@ -51,7 +51,7 @@ make link-check
 - `docs/proxmox/ct-template-guide.md`
   (Proxmox CT 템플릿 등록, 운영 계정 포함 표준 LXC 복제 절차)
 - `docs/ct-devtools/installation.md`
-  (ct-devtools CT 생성, semtl 계정, SSH, Docker, Homepage/Uptime Kuma/Portainer/Dozzle 구성)
+  (ct-devtools CT 생성, semtl 계정, SSH, Docker, Homepage/Uptime Kuma/Dozzle 구성)
 - `docs/proxmox/vm-template-guide.md`
   (Proxmox VM 템플릿 등록, Cloud-Init 기반 복제 절차)
 - `docs/proxmox/storage-and-network-expansion.md`
