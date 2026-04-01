@@ -41,6 +41,9 @@ nav:
       - 운영 가이드: pbs/operation-guide.md
   - MinIO:
       - 설치: minio/installation.md
+      - Harbor 연동: minio/harbor-integration.md
+      - GitLab 연동: minio/gitlab-integration.md
+      - Jenkins 연동: minio/jenkins-integration.md
   - Kubernetes:
       - 개요: k8s/overview.md
       - 설치: k8s/installation.md
@@ -51,7 +54,6 @@ nav:
       - 설치: vm-admin/installation.md
   - GitLab:
       - 설치: gitlab/installation.md
-      - MinIO 연동: gitlab/minio-integration.md
       - Harbor 연동: gitlab/harbor-integration.md
   - Jenkins:
       - 설치: jenkins/installation.md

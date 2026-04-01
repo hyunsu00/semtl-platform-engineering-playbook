@@ -5,7 +5,7 @@
 이 문서는 VM 기반 Harbor 기본 설치 절차를 정의합니다.
 
 설치가 가장 중요한 기준 문서이므로, 구축 직후 필요한 검증, 초기 스냅샷,
-기본 운영 기준, MinIO S3 backend 연동, Keycloak OIDC 준비, 자주 발생하는 이슈까지
+기본 운영 기준, 외부 스토리지/SSO 연계 포인트, 자주 발생하는 이슈까지
 이 문서에 포함합니다.
 
 ## 사전 조건
@@ -80,10 +80,19 @@ sudo editor harbor.yml
 핵심 항목:
 
 - `hostname: harbor.semtl.synology.me`
+- `external_url: https://harbor.semtl.synology.me`
 - `http: port: 80`
 - `harbor_admin_password: <초기 관리자 비밀번호>`
 - HTTPS 인증서는 Reverse Proxy에서 종료하므로 Harbor VM에서는 `https:` 블록 비활성 또는 미사용
 - 내부 저장소는 초기 설치 기준으로 기본 filesystem 사용
+
+Reverse Proxy 운영 기준:
+
+- Synology Reverse Proxy 뒤에서 운영하는 경우 `external_url`을 반드시 `https` 기준으로 명시합니다.
+- `external_url`이 없으면 Harbor token realm이 `http://.../service/token`으로 생성되어
+  `docker login` 시 HTML 응답 또는 인증 오류가 발생할 수 있습니다.
+- 이 경우 `curl -k -i https://harbor.semtl.synology.me/v2/` 응답의
+  `www-authenticate` 헤더가 `https://.../service/token`인지 확인합니다.
 
 ### 4. Harbor 설치 실행
 
@@ -148,6 +157,9 @@ sudo docker ps
 # 외부 URL 응답 확인
 curl -I https://harbor.semtl.synology.me
 
+# Registry API 응답 확인
+curl -k -i https://harbor.semtl.synology.me/v2/
+
 # 컨테이너 이미지 태그 확인
 sudo docker ps --format '{{.Image}}' | grep goharbor
 
@@ -164,6 +176,10 @@ sudo docker ps | grep -E 'harbor-core|harbor-portal|harbor-jobservice'
 검증 기준:
 
 - 로그인 페이지 응답
+- `curl -k -i https://harbor.semtl.synology.me/v2/` 응답에
+  `Docker-Distribution-Api-Version: registry/2.0` 헤더 존재
+- `www-authenticate`의 token realm이 `https://harbor.semtl.synology.me/service/token`
+  기준으로 반환됨
 - 이미지 프로젝트 생성 가능
 - Harbor 컨테이너 이미지 태그가 `v2.13.2`로 확인됨
 - 재부팅 후 `harbor.service`와 주요 컨테이너가 정상 기동
@@ -242,72 +258,9 @@ curl -I https://harbor.semtl.synology.me
 
 ## MinIO S3 backend 연동
 
-### 연동 사전 조건
+Harbor를 MinIO 외부 스토리지와 연동하는 상세 절차는 아래 문서로 분리합니다.
 
-- Harbor 기본 설치 완료
-- MinIO 설치 및 동작 확인 완료
-- MinIO endpoint: `http://192.168.0.171:9000`
-- MinIO bucket `harbor` 및 Access/Secret Key 준비
-
-### 1. Harbor 설정 파일 백업
-
-```bash
-cd ~/harbor
-cp harbor.yml harbor.yml.bak.$(date -u +%Y%m%d%H%M%S)
-```
-
-### 2. `harbor.yml`에 S3 backend 반영
-
-`storage_service`를 아래처럼 설정합니다.
-
-```yaml
-storage_service:
-  s3:
-    regionendpoint: http://192.168.0.171:9000
-    accesskey: harbor
-    secretkey: <minio-secret>
-    bucket: harbor
-    secure: false
-    v4auth: true
-    chunksize: 5242880
-    rootdirectory: /
-    storageclass: STANDARD
-```
-
-### 3. Harbor 재적용
-
-```bash
-cd ~/harbor
-sudo ./prepare
-sudo docker compose down
-sudo docker compose up -d
-```
-
-### 검증
-
-```bash
-# Harbor 컨테이너 상태 확인
-sudo docker ps
-
-# Harbor 접속 확인
-curl -I https://harbor.semtl.synology.me
-```
-
-검증 기준:
-
-- Harbor 로그인 및 프로젝트 접근 정상
-- 이미지 push/pull 동작 정상
-- MinIO bucket `harbor`에 오브젝트 생성 확인
-
-### 롤백
-
-```bash
-cd ~/harbor
-cp harbor.yml.bak.<timestamp> harbor.yml
-sudo ./prepare
-sudo docker compose down
-sudo docker compose up -d
-```
+- [MinIO Harbor 연동](../minio/harbor-integration.md)
 
 ## Keycloak OIDC 연동 준비
 

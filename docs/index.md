@@ -10,6 +10,12 @@
    [Proxmox Overview](./proxmox/overview.md)
 1. MinIO 설치:
    [MinIO Installation](./minio/installation.md)
+1. MinIO Harbor 연동:
+   [MinIO Harbor Integration](./minio/harbor-integration.md)
+1. MinIO GitLab 연동:
+   [MinIO GitLab Integration](./minio/gitlab-integration.md)
+1. MinIO Jenkins 연동:
+   [MinIO Jenkins Integration](./minio/jenkins-integration.md)
 1. GitLab 설치:
    [GitLab Installation](./gitlab/installation.md)
 1. Harbor 설치:
@@ -50,7 +56,10 @@
   [Installation](./pbs/installation.md) |
   [Operation Guide](./pbs/operation-guide.md)
 - MinIO:
-  [Installation](./minio/installation.md)
+  [Installation](./minio/installation.md) |
+  [Harbor Integration](./minio/harbor-integration.md) |
+  [GitLab Integration](./minio/gitlab-integration.md) |
+  [Jenkins Integration](./minio/jenkins-integration.md)
 - Jenkins:
   [Installation](./jenkins/installation.md)
 - n8n:

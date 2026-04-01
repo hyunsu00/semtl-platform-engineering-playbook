@@ -73,13 +73,15 @@ make link-check
 - `docs/pbs/operation-guide.md`
   (Proxmox VE 연동, 백업 작업, PBS 트러블슈팅)
 - `docs/minio/installation.md`
+- `docs/minio/harbor-integration.md` (MinIO-Harbor 외부 스토리지 연동)
+- `docs/minio/gitlab-integration.md` (MinIO-GitLab Object Storage 연동)
+- `docs/minio/jenkins-integration.md` (MinIO-Jenkins Artifact Storage 연동)
 - `docs/vm-admin/installation.md`
   (운영 전용 관리 노드 구성, kubectl 원격 제어, MinIO mc 관리, snap 정리)
 - `docs/jenkins/installation.md`
 - `docs/n8n/installation.md`
 - `docs/harbor/installation.md`
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)
-- `docs/gitlab/minio-integration.md` (GitLab-MinIO Object Storage 연동)
 - `docs/gitlab/backup-and-restore.md`
 - `docs/k8s/cluster-bootstrap.md`
 - `docs/k8s/external-api-ha.md`

@@ -311,7 +311,12 @@ cat /dev/null > ~/.bash_history && history -c
 - Jenkins Controller는 VM에 단독 배치
 - Controller의 executor는 `0`으로 유지
 - 실제 빌드는 Kubernetes Agent에서 수행
+- 빌드 산출물 외부 스토리지는 MinIO 연동을 기본으로 사용
 - 계정, 권한, 구성 변경은 변경 이력과 함께 관리
+
+설치 후 MinIO 연동은 아래 문서를 사용합니다.
+
+- [MinIO Jenkins 연동](../minio/jenkins-integration.md)
 
 ### 일일 / 주간 점검
 

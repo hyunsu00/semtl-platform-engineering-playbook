@@ -235,7 +235,7 @@ cat /dev/null > ~/.bash_history && history -c
 
 설치 후 연동 작업은 아래 문서를 사용합니다.
 
-- [GitLab MinIO 연동](./minio-integration.md)
+- [MinIO GitLab 연동](../minio/gitlab-integration.md)
 - [GitLab Harbor 연동](./harbor-integration.md)
 
 ## Runner 운영 절차
