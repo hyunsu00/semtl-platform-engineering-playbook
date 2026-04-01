@@ -32,10 +32,43 @@ mc alias set local http://127.0.0.1:9000 <MINIO_ROOT_USER> '<MINIO_ROOT_PASSWORD
 
 # Harbor가 사용할 bucket 생성
 mc mb -p local/harbor
+
+# Harbor 전용 bucket 제한 정책 파일 생성
+cat > /tmp/policy-harbor-s3.json <<'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::harbor"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::harbor/*"
+      ]
+    }
+  ]
+}
+EOF
+
+# Harbor 전용 정책 등록
+mc admin policy create local policy-harbor-s3 /tmp/policy-harbor-s3.json
 # Harbor 전용 서비스 계정 생성
 mc admin user add local svc-harbor-s3 'replace-with-strong-password'
-# Harbor 계정에 읽기/쓰기 권한 부여
-mc admin policy attach local readwrite --user svc-harbor-s3
+# Harbor 계정에 Harbor bucket 전용 정책 연결
+mc admin policy attach local policy-harbor-s3 --user svc-harbor-s3
 # bucket 생성 결과 확인
 mc ls local/harbor
 ```
@@ -44,7 +77,7 @@ mc ls local/harbor
 
 - Harbor 전용 계정 `svc-harbor-s3`를 사용합니다.
 - bucket은 `harbor` 단일 bucket으로 시작합니다.
-- `readwrite` 정책으로 push/pull/GC 작업을 처리합니다.
+- 공용 `readwrite` 대신 `policy-harbor-s3`로 `harbor/*` 범위만 허용합니다.
 
 ### 2. [Harbor VM] Harbor 설정 파일 백업
 

@@ -29,10 +29,43 @@ mc alias set local http://127.0.0.1:9000 <MINIO_ROOT_USER> '<MINIO_ROOT_PASSWORD
 
 # CI artifact 전용 bucket 생성
 mc mb -p local/ci
+
+# CI 전용 bucket 제한 정책 파일 생성
+cat > /tmp/policy-ci-artifact.json <<'EOF'
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ci"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ci/*"
+      ]
+    }
+  ]
+}
+EOF
+
+# CI 전용 정책 등록
+mc admin policy create local policy-ci-artifact /tmp/policy-ci-artifact.json
 # CI 전용 서비스 계정 생성
 mc admin user add local svc-ci-artifact 'replace-with-strong-password'
-# CI 계정에 읽기/쓰기 권한 부여
-mc admin policy attach local readwrite --user svc-ci-artifact
+# CI 계정에 CI bucket 전용 정책 연결
+mc admin policy attach local policy-ci-artifact --user svc-ci-artifact
 # 계정 생성 및 정책 연결 상태 확인
 mc admin user info local svc-ci-artifact
 ```
@@ -41,6 +74,7 @@ mc admin user info local svc-ci-artifact
 
 - Jenkins/CI 전용 bucket은 `ci`를 기본값으로 사용합니다.
 - 계정 이름은 `svc-ci-artifact`로 통일합니다.
+- 공용 `readwrite` 대신 `policy-ci-artifact`로 `ci/*` 범위만 허용합니다.
 - Console 포트(`9001`)가 아니라 S3 API 포트(`9000`)를 사용합니다.
 
 ### 2. Jenkins Credentials 등록

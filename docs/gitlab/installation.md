@@ -235,6 +235,8 @@ cat /dev/null > ~/.bash_history && history -c
 
 설치 후 연동 작업은 아래 문서를 사용합니다.
 
+- GitLab Object Storage bucket 목록과 `gitlab.rb` 매핑 기준은
+  [MinIO GitLab 연동](../minio/gitlab-integration.md) 문서를 따릅니다.
 - [MinIO GitLab 연동](../minio/gitlab-integration.md)
 - [GitLab Harbor 연동](./harbor-integration.md)
 
