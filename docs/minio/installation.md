@@ -31,7 +31,16 @@ Ubuntu 22.04 VM에서 OS 설치를 완료한 뒤, Proxmox에서 `1TB` 데이터 
 - MinIO VM: `192.168.0.171`
 - API endpoint: `http://192.168.0.171:9000`
 - Console endpoint: `http://192.168.0.171:9001`
+- Public S3 API endpoint: `https://minio-api.semtl.synology.me`
+- Public Console endpoint: `https://minio.semtl.synology.me`
 - SSO: Keycloak OIDC(`https://auth.semtl.synology.me/realms/semtl`)
+
+서비스별 endpoint 기준:
+
+- GitLab: `proxy_download: true` 기준이면 GitLab VM에서 MinIO 내부 API endpoint(`http://192.168.0.171:9000`)로 접근해도 됩니다.
+- Jenkins: 외부 브라우저 artifact 다운로드까지 고려하면 `https://minio-api.semtl.synology.me` 같은 공개 S3 API endpoint를 권장합니다.
+- Harbor: 내부/외부 Docker client를 함께 지원하려면 `https://minio-api.semtl.synology.me` 같은 공개 S3 API endpoint를 권장합니다.
+- 공용 Console 도메인(`https://minio.semtl.synology.me`)은 관리 UI용이고, 서비스 연동에는 사용하지 않습니다.
 
 ## 네트워크 기준
 
