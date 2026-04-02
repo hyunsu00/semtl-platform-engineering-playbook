@@ -76,6 +76,8 @@ make link-check
 - `docs/minio/harbor-integration.md` (MinIO-Harbor 외부 스토리지 연동)
 - `docs/minio/gitlab-integration.md` (MinIO-GitLab Object Storage 연동)
 - `docs/minio/jenkins-integration.md` (MinIO-Jenkins Artifact Storage 연동)
+- `docs/minio/n8n-integration.md`
+  (n8n Enterprise 도입 시 참고하는 MinIO-n8n Binary Storage 절차)
 - `docs/vm-admin/installation.md`
   (운영 전용 관리 노드 구성, kubectl 원격 제어, MinIO mc 관리, snap 정리)
 - `docs/jenkins/installation.md`

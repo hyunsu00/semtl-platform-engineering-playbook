@@ -24,7 +24,8 @@ Ubuntu 22.04 VM에서 OS 설치를 완료한 뒤, Proxmox에서 `1TB` 데이터 
 - OS 디스크와 데이터 디스크를 분리합니다.
 - MinIO 데이터 경로는 `/data/minio`를 기본으로 사용합니다.
 - TLS 종료는 Reverse Proxy에서 수행하고 MinIO는 내부망으로 노출합니다.
-- 주요 사용처는 Harbor, GitLab, Jenkins 연동입니다.
+- 주요 사용처는 Harbor, GitLab, Jenkins 연동이며,
+  n8n은 Enterprise 기능 확인용 참고 절차만 문서화합니다.
 
 예시 구성:
 
@@ -40,6 +41,8 @@ Ubuntu 22.04 VM에서 OS 설치를 완료한 뒤, Proxmox에서 `1TB` 데이터 
 - GitLab: `proxy_download: true` 기준이면 GitLab VM에서 MinIO 내부 API endpoint(`http://192.168.0.171:9000`)로 접근해도 됩니다.
 - Jenkins: 외부 브라우저 artifact 다운로드까지 고려하면 `https://minio-api.semtl.synology.me` 같은 공개 S3 API endpoint를 권장합니다.
 - Harbor: 내부/외부 Docker client를 함께 지원하려면 `https://minio-api.semtl.synology.me` 같은 공개 S3 API endpoint를 권장합니다.
+- n8n: S3 external storage가 Enterprise 기능이므로 현재는 운영 적용 대상이 아니며,
+  향후 Enterprise 도입 시 내부 API endpoint(`http://192.168.0.171:9000`)부터 검토합니다.
 - 공용 Console 도메인(`https://minio.semtl.synology.me`)은 관리 UI용이고, 서비스 연동에는 사용하지 않습니다.
 
 ## 네트워크 기준
@@ -231,7 +234,8 @@ mc admin info local
 | --- | --- | --- |
 | `svc-harbor-s3` | Harbor storage | `harbor/*` |
 | `svc-gitlab-s3` | GitLab storage | `gitlab-*` |
-| `svc-ci-artifact` | CI 업로드 | `ci/*` |
+| `svc-jenkins-s3` | Jenkins artifact | `jenkins-artifacts/*` |
+| `svc-n8n-s3` | n8n binary data | `n8n-binaries/*` |
 | `svc-backup` | 백업 | `backup/*` |
 
 운영 기준:
@@ -251,6 +255,8 @@ MinIO 설치를 마친 뒤 아래 순서로 연동을 진행합니다.
 1. [MinIO Harbor 연동](./harbor-integration.md)
 1. [MinIO GitLab 연동](./gitlab-integration.md)
 1. [MinIO Jenkins 연동](./jenkins-integration.md)
+1. [MinIO n8n 연동](./n8n-integration.md)
+   (`n8n Enterprise` 도입 시 참고용 절차 문서)
 
 ## 초기 스냅샷
 

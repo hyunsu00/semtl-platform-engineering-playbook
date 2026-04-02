@@ -6,12 +6,19 @@
 `Docker Compose`를 사용해 `n8n`과 `PostgreSQL`을 설치하고,
 초기 검증까지 수행하는 절차를 설명합니다.
 
+이 문서의 기본 구성은 다음을 전제로 합니다.
+
+- n8n은 `PostgreSQL`을 메인 DB로 사용합니다.
+- TLS 종료는 Synology Reverse Proxy에서 수행합니다.
+- n8n VM은 `5678/tcp`를 내부망에만 노출합니다.
+- 운영 기본값으로 telemetry는 비활성화합니다.
+
 ## 사전 조건
 
 - OS: Ubuntu 22.04 LTS 이상
 - VM 리소스: `2 vCPU / 4GB RAM` 이상
 - 디스크: OS `60GB` 이상
-- n8n 버전: `v2.10.2`
+- n8n 버전: `v2.14.2`
 - 도메인: `n8n.semtl.synology.me`
 - Reverse Proxy 라우팅 준비:
   `https://n8n.semtl.synology.me` -> `http://<N8N_VM_IP>:5678`
@@ -96,7 +103,7 @@ N8N_ENCRYPTION_KEY="$(openssl rand -hex 32)"
 
 cat > ~/n8n/.env <<EOF
 # n8n 버전
-N8N_VERSION=2.10.2
+N8N_VERSION=2.14.2
 
 # 외부 접근 도메인/URL
 N8N_HOST=n8n.semtl.synology.me
@@ -107,7 +114,7 @@ N8N_PROXY_HOPS=1
 # 보안/실행 옵션
 N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
 N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
-N8N_RUNNERS_ENABLED=true
+N8N_DIAGNOSTICS_ENABLED=false
 NODE_ENV=production
 
 # 시간대
@@ -124,7 +131,7 @@ EOF
 chmod 600 ~/n8n/.env
 ```
 
-`N8N_VERSION=2.10.2`는 `2026-03-08` 기준 최신 안정 버전입니다.
+이 문서의 예시는 `N8N_VERSION=2.14.2` 기준으로 작성했습니다.
 
 현재 문서의 Compose 파일 기준으로, 위 `.env` 변수들을 모두 정의하면
 기동에 필요한 환경변수는 충족됩니다.
@@ -142,6 +149,8 @@ chmod 600 ~/n8n/.env
 - n8n `Owner` 계정(이메일 기반)은 첫 로그인 후 UI에서 생성합니다.
 - n8n `v1.0+`부터 인스턴스 Basic Auth 환경변수는 지원되지 않습니다.
 - `N8N_ENCRYPTION_KEY`는 위 명령으로 자동 생성되며 백업 시 반드시 포함합니다.
+- 운영 기본값으로 `N8N_DIAGNOSTICS_ENABLED=false`를 사용합니다.
+- `N8N_RUNNERS_ENABLED`는 더 이상 필요하지 않으므로 추가하지 않습니다.
 
 ### 4. Compose 파일 작성
 
@@ -177,7 +186,7 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV}
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=${N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS}
-      - N8N_RUNNERS_ENABLED=${N8N_RUNNERS_ENABLED}
+      - N8N_DIAGNOSTICS_ENABLED=${N8N_DIAGNOSTICS_ENABLED}
       - N8N_HOST=${N8N_HOST}
       - N8N_PROTOCOL=https
       - N8N_PORT=5678
@@ -202,6 +211,13 @@ services:
 EOF
 ```
 
+구성 기준:
+
+- 이 기본 설치 문서는 task runner 관련 별도 환경변수를 사용하지 않습니다.
+- `N8N_RUNNERS_ENABLED`는 제거된 설정이므로 넣지 않습니다.
+- telemetry 오류를 줄이기 위해 `N8N_DIAGNOSTICS_ENABLED=false`를 기본값으로 둡니다.
+- Python Code node 운영이 필요하면 기본 설치 후 external mode runner를 별도 설계합니다.
+
 ### 5. 컨테이너 기동
 
 ```bash
@@ -209,6 +225,7 @@ cd ~/n8n
 docker compose pull
 docker compose up -d
 docker compose ps
+docker compose logs --tail=100 n8n
 ```
 
 ### 6. Synology Reverse Proxy 연결
@@ -252,6 +269,8 @@ docker compose -f ~/n8n/docker-compose.yml logs --tail=100 n8n
 - `n8n`, `n8n-postgres` 컨테이너가 `Up` 상태
 - `/healthz` 요청이 정상 응답
 - UI 로그인 페이지 접근 가능(`https://n8n.semtl.synology.me`)
+- 로그에 `N8N_RUNNERS_ENABLED` deprecation 경고가 없어야 함
+- telemetry를 끈 구성이라면 `telemetry.n8n.io ENOTFOUND` 경고도 없어야 함
 
 ## 운영 메모
 
@@ -298,7 +317,7 @@ cat /dev/null > ~/.bash_history && history -c
 
   ```text
   [설치]
-  - n8n : v2.10.2
+  - n8n : v2.14.2
   - hostname : n8n.semtl.synology.me
   - reverse proxy : synology(443) -> n8n vm(5678)
   - data path : ~/n8n/n8n-data
@@ -316,6 +335,18 @@ cat /dev/null > ~/.bash_history && history -c
 
 - 원인: `N8N_ENCRYPTION_KEY` 변경 또는 누락
 - 조치: 최초 운영 시점의 `N8N_ENCRYPTION_KEY`를 복구하고 재기동
+
+### 증상: `N8N_RUNNERS_ENABLED` deprecation 경고가 보임
+
+- 원인: 과거 설정 예시가 `.env` 또는 `docker-compose.yml`에 남아 있음
+- 조치: `N8N_RUNNERS_ENABLED`를 제거하고
+  `docker compose down && docker compose up -d`로 재기동
+
+### 증상: `telemetry.n8n.io` DNS 오류가 보임
+
+- 원인: telemetry 활성 상태에서 외부 DNS 해석이 실패함
+- 조치: 운영 기본값대로 `N8N_DIAGNOSTICS_ENABLED=false`를 적용하거나,
+  외부 DNS 경로를 점검
 
 ### 증상: 웹훅 URL이 내부 IP로 생성됨
 
