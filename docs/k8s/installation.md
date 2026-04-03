@@ -231,8 +231,14 @@ ping -c 3 10.10.10.21
 
 ```bash
 sudo apt update
-sudo apt install -y curl apt-transport-https ca-certificates gnupg lsb-release
+sudo apt install -y curl apt-transport-https ca-certificates gnupg lsb-release \
+  nfs-common
 ```
+
+설명:
+
+- `nfs-common`은 이후 NFS 기반 StorageClass 또는 동적 프로비저너를 사용할 때 필요합니다.
+- 모든 `control-plane`, `worker` 노드에 공통으로 설치합니다.
 
 #### 5.2 Swap 완전 제거
 
@@ -266,6 +272,25 @@ net.ipv4.ip_forward = 1
 EOF2
 sudo sysctl --system
 ```
+
+#### 5.5 NFS 접근 확인
+
+NFS 기반 스토리지를 사용할 계획이면 최소 1개 노드에서 먼저 확인하고,
+운영 환경에서는 모든 노드가 같은 NFS 경로에 접근 가능한지 확인합니다.
+
+```bash
+showmount -e 192.168.0.2
+```
+
+예상 결과:
+
+- `/volume2/nfs`
+- 또는 `/volume2/nfs/k8s` 같은 export 경로가 조회
+
+참고:
+
+- `showmount`는 `nfs-common` 설치 후 사용할 수 있습니다.
+- Synology NFS 권한에서 Kubernetes 노드 대역(`192.168.0.0/24`)이 허용되어 있어야 합니다.
 
 ### 6. `containerd` 설치 `[모든 노드]`
 
@@ -820,7 +845,10 @@ kubectl -n metallb-system get pods
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.3/deploy/static/provider/cloud/deploy.yaml
+kubectl -n ingress-nginx patch svc ingress-nginx-controller \
+  -p '{"spec":{"externalTrafficPolicy":"Cluster"}}'
 kubectl -n ingress-nginx get pods
+kubectl -n ingress-nginx get svc ingress-nginx-controller
 ```
 
 정상 기준:
@@ -828,6 +856,13 @@ kubectl -n ingress-nginx get pods
 - `ingress-nginx-controller` 파드는 `Running`
 - `ingress-nginx-admission-create`, `ingress-nginx-admission-patch` Job 파드는
   1회 실행 후 `Completed` 상태로 남아 있어도 정상
+- `ingress-nginx-controller` 서비스의 `externalTrafficPolicy`가 `Cluster`
+
+설명:
+
+- 이 저장소 기준 홈랩/단일 replica 환경에서는 `externalTrafficPolicy: Cluster`를 기본값으로 사용합니다.
+- `Local`은 source IP 보존에는 유리하지만, ingress controller endpoint가 일부 노드에만 있으면
+  MetalLB `EXTERNAL-IP`로의 `80/443` 연결이 거부될 수 있습니다.
 
 ### 16. etcd 자동 백업 설정(운영 권장) `[cp1 전용]`
 

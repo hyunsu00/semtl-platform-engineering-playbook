@@ -79,17 +79,8 @@
 - Keycloak:
   [Installation](./keycloak/installation.md)
 - Prometheus:
-  [Overview](./prometheus/overview.md) |
-  [Installation](./prometheus/installation.md) |
-  [Operation Guide](./prometheus/operation-guide.md) |
-  [Troubleshooting](./prometheus/troubleshooting.md)
+  [Installation](./prometheus/installation.md)
 - Grafana:
-  [Overview](./grafana/overview.md) |
-  [Installation](./grafana/installation.md) |
-  [Operation Guide](./grafana/operation-guide.md) |
-  [Troubleshooting](./grafana/troubleshooting.md)
+  [Installation](./grafana/installation.md)
 - Argo CD:
-  [Overview](./argocd/overview.md) |
-  [Installation](./argocd/installation.md) |
-  [Operation Guide](./argocd/operation-guide.md) |
-  [Troubleshooting](./argocd/troubleshooting.md)
+  [Installation](./argocd/installation.md)

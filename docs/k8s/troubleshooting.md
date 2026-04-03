@@ -220,6 +220,51 @@ ip -br a
 networkctl status
 ```
 
+## 10. Ingress `EXTERNAL-IP`는 보이지만 `80/443` 연결 거부
+
+증상:
+
+- `kubectl -n ingress-nginx get svc ingress-nginx-controller`에서는
+  `EXTERNAL-IP`가 정상 할당됨
+- `nc -vz <EXTERNAL-IP> 80` 또는 `443` 결과가 `Connection refused`
+- Synology Reverse Proxy 또는 외부 `curl`에서 `502 Bad Gateway`
+- `kubectl -n ingress-nginx get pods -o wide`를 보면
+  controller 파드가 특정 노드 1대에만 존재
+
+원인:
+
+- `ingress-nginx-controller` 서비스의 `externalTrafficPolicy`가 `Local`
+- 실제 ingress controller endpoint가 일부 노드에만 존재
+- MetalLB 또는 VIP가 endpoint가 없는 노드에서 응답하면
+  `80/443` 연결이 거부될 수 있음
+
+조치:
+
+1. 현재 서비스 정책과 endpoint 위치를 확인합니다.
+2. ingress controller replica가 1개이거나 일부 노드에만 있으면
+   `externalTrafficPolicy`를 `Cluster`로 변경합니다.
+3. 변경 후 `80/443` 연결과 Host 헤더 기반 응답을 다시 확인합니다.
+
+핵심 명령:
+
+```bash
+kubectl -n ingress-nginx get svc ingress-nginx-controller -o wide
+kubectl -n ingress-nginx describe svc ingress-nginx-controller
+kubectl -n ingress-nginx get pods -o wide
+kubectl -n ingress-nginx get endpoints ingress-nginx-controller
+kubectl -n ingress-nginx patch svc ingress-nginx-controller \
+  -p '{"spec":{"externalTrafficPolicy":"Cluster"}}'
+nc -vz 192.168.0.200 80
+nc -vz 192.168.0.200 443
+curl -I -H 'Host: prometheus.semtl.synology.me' http://192.168.0.200
+```
+
+참고:
+
+- `externalTrafficPolicy: Local`은 source IP 보존에는 유리하지만,
+  endpoint가 없는 노드로 트래픽이 들어오면 연결 실패가 날 수 있습니다.
+- 홈랩/단일 replica 환경에서는 `Cluster`가 더 안정적일 수 있습니다.
+
 ## 공통 진단 순서
 
 1. `kubectl get nodes -o wide`
