@@ -53,8 +53,8 @@
 | vm-k8s-cp1 | control-plane | 2 | 6GB | 60GB | 10.10.10.11 |
 | vm-k8s-cp2 | control-plane | 2 | 6GB | 60GB | 10.10.10.12 |
 | vm-k8s-cp3 | control-plane | 2 | 6GB | 60GB | 10.10.10.13 |
-| vm-k8s-w1 | worker | 4 | 8GB | 200GB | 10.10.10.21 |
-| vm-k8s-w2 | worker | 4 | 8GB | 200GB | 10.10.10.22 |
+| vm-k8s-w1 | worker | 4 | 8GB | 400GB | 10.10.10.21 |
+| vm-k8s-w2 | worker | 4 | 8GB | 400GB | 10.10.10.22 |
 | API VIP | kube-vip | - | - | - | 10.10.10.100 |
 
 네트워크:
@@ -131,7 +131,7 @@
 
 - VM 5대 모두 NIC 2개 장착
 - cp 계열은 `2 vCPU / 6GB RAM / 60GB Disk`
-- worker 계열은 `4 vCPU / 8GB RAM / 200GB Disk`
+- worker 계열은 `4 vCPU / 8GB RAM / 400GB Disk`
 
 ### Proxmox VM H/W 참고 이미지
 
@@ -154,12 +154,12 @@
   `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 - vm-k8s-w1
   ![Proxmox VM Hardware - vm-k8s-w1](../assets/images/k8s/proxmox-vm-hw-k8s-w1.png)
-  캡션: `VM ID 211`, `4 vCPU`, `8GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
+  캡션: `VM ID 211`, `4 vCPU`, `8GB RAM`, `400GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
   `q35`, `OVMF (UEFI)`, `VirtIO SCSI single`, `cache=writeback`, `discard=on`,
   `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 - vm-k8s-w2
   ![Proxmox VM Hardware - vm-k8s-w2](../assets/images/k8s/proxmox-vm-hw-k8s-w2.png)
-  캡션: `VM ID 212`, `4 vCPU`, `8GB RAM`, `200GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
+  캡션: `VM ID 212`, `4 vCPU`, `8GB RAM`, `400GB Disk`, `NIC 2개 (vmbr0 + vmbr1)`,
   `q35`, `OVMF (UEFI)`, `VirtIO SCSI single`, `cache=writeback`, `discard=on`,
   `iothread=1`, `ssd=1`, `balloon=0`, `allow-ksm=0`, `firewall=1`
 
@@ -232,15 +232,29 @@ ping -c 3 10.10.10.21
 ```bash
 sudo apt update
 sudo apt install -y curl apt-transport-https ca-certificates gnupg lsb-release \
-  nfs-common
+  nfs-common open-iscsi
 ```
 
 설명:
 
 - `nfs-common`은 이후 NFS 기반 StorageClass 또는 동적 프로비저너를 사용할 때 필요합니다.
+- `open-iscsi`는 이후 `Longhorn`을 사용할 때 필요합니다.
 - 모든 `control-plane`, `worker` 노드에 공통으로 설치합니다.
 
-#### 5.2 Swap 완전 제거
+#### 5.2 `iscsid` 활성화
+
+`Longhorn`을 사용할 계획이면 모든 노드에서 아래 상태까지 맞춰 둡니다.
+
+```bash
+sudo systemctl enable --now iscsid
+systemctl is-active iscsid
+```
+
+정상 기준:
+
+- `is-active` 결과가 `active`
+
+#### 5.3 Swap 완전 제거
 
 ```bash
 sudo swapoff -a
@@ -251,7 +265,7 @@ swapon --show
 
 `swapon --show` 출력이 비어 있어야 합니다.
 
-#### 5.3 커널 모듈
+#### 5.4 커널 모듈
 
 ```bash
 sudo tee /etc/modules-load.d/k8s.conf >/dev/null <<'EOF2'
@@ -262,7 +276,7 @@ sudo modprobe overlay
 sudo modprobe br_netfilter
 ```
 
-#### 5.4 sysctl
+#### 5.5 sysctl
 
 ```bash
 sudo tee /etc/sysctl.d/k8s.conf >/dev/null <<'EOF2'
@@ -273,7 +287,7 @@ EOF2
 sudo sysctl --system
 ```
 
-#### 5.5 NFS 접근 확인
+#### 5.6 NFS 접근 확인
 
 NFS 기반 스토리지를 사용할 계획이면 최소 1개 노드에서 먼저 확인하고,
 운영 환경에서는 모든 노드가 같은 NFS 경로에 접근 가능한지 확인합니다.

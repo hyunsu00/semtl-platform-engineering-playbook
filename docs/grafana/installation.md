@@ -16,6 +16,9 @@
 이 문서에서는 브라우저 접속과 운영 편의성을 위해
 `Ingress`를 통한 HTTPS 노출을 기본값으로 사용합니다.
 
+스토리지 기준은 먼저 [`K8s Storage Guide`](../k8s/storage-guide.md)를 확인합니다.
+Grafana의 영속 스토리지는 운영 핵심 스택 기준에 맞춰 `Longhorn`을 기본값으로 사용합니다.
+
 Grafana와 Prometheus를 분리 설치하는 이유:
 
 - Grafana는 시각화 계층이라 데이터 수집기인 Prometheus와 역할이 다릅니다.
@@ -28,6 +31,7 @@ Grafana와 Prometheus를 분리 설치하는 이유:
 - Kubernetes 클러스터가 정상이며 `kubectl` 접근이 가능합니다.
 - `MetalLB`와 `ingress-nginx`가 이미 설치되어 있습니다.
 - `helm` CLI가 설치되어 있습니다.
+- `Longhorn`이 이미 설치되어 있고 `longhorn` StorageClass를 사용할 수 있어야 합니다.
 - 운영 도메인 예시: `grafana.semtl.synology.me`
 - DNS가 `ingress-nginx` 외부 IP를 가리키도록 준비되어 있습니다.
 - Synology Reverse Proxy에서 TLS를 종료할 수 있어야 합니다.
@@ -38,6 +42,7 @@ Grafana와 Prometheus를 분리 설치하는 이유:
 kubectl get nodes
 kubectl -n ingress-nginx get pods
 kubectl -n ingress-nginx get svc ingress-nginx-controller
+kubectl get storageclass
 helm version
 ```
 
@@ -46,11 +51,22 @@ helm version
 - 모든 노드가 `Ready`
 - `ingress-nginx-controller` 파드가 `Running`
 - `ingress-nginx-controller` 서비스의 `EXTERNAL-IP`가 할당됨
+- `longhorn` StorageClass가 존재
 - `helm version`이 정상 응답
 
 운영 기준 예시 DNS:
 
-- `grafana.semtl.synology.me` -> `192.168.0.201`
+- `grafana.semtl.synology.me` -> 현재 `ingress-nginx-controller`의 `EXTERNAL-IP`
+
+예시 확인:
+
+```bash
+kubectl -n ingress-nginx get svc ingress-nginx-controller
+```
+
+예를 들어 위 명령 결과가 `192.168.0.200`이면 DNS도 아래처럼 맞춥니다.
+
+- `grafana.semtl.synology.me` -> `192.168.0.200`
 
 ## 배치 원칙
 
@@ -66,6 +82,8 @@ helm version
 - 운영 환경에서는 `NodePort`로 Grafana를 직접 노출하지 않습니다.
 - 관리자 비밀번호는 values에 명시해 최초 로그인 값을 고정합니다.
 - 대시보드 JSON, 데이터소스 설정, 플러그인 추가 여부는 설치 직후 기준을 문서화합니다.
+- Grafana는 Prometheus와 마찬가지로 같은 `ingress-nginx`의 `EXTERNAL-IP`를 공유할 수 있습니다.
+- 서비스별 구분은 별도 IP가 아니라 `grafana.semtl.synology.me` 같은 host 기준으로 처리합니다.
 
 ## 설치 절차
 
@@ -111,6 +129,7 @@ service:
 persistence:
   enabled: true
   size: 10Gi
+  storageClassName: longhorn
 
 ingress:
   enabled: true
@@ -154,6 +173,7 @@ EOF
 
 - `adminPassword`를 미리 지정해 첫 로그인 때 비밀번호 확인 절차를 단순화합니다.
 - `persistence.enabled=true`로 대시보드/설정 유실 가능성을 줄입니다.
+- `storageClassName: longhorn`으로 운영 핵심 스택용 스토리지를 사용합니다.
 - `service.type=ClusterIP`로 내부 서비스만 사용합니다.
 - `ingress.enabled=true`로 `ingress-nginx`를 통해 외부 노출합니다.
 - `root_url`은 실제 접속 도메인과 일치해야 합니다.
@@ -222,25 +242,40 @@ Ingress를 붙이기 전, 내부 상태를 먼저 확인합니다.
 kubectl -n grafana port-forward svc/grafana 3000:80
 ```
 
-그다음 로컬 브라우저에서 아래 주소에 접속합니다.
+그다음 같은 PC에서 `curl`로 먼저 응답을 확인합니다.
 
-- `http://127.0.0.1:3000`
+```bash
+curl -I http://127.0.0.1:3000/api/health
+curl -s http://127.0.0.1:3000/api/health
+curl -u admin:'<change-required>' -s http://127.0.0.1:3000/api/user
+```
 
 이 단계에서 확인할 항목:
 
-- 로그인 가능 여부
-- 홈 대시보드 진입 가능 여부
-- `Administration` 메뉴 노출 여부
+- `/api/health` 응답이 `200 OK`
+- 헬스 응답 JSON에 `database: ok`가 포함됨
+- `api/user` 응답이 JSON으로 반환되고 `login: admin`이 확인됨
+- 필요하면 같은 주소를 브라우저에서 열어 UI도 확인 가능
 
 ### 7. 브라우저 접속 검증
 
 Synology Reverse Proxy 예시:
 
 - Source: `https://grafana.semtl.synology.me`
-- Destination: `http://192.168.0.201`
+- Destination: `http://<INGRESS_EXTERNAL_IP>:80`
 
 즉 외부에서는 `443`으로 접속하고, Synology가 `ingress-nginx`의
-`EXTERNAL-IP`인 `192.168.0.201`으로 프록시합니다.
+`EXTERNAL-IP`로 프록시합니다.
+
+예:
+
+- `kubectl -n ingress-nginx get svc ingress-nginx-controller` 결과가 `192.168.0.200`
+- Synology Reverse Proxy 대상: `http://192.168.0.200:80`
+
+참고:
+
+- Grafana와 Prometheus는 같은 `ingress-nginx` 외부 IP를 함께 사용할 수 있습니다.
+- 예를 들어 둘 다 `192.168.0.200`을 공유하고, host 기준으로 라우팅합니다.
 
 DNS 반영 후 아래 주소로 접속합니다.
 
@@ -248,10 +283,11 @@ DNS 반영 후 아래 주소로 접속합니다.
 
 검증 항목:
 
-- 로그인 페이지 응답
-- `admin` 계정 로그인 성공
-- 좌측 탐색 메뉴(`Dashboards`, `Connections`, `Administration`) 정상 노출
-- 브라우저 개발자 도구 기준 정적 자산 로딩 오류 없음
+- `curl -I https://grafana.semtl.synology.me/api/health` 응답 확인
+- `curl -s https://grafana.semtl.synology.me/api/health` 결과 확인
+- `curl -u admin:'<change-required>' -s \
+  https://grafana.semtl.synology.me/api/user` 결과 확인
+- 필요하면 이후 브라우저에서 로그인 화면과 메뉴를 추가 확인
 
 ### 8. 설치 직후 바로 사용하는 방법
 
@@ -316,16 +352,18 @@ node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100
 스냅샷 예시:
 
 ```bash
-mkdir -p .local/scratch
+mkdir -p ~/k8s/grafana/snapshot
+SNAPSHOT_DATE=$(date +%F)
+
 kubectl -n grafana get all -o wide \
-  > .local/scratch/2026-04-03-grafana-install-status-v1.txt
+  > ~/k8s/grafana/snapshot/${SNAPSHOT_DATE}-grafana-install-status.txt
 kubectl -n grafana get cm,secret,ingress,pvc \
-  > .local/scratch/2026-04-03-grafana-install-config-v1.txt
+  > ~/k8s/grafana/snapshot/${SNAPSHOT_DATE}-grafana-install-config.txt
 ```
 
 주의:
 
-- `.local/` 산출물은 참고용이며 Git에 커밋하지 않습니다.
+- 스냅샷 파일은 `values-grafana.yaml`과 분리해 `~/k8s/grafana/snapshot/` 아래에 보관합니다.
 - `Secret` 전체 YAML을 평문으로 보관할 때는 접근권한을 별도로 통제합니다.
 
 ## 설치 검증
@@ -385,6 +423,23 @@ kubectl -n grafana logs deploy/grafana --tail=100
 - 도메인, TLS, `root_url`, SSO 설정 변경 시에는 로그인과 정적 자산 로딩을 함께 검증합니다.
 - 플러그인 추가 시에는 보안 검토와 재기동 시간을 함께 고려합니다.
 
+values 변경 재반영 예시:
+
+```bash
+helm upgrade --install grafana grafana/grafana \
+  --namespace grafana \
+  -f ~/k8s/grafana/values-grafana.yaml
+```
+
+확인:
+
+```bash
+helm list -n grafana
+kubectl -n grafana get pods
+kubectl -n grafana rollout status deploy/grafana --timeout=5m
+helm get values grafana -n grafana
+```
+
 ### 백업 및 복구 메모
 
 - 최소 백업 대상은 `grafana` 네임스페이스의 `Secret`, `ConfigMap`, `Ingress`, `PVC` 정보입니다.
@@ -439,7 +494,7 @@ kubectl -n grafana get svc grafana
 
 - 도메인 해석 결과와 `ingress-nginx-controller`의 `EXTERNAL-IP`를 대조합니다.
 - `grafana.ini.server.root_url`이 실제 접속 주소와 일치하는지 확인합니다.
-- Synology Reverse Proxy 대상이 `http://192.168.0.201`로 향하는지 확인합니다.
+- Synology Reverse Proxy 대상이 실제 `EXTERNAL-IP`의 `:80`으로 향하는지 확인합니다.
 - 필요하면 `port-forward` 접속으로 서버 자체 정상 여부를 먼저 분리 진단합니다.
 
 ### 증상: 로그인은 되지만 대시보드 또는 데이터소스가 정상 동작하지 않음
@@ -484,6 +539,70 @@ kubectl get ingress -A | grep grafana
 
 - PVC 삭제 여부에 따라 대시보드와 설정 데이터 보존 여부가 달라집니다.
 - 롤백 전에 보존이 필요한 데이터와 Secret이 있는지 먼저 확인합니다.
+- `longhorn` 기준 기본 `ReclaimPolicy=Delete`이므로 PVC까지 제거되면
+  Grafana 볼륨도 함께 정리될 수 있습니다.
+
+## 재설치 전 완전 정리
+
+Values를 크게 바꿨거나 처음부터 다시 설치하고 싶다면 아래 순서로 정리합니다.
+
+### 1. Helm 릴리스 제거
+
+```bash
+helm uninstall grafana -n grafana
+```
+
+확인:
+
+```bash
+helm list -n grafana
+```
+
+### 2. 네임스페이스 전체 삭제
+
+```bash
+kubectl delete namespace grafana
+```
+
+확인:
+
+```bash
+kubectl get ns grafana
+```
+
+정상 기준:
+
+- `NotFound`가 나오면 삭제 완료
+
+### 3. 잔여 리소스 확인
+
+```bash
+kubectl get pv | grep grafana
+kubectl get ingress -A | grep grafana
+```
+
+정상 기준:
+
+- 관련 PV가 남아 있지 않음
+- 다른 네임스페이스에 `grafana` Ingress가 남아 있지 않음
+
+### 4. 다시 설치
+
+```bash
+kubectl create namespace grafana
+
+helm upgrade --install grafana grafana/grafana \
+  --namespace grafana \
+  -f ~/k8s/grafana/values-grafana.yaml
+```
+
+재설치 직후 확인:
+
+```bash
+kubectl -n grafana get pods
+kubectl -n grafana get pvc
+kubectl -n grafana get ingress
+```
 
 ## 참고
 

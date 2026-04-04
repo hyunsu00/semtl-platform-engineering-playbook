@@ -19,6 +19,9 @@
 이번 문서의 목표는 실패 사례를 배제하고, 최소 설정으로 한 번에 설치가 끝나는
 성공 경로를 제공하는 것입니다.
 
+스토리지 기준은 먼저 [`K8s Storage Guide`](../k8s/storage-guide.md)를 확인합니다.
+이 문서는 운영 핵심 스택 표준에 맞춰 `Longhorn` 기반 설치를 기준으로 작성합니다.
+
 Prometheus와 Grafana를 분리 설치하는 이유:
 
 - Prometheus는 메트릭 수집과 저장에 집중합니다.
@@ -31,6 +34,7 @@ Prometheus와 Grafana를 분리 설치하는 이유:
 - Kubernetes 클러스터가 정상이며 `kubectl` 접근이 가능합니다.
 - `MetalLB`와 `ingress-nginx`가 이미 설치되어 있습니다.
 - `helm` CLI가 설치되어 있습니다.
+- `Longhorn`이 이미 설치되어 있고 `longhorn` StorageClass를 사용할 수 있어야 합니다.
 - 운영 도메인 예시: `prometheus.semtl.synology.me`
 - DNS가 `ingress-nginx` 외부 IP를 가리키도록 준비되어 있습니다.
 - Synology Reverse Proxy에서 TLS를 종료할 수 있어야 합니다.
@@ -41,6 +45,7 @@ Prometheus와 Grafana를 분리 설치하는 이유:
 kubectl get nodes
 kubectl -n ingress-nginx get pods
 kubectl -n ingress-nginx get svc ingress-nginx-controller
+kubectl get storageclass
 helm version
 ```
 
@@ -49,6 +54,7 @@ helm version
 - 모든 노드가 `Ready`
 - `ingress-nginx-controller` 파드가 `Running`
 - `ingress-nginx-controller` 서비스의 `EXTERNAL-IP`가 할당됨
+- `longhorn` StorageClass가 존재
 - `helm version`이 정상 응답
 
 운영 기준 예시 DNS:
@@ -88,6 +94,8 @@ Prometheus를 외부로 노출하는 이유:
 - 장기 보관이 필요하면 retention과 PVC 크기를 함께 설계합니다.
 - Alert 라우팅은 설치 직후 검증하지 않더라도 최소 기본 수신 경로는 빠르게 준비합니다.
 - Grafana는 이 stack에 포함하지 않고 별도 설치해 역할을 분리합니다.
+- Prometheus는 Grafana와 마찬가지로 같은 `ingress-nginx`의 `EXTERNAL-IP`를 공유할 수 있습니다.
+- 서비스별 구분은 별도 IP가 아니라 `prometheus.semtl.synology.me` 같은 host 기준으로 처리합니다.
 
 ## 설치 절차
 
@@ -116,63 +124,26 @@ helm repo update
 helm search repo prometheus-community/kube-prometheus-stack
 ```
 
-### 3. NFS StorageClass 구성
+### 3. Longhorn StorageClass 확인
 
-이 문서는 NFS 서버가 이미 준비되어 있다는 전제로,
-`nfs-subdir-external-provisioner`로 동적 프로비저닝을 구성하는 방식을 사용합니다.
+이 문서는 `Longhorn`이 이미 준비되어 있다는 전제로 진행합니다.
+Longhorn 설치와 스토리지 역할 구분은 [`K8s Storage Guide`](../k8s/storage-guide.md)를 먼저 확인합니다.
 
-Helm 저장소 등록:
-
-```bash
-helm repo add nfs-subdir-external-provisioner \
-  https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-helm repo update
-```
-
-프로비저너 전용 네임스페이스 생성:
+확인 명령:
 
 ```bash
-kubectl create namespace nfs-provisioner
-```
-
-설치 예시:
-
-```bash
-helm upgrade --install nfs-subdir-external-provisioner \
-  nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-  --namespace nfs-provisioner \
-  --set nfs.server=192.168.0.2 \
-  --set nfs.path=/volume2/nfs/k8s \
-  --set storageClass.name=nfs-client \
-  --set storageClass.defaultClass=true \
-  --set storageClass.reclaimPolicy=Retain
-```
-
-예:
-
-- `nfs.server`: `192.168.0.2`
-- `nfs.path`: `/volume2/nfs/k8s`
-
-설치 후 확인:
-
-```bash
-kubectl -n nfs-provisioner get pods
 kubectl get storageclass
+kubectl -n longhorn-system get pods
 ```
 
 정상 기준:
 
-- `nfs-subdir-external-provisioner` 파드가 `Running`
-- `nfs-client` StorageClass가 생성됨
-- `(default)` 표시가 붙으면 기본 StorageClass로 사용 가능
+- `longhorn` StorageClass가 존재
+- `longhorn-system` 주요 파드가 `Running`
 
 참고:
 
-- NFS export 경로는 Kubernetes 노드들이 모두 접근 가능해야 합니다.
-- Synology NFS 권한에서 각 노드 IP에 대해 읽기/쓰기가 허용되어 있어야 합니다.
-- 운영에서는 `reclaimPolicy=Retain`을 권장합니다.
-- Synology 공유폴더 `nfs` 아래에 `k8s` 폴더를 미리 만들어 두는 것을 권장합니다.
-- 실제 PVC 데이터는 `/volume2/nfs/k8s` 아래에 하위 폴더로 자동 생성됩니다.
+- Prometheus는 이 문서 기준으로 `longhorn` PVC를 사용합니다.
 
 ### 4. Values 파일 작성
 
@@ -204,7 +175,7 @@ prometheus:
       volumeClaimTemplate:
         spec:
           accessModes: ["ReadWriteOnce"]
-          storageClassName: nfs-client
+          storageClassName: longhorn
           resources:
             requests:
               storage: 50Gi
@@ -222,7 +193,7 @@ EOF
 - 기본 alert rule은 활성화해 클러스터 기초 이상 징후를 빠르게 확인합니다.
 - 이 values 파일은 최소 성공 경로만 남긴 기준값입니다.
 - HTTPS 종단은 Kubernetes가 아니라 Synology Reverse Proxy에서 처리합니다.
-- `storageClassName: nfs-client`로 NFS 기반 PVC를 동적 생성합니다.
+- `storageClassName: longhorn`으로 운영 핵심 스택용 스토리지를 사용합니다.
 
 ### 5. Prometheus stack 설치
 
@@ -254,7 +225,8 @@ kubectl get storageclass
 대기 예시:
 
 ```bash
-kubectl -n prometheus rollout status deploy/prometheus-operator --timeout=5m
+kubectl -n prometheus rollout status \
+  deploy/prometheus-kube-prometheus-operator --timeout=5m
 kubectl -n prometheus rollout status deploy/prometheus-kube-state-metrics --timeout=5m
 ```
 
@@ -326,6 +298,11 @@ Synology Reverse Proxy 예시:
 - `kubectl -n ingress-nginx get svc ingress-nginx-controller` 결과가 `192.168.0.200`
 - Synology Reverse Proxy 대상: `http://192.168.0.200:80`
 
+참고:
+
+- Prometheus와 Grafana는 같은 `ingress-nginx` 외부 IP를 함께 사용할 수 있습니다.
+- 예를 들어 둘 다 `192.168.0.200`을 공유하고, host 기준으로 라우팅합니다.
+
 DNS 반영 후 아래 주소로 접속합니다.
 
 - `https://prometheus.semtl.synology.me`
@@ -344,7 +321,7 @@ DNS 반영 후 아래 주소로 접속합니다.
 - `kube-apiserver`
 - `kube-state-metrics`
 - `node-exporter`
-- `prometheus-operator`
+- `prometheus-kube-prometheus-operator`
 
 쿼리 예시:
 
@@ -378,7 +355,7 @@ curl -s http://127.0.0.1:9090/api/v1/query --data-urlencode 'query=up'
 
 - `kube-state-metrics`
 - `node-exporter`
-- `prometheus-operator`
+- `prometheus-kube-prometheus-operator`
 
 ### 2. 기본 쿼리 실행
 
@@ -432,8 +409,25 @@ kubectl -n prometheus get ingress
 
 참고:
 
-- 상태 스냅샷 파일을 별도로 저장하고 싶다면 원하는 경로에 직접 저장해도 됩니다.
-- `.local/` 저장은 선택 사항이며, 설치 자체에 필수는 아닙니다.
+- 상태 스냅샷을 남기고 싶다면 `values` 파일과 분리해서
+  `~/k8s/prometheus/snapshot/` 아래에 저장하는 것을 권장합니다.
+- 설치 자체에 필수는 아니지만, 이후 장애 비교나 재설치 전 점검에 도움이 됩니다.
+
+예:
+
+```bash
+mkdir -p ~/k8s/prometheus/snapshot
+SNAPSHOT_DATE=$(date +%F)
+
+kubectl -n prometheus get pods -o wide \
+  > ~/k8s/prometheus/snapshot/${SNAPSHOT_DATE}-prometheus-pods.txt
+kubectl -n prometheus get pvc \
+  > ~/k8s/prometheus/snapshot/${SNAPSHOT_DATE}-prometheus-pvc.txt
+kubectl -n prometheus get ingress \
+  > ~/k8s/prometheus/snapshot/${SNAPSHOT_DATE}-prometheus-ingress.txt
+kubectl get storageclass \
+  > ~/k8s/prometheus/snapshot/${SNAPSHOT_DATE}-storageclass.txt
+```
 
 ## 설치 검증
 
@@ -460,7 +454,8 @@ kubectl -n prometheus get prometheus
 ### 서버 응답
 
 ```bash
-kubectl -n prometheus logs deploy/prometheus-operator --tail=100
+kubectl -n prometheus logs \
+  deploy/prometheus-kube-prometheus-operator --tail=100
 kubectl -n prometheus logs \
   statefulset/prometheus-prometheus-kube-prometheus-prometheus --tail=100
 ```
@@ -521,7 +516,7 @@ kubectl get ns prometheus
 
 ### 4. PVC/PV 잔여물 확인
 
-네임스페이스를 삭제했더라도 스토리지 정책에 따라 PV나 실제 NFS 폴더는 남을 수 있습니다.
+네임스페이스를 삭제했더라도 스토리지 정책에 따라 PV가 남아 있을 수 있습니다.
 
 ```bash
 kubectl get pvc -n prometheus
@@ -531,25 +526,9 @@ kubectl get pv | grep prometheus
 참고:
 
 - `kubectl get pvc -n prometheus`는 새 네임스페이스 직후 비어 있어야 정상입니다.
-- `nfs-client` StorageClass의 `reclaimPolicy=Retain`이면 PV 또는 실제 데이터 폴더는 남을 수 있습니다.
+- `kubectl get pv | grep prometheus` 결과가 남아 있으면 상태를 한 번 더 확인합니다.
 
-### 5. NFS 하위 폴더 정리 여부 결정
-
-NFS provisioner는 `/volume2/nfs/k8s` 아래에 PVC별 하위 폴더를 자동 생성합니다.
-재설치 전에 데이터를 완전히 초기화하려면 Synology에서 해당 하위 폴더를 직접 정리해야 합니다.
-
-예:
-
-- `/volume2/nfs/k8s/prometheus-prometheus-kube-prometheus-prometheus-db-...`
-- `/volume2/nfs/k8s/pvc-<UUID>`
-
-주의:
-
-- 운영 데이터가 필요 없을 때만 삭제합니다.
-- `nfs-subdir-external-provisioner` 자체는 삭제하지 않습니다.
-- Prometheus만 재설치할 때는 `nfs-provisioner` 네임스페이스와 `nfs-client` StorageClass는 유지합니다.
-
-### 6. 다시 설치
+### 5. 다시 설치
 
 ```bash
 helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \

@@ -71,6 +71,9 @@
 - Kubernetes:
   [Overview](./k8s/overview.md) |
   [Installation](./k8s/installation.md) |
+  [Storage Guide](./k8s/storage-guide.md) |
+  [Longhorn Installation](./k8s/longhorn-installation.md) |
+  [NFS StorageClass](./k8s/nfs-storageclass.md) |
   [External API HA](./k8s/external-api-ha.md) |
   [Operation Guide](./k8s/operation-guide.md) |
   [Troubleshooting](./k8s/troubleshooting.md)

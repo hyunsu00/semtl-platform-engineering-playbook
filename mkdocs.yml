@@ -48,6 +48,9 @@ nav:
   - Kubernetes:
       - 개요: k8s/overview.md
       - 설치: k8s/installation.md
+      - 스토리지 가이드: k8s/storage-guide.md
+      - Longhorn 설치: k8s/longhorn-installation.md
+      - NFS StorageClass 설치: k8s/nfs-storageclass.md
       - 외부 API HA: k8s/external-api-ha.md
       - 운영 가이드: k8s/operation-guide.md
       - 트러블슈팅: k8s/troubleshooting.md

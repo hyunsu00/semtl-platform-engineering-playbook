@@ -86,6 +86,12 @@ make link-check
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)
 - `docs/gitlab/backup-and-restore.md`
 - `docs/k8s/cluster-bootstrap.md`
+- `docs/k8s/storage-guide.md`
+  (Longhorn, NFS, local 역할 구분과 앱별 권장 StorageClass 기준)
+- `docs/k8s/longhorn-installation.md`
+  (운영 핵심 스택용 Longhorn 설치 및 `longhorn` StorageClass 준비)
+- `docs/k8s/nfs-storageclass.md`
+  (Synology NFS 기반 `nfs-client` StorageClass 설치)
 - `docs/k8s/external-api-ha.md`
   (CT-LB1/CT-LB2, HAProxy, Keepalived 기반 외부 API VIP 구성)
 - `docs/keycloak/sso-integration.md`
