@@ -97,6 +97,14 @@ make link-check
 - `docs/keycloak/sso-integration.md`
 - `docs/prometheus/monitoring-basics.md`
 - `docs/grafana/dashboard-guide.md`
+- `docs/loki/installation.md`
+  (MinIO object storage 기반 Loki 설치, Grafana 데이터소스 연결, 초기 로그 조회 검증)
+- `docs/rancher/installation.md`
+  (Rancher 설치, external TLS 종료 기준 구성, UI 활용 범위와 현재 단계 필요성 정리)
+- `docs/cert-manager/installation.md`
+  (Kubernetes 내부 TLS 자동화용 cert-manager 설치, 현재 구조에서 아직 필수가 아닌 이유 정리)
+- `docs/velero/installation.md`
+  (Kubernetes 백업/복구용 Velero 설치, MinIO 백업 저장소 연결, 초기 백업 검증)
 - `docs/argocd/gitops-workflow.md`
 
 ## 검증

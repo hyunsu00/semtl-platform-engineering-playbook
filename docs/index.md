@@ -85,5 +85,13 @@
   [Installation](./prometheus/installation.md)
 - Grafana:
   [Installation](./grafana/installation.md)
+- Loki:
+  [Installation](./loki/installation.md)
+- Rancher:
+  [Installation](./rancher/installation.md)
+- cert-manager:
+  [Installation](./cert-manager/installation.md)
+- Velero:
+  [Installation](./velero/installation.md)
 - Argo CD:
   [Installation](./argocd/installation.md)

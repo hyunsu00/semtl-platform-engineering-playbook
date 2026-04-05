@@ -861,6 +861,11 @@ kubectl -n metallb-system get pods
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.3/deploy/static/provider/cloud/deploy.yaml
 kubectl -n ingress-nginx patch svc ingress-nginx-controller \
   -p '{"spec":{"externalTrafficPolicy":"Cluster"}}'
+kubectl -n ingress-nginx patch configmap ingress-nginx-controller \
+  --type merge \
+  -p '{"data":{"use-forwarded-headers":"true","compute-full-forwarded-for":"true","proxy-real-ip-cidr":"192.168.0.0/24"}}'
+kubectl -n ingress-nginx rollout restart deploy/ingress-nginx-controller
+kubectl -n ingress-nginx rollout status deploy/ingress-nginx-controller --timeout=5m
 kubectl -n ingress-nginx get pods
 kubectl -n ingress-nginx get svc ingress-nginx-controller
 ```
@@ -871,12 +876,16 @@ kubectl -n ingress-nginx get svc ingress-nginx-controller
 - `ingress-nginx-admission-create`, `ingress-nginx-admission-patch` Job 파드는
   1회 실행 후 `Completed` 상태로 남아 있어도 정상
 - `ingress-nginx-controller` 서비스의 `externalTrafficPolicy`가 `Cluster`
+- `ingress-nginx-controller` ConfigMap에 `use-forwarded-headers=true`가 반영됨
 
 설명:
 
 - 이 저장소 기준 홈랩/단일 replica 환경에서는 `externalTrafficPolicy: Cluster`를 기본값으로 사용합니다.
 - `Local`은 source IP 보존에는 유리하지만, ingress controller endpoint가 일부 노드에만 있으면
   MetalLB `EXTERNAL-IP`로의 `80/443` 연결이 거부될 수 있습니다.
+- `use-forwarded-headers=true`는 Synology Reverse Proxy 같은 외부 프록시가 전달한
+  `X-Forwarded-Proto`, `X-Forwarded-Port`를 `ingress-nginx`가 신뢰하도록 만드는 설정입니다.
+- 이 설정이 없으면 Rancher 같은 앱에서 `https -> https` 자기 자신 리다이렉트 루프가 생길 수 있습니다.
 
 ### 16. etcd 자동 백업 설정(운영 권장) `[cp1 전용]`
 

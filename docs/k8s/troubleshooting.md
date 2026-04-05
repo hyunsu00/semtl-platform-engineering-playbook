@@ -220,6 +220,47 @@ ip -br a
 networkctl status
 ```
 
+## 10. Reverse Proxy 뒤 앱이 자기 자신으로 무한 리다이렉트
+
+증상:
+
+- `Rancher` 같은 앱에서 `/healthz`는 되지만 `/`는 `302` 반복
+- 브라우저에서는 `ERR_TOO_MANY_REDIRECTS`
+- `curl -k -L -I https://<host>/` 결과가 같은 URL로 계속 `Location` 반환
+
+원인:
+
+- Synology Reverse Proxy가 `X-Forwarded-Proto`, `X-Forwarded-Port`를 전달해도
+  `ingress-nginx`가 이를 신뢰하지 않음
+- 그 결과 backend 앱이 원래 요청을 `http`로 오인하고 다시 `https`로 리다이렉트함
+
+조치:
+
+```bash
+kubectl -n ingress-nginx patch configmap ingress-nginx-controller \
+  --type merge \
+  -p '{"data":{"use-forwarded-headers":"true","compute-full-forwarded-for":"true","proxy-real-ip-cidr":"192.168.0.0/24"}}'
+kubectl -n ingress-nginx rollout restart deploy/ingress-nginx-controller
+kubectl -n ingress-nginx rollout status deploy/ingress-nginx-controller --timeout=5m
+```
+
+함께 확인:
+
+- Reverse Proxy의 대상이 실제 `EXTERNAL-IP`의 `:80`으로 향하는지 확인
+- `Host`, `X-Forwarded-Proto`, `X-Forwarded-Port` 헤더가 전달되는지 확인
+- `X-Forwarded-For`는 고정 문자열로 수동 입력하지 않고 자동 전달 사용
+
+검증:
+
+```bash
+curl -I \
+  -H 'Host: rancher.semtl.synology.me' \
+  -H 'X-Forwarded-Proto: https' \
+  -H 'X-Forwarded-Port: 443' \
+  http://192.168.0.200/
+curl -k -I https://rancher.semtl.synology.me/
+```
+
 ## 10. Ingress `EXTERNAL-IP`는 보이지만 `80/443` 연결 거부
 
 증상:

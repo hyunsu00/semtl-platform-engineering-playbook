@@ -71,5 +71,13 @@ nav:
       - 설치: prometheus/installation.md
   - Grafana:
       - 설치: grafana/installation.md
+  - Loki:
+      - 설치: loki/installation.md
+  - Rancher:
+      - 설치: rancher/installation.md
+  - cert-manager:
+      - 설치: cert-manager/installation.md
+  - Velero:
+      - 설치: velero/installation.md
   - Argo CD:
       - 설치: argocd/installation.md
