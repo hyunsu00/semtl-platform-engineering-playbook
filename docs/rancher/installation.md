@@ -130,12 +130,26 @@ mkdir -p ~/k8s/rancher
 cat <<'EOF' > ~/k8s/rancher/values-rancher.yaml
 hostname: rancher.semtl.synology.me
 bootstrapPassword: FVMRrPCYaIZz9nGu
-replicas: 3
+
+replicas: 1
+
 tls: external
+
 ingress:
   enabled: true
   ingressClassName: nginx
+  extraAnnotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
 antiAffinity: preferred
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1536Mi
 EOF
 ```
 
@@ -147,9 +161,14 @@ EOF
 - 실제 설치 검증에서는 `FVMRrPCYaIZz9nGu` 같은 16자 값으로 정상 로그인했습니다.
 - `bootstrapPassword`에는 `#`, `?`, `&` 같은 URL 특수문자를 가능한 한 피합니다.
 - 이유는 최초 `setup` URL에 비밀번호를 붙여 진입할 때 특수문자 인코딩 문제를 만들 수 있기 때문입니다.
-- `replicas: 3`으로 Rancher server를 HA 기준으로 배치합니다.
+- 현재 클러스터 기준 기본값은 `replicas: 1`입니다.
+- worker 2대 환경에서는 먼저 `1`로 안정화한 뒤, 필요할 때만 `2` 이상으로 늘리는 편이 단순합니다.
 - `tls: external`로 현재 구조처럼 Synology Reverse Proxy가 TLS를 종료하도록 맞춥니다.
 - `ingressClassName: nginx`로 Rancher Ingress가 `ingress-nginx`를 명확히 사용하도록 맞춥니다.
+- `nginx.ingress.kubernetes.io/ssl-redirect: "false"`로
+  Ingress 단계의 강제 HTTPS 리다이렉트를 끕니다.
+- 현재 구조에서는 외부 HTTPS를 Synology Reverse Proxy가 종료하므로 이 설정이 더 단순합니다.
+- `resources.requests`와 `resources.limits`를 함께 두어 Rancher 파드의 자원 사용 기준을 명확히 잡습니다.
 - 이 문서 기준으로 `cert-manager`는 사용하지 않습니다.
 
 ### 4. Rancher 설치
