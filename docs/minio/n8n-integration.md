@@ -18,7 +18,7 @@ MinIO bucket으로 분리하는 방법을 기록해 두는 것입니다.
 ## 대상 환경
 
 - MinIO API endpoint: `http://192.168.0.171:9000`
-- MinIO public S3 endpoint: `https://minio-api.semtl.synology.me`
+- MinIO public S3 endpoint: `https://s3.semtl.synology.me`
 - n8n URL: `https://n8n.semtl.synology.me`
 - n8n 배포 방식: `Docker Compose`
 - n8n binary storage bucket: `n8n-binaries`
@@ -38,7 +38,7 @@ endpoint 선택 기준:
 - n8n은 서버가 MinIO에 직접 접근하므로 내부 API endpoint만으로도 연동은 가능합니다.
 - 기본 구성은 `192.168.0.171:9000` 같은 내부 MinIO API endpoint를 권장합니다.
 - 내/외부 공용 DNS와 TLS 구성이 이미 준비되어 있으면
-  `minio-api.semtl.synology.me` 같은
+  `s3.semtl.synology.me` 같은
   공개 S3 API endpoint로 바꿀 수 있습니다.
 - MinIO Console 도메인인 `https://minio.semtl.synology.me`는 n8n S3 host로 사용하지 않습니다.
 
@@ -124,7 +124,7 @@ N8N_EXTERNAL_STORAGE_S3_ACCESS_SECRET=<minio-secret-key>
 - `N8N_EXTERNAL_STORAGE_S3_HOST`는 프로토콜 없이 host만 사용합니다.
 - 기본값은 내부 MinIO API host인 `192.168.0.171`을 사용합니다.
 - 공개 S3 API endpoint를 사용할 때는
-  `minio-api.semtl.synology.me`처럼
+  `s3.semtl.synology.me`처럼
   Console이 아닌 API 도메인을 사용합니다.
 - provider가 region을 강제하지 않으면
   `N8N_EXTERNAL_STORAGE_S3_BUCKET_REGION=auto`도 사용할 수 있지만,
@@ -412,16 +412,16 @@ mc admin user info local svc-n8n-s3
 
 주요 원인:
 
-- `minio-api.semtl.synology.me`가 MinIO Console이 아니라
+- `s3.semtl.synology.me`가 MinIO Console이 아니라
   S3 API(`9000`)로 reverse proxy 되지 않음
 - n8n VM 내부 DNS에서
-  `minio-api.semtl.synology.me`가 정상 해석되지 않음
+  `s3.semtl.synology.me`가 정상 해석되지 않음
 - TLS 인증서 신뢰 문제가 있음
 
 확인 순서:
 
 1. n8n VM에서
-   `curl -I https://minio-api.semtl.synology.me/minio/health/live`
+   `curl -I https://s3.semtl.synology.me/minio/health/live`
    로 응답을 확인합니다.
 2. reverse proxy 대상이 `9001` Console이 아니라 `9000` S3 API인지 확인합니다.
 3. 내부 DNS와 인증서 체인을 점검합니다.

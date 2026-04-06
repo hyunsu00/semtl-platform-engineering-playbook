@@ -8,7 +8,7 @@
 ## 대상 환경
 
 - MinIO API endpoint: `http://192.168.0.171:9000`
-- MinIO public S3 endpoint: `https://minio-api.semtl.synology.me`
+- MinIO public S3 endpoint: `https://s3.semtl.synology.me`
 - Jenkins URL: `https://jenkins.semtl.synology.me`
 - Jenkins 플러그인: `aws-credentials`, `artifact-manager-s3`, `pipeline-utility-steps`
 - Jenkins service account: `svc-jenkins-s3`
@@ -22,8 +22,11 @@
 
 endpoint 선택 기준:
 
-- Jenkins는 artifact 다운로드 URL에 MinIO endpoint가 직접 반영될 수 있으므로 `https://minio-api.semtl.synology.me` 같은 공개 S3 API endpoint를 권장합니다.
-- MinIO Console 도메인인 `https://minio.semtl.synology.me`는 Jenkins `Custom Endpoint`에 사용하지 않습니다.
+- Jenkins는 artifact 다운로드 URL에 MinIO endpoint가 직접 반영될 수
+  있으므로 `https://s3.semtl.synology.me` 같은 공개 S3 API endpoint를
+  권장합니다.
+- MinIO Console 도메인인 `https://minio.semtl.synology.me`는
+  Jenkins `Custom Endpoint`에 사용하지 않습니다.
 
 ## 연동 순서
 
@@ -103,11 +106,15 @@ Jenkins UI 경로:
 참고:
 
 - 저장 위치는 `System -> Global credentials (unrestricted)`를 사용합니다.
-- `Artifact Manager on S3`는 Jenkins 전역 설정에서 credential을 참조하므로 `Scope`는 `Global`로 둡니다.
+- `Artifact Manager on S3`는 Jenkins 전역 설정에서
+  credential을 참조하므로 `Scope`는 `Global`로 둡니다.
 - `IAM Role Support`는 사용하지 않고 기본값으로 둡니다.
 - 현재 구성은 AWS IAM Role이 아니라 MinIO의 고정 Access Key/Secret Key를 사용합니다.
-- Jenkins의 `AWS Credentials` 입력 화면에서 `AWS was not able to validate the provided access credentials` 경고가 표시될 수 있습니다.
-- 이 경고는 Jenkins가 MinIO 계정을 AWS IAM 자격증명처럼 사전 검증하려고 할 때 발생할 수 있습니다.
+- Jenkins의 `AWS Credentials` 입력 화면에서
+  `AWS was not able to validate the provided access credentials`
+  경고가 표시될 수 있습니다.
+- 이 경고는 Jenkins가 MinIO 계정을 AWS IAM 자격증명처럼
+  사전 검증하려고 할 때 발생할 수 있습니다.
 - MinIO 연동에서는 저장 후 `Artifact Manager on S3` 설정과 실제 artifact 업로드 테스트로 동작 여부를 확인합니다.
 
 ### 3. [Jenkins Web UI] Artifact Management for Builds 설정
@@ -122,8 +129,13 @@ Jenkins UI 경로:
 
 설정 기준:
 
-- 먼저 `Artifact Management for Builds`에서 Cloud Provider를 `Amazon S3`로 선택해야 Jenkins가 기본 로컬 artifact manager 대신 S3 artifact manager를 사용합니다.
-- 이 설정이 빠지면 Jenkins UI에서는 artifact가 보여도 실제 파일은 `/var/lib/jenkins/jobs/.../archive/` 아래 로컬 디스크에만 저장될 수 있습니다.
+- 먼저 `Artifact Management for Builds`에서
+  Cloud Provider를 `Amazon S3`로 선택해야 Jenkins가
+  기본 로컬 artifact manager 대신
+  S3 artifact manager를 사용합니다.
+- 이 설정이 빠지면 Jenkins UI에서는 artifact가 보여도
+  실제 파일은 `/var/lib/jenkins/jobs/.../archive/` 아래
+  로컬 디스크에만 저장될 수 있습니다.
 - 저장 후 다음 단계의 `AWS` 페이지에서 bucket과 credential 상세 설정을 진행합니다.
 
 ### 4. [Jenkins Web UI] AWS 페이지 설정
@@ -142,7 +154,7 @@ Jenkins UI 경로:
 - Base Prefix: 비움
 - Delete Artifacts: `OFF`
 - Delete Stashes: `OFF`
-- Custom Endpoint: `minio-api.semtl.synology.me`
+- Custom Endpoint: `s3.semtl.synology.me`
 - Custom Signing Region: `us-east-1`
 - Use Path Style URL: `ON`
 - Use Insecure HTTP: `OFF`
@@ -160,16 +172,31 @@ Jenkins UI 경로:
 
 - `Artifact Manager Amazon S3 Bucket`와 `Amazon Credentials`를 같은 `AWS` 페이지에서 함께 저장합니다.
 - bucket 이름은 MinIO에 생성한 `jenkins-artifacts`와 정확히 일치해야 합니다.
-- `Custom Endpoint`는 프로토콜 없이 `host:port` 형식으로 입력하고, HTTP 사용 여부는 `Use Insecure HTTP` 체크박스로 제어합니다.
-- MinIO 같은 S3 호환 스토리지는 AWS가 아니므로 `Custom Endpoint`, `Use Path Style URL`, `Use Insecure HTTP`, `Disable Session Token`을 함께 설정합니다.
-- 외부 브라우저에서도 Jenkins artifact 다운로드가 가능해야 하면 `Custom Endpoint`는 내부 IP보다 `minio-api.semtl.synology.me` 같은 외부 접근 가능한 S3 API endpoint를 사용합니다.
-- `minio-api.semtl.synology.me`는 MinIO Console이 아니라 S3 API로 reverse proxy 되어 있어야 합니다.
-- HTTPS reverse proxy를 사용할 때는 `Use Insecure HTTP`를 반드시 `OFF`로 저장하고, 새 build로 다시 검증합니다.
-- `Custom Signing Region`은 `us-east-1`로 두고, `Amazon Credentials`의 `Region`은 `Auto`를 사용하거나 필요 시 `US East (N. Virginia) / us-east-1`로 명시합니다.
-- `Amazon Credentials` 드롭다운에는 credential ID인 `jenkins-minio-s3` 대신 Access Key ID와 설명이 조합된 표시 이름이 보일 수 있습니다.
+- `Custom Endpoint`는 프로토콜 없이 `host:port` 형식으로 입력하고,
+  HTTP 사용 여부는 `Use Insecure HTTP` 체크박스로 제어합니다.
+- MinIO 같은 S3 호환 스토리지는 AWS가 아니므로
+  `Custom Endpoint`, `Use Path Style URL`, `Use Insecure HTTP`,
+  `Disable Session Token`을 함께 설정합니다.
+- 외부 브라우저에서도 Jenkins artifact 다운로드가 가능해야 하면
+  `Custom Endpoint`는 내부 IP보다 `s3.semtl.synology.me` 같은
+  외부 접근 가능한 S3 API endpoint를 사용합니다.
+- `s3.semtl.synology.me`는 MinIO Console이 아니라 S3 API로 reverse proxy 되어 있어야 합니다.
+- HTTPS reverse proxy를 사용할 때는 `Use Insecure HTTP`를
+  반드시 `OFF`로 저장하고, 새 build로 다시 검증합니다.
+- `Custom Signing Region`은 `us-east-1`로 두고,
+  `Amazon Credentials`의 `Region`은 `Auto`를 사용하거나 필요 시
+  `US East (N. Virginia) / us-east-1`로 명시합니다.
+- `Amazon Credentials` 드롭다운에는 credential ID인
+  `jenkins-minio-s3` 대신 Access Key ID와 설명이 조합된
+  표시 이름이 보일 수 있습니다.
 - `Base Prefix`를 비워 두면 artifact는 bucket 루트 경로 아래에 저장됩니다.
-- `Delete Artifacts`와 `Delete Stashes`는 기본적으로 비활성화합니다. 삭제 동기화는 Jenkins 메타데이터와 S3 오브젝트 정합성이 어긋날 수 있어, 보관 정리는 MinIO lifecycle 정책으로 관리하는 편이 안전합니다.
-- `Cloud Artifact Storage` 또는 `Artifact Manager on S3` 관련 경고가 보이면, 이 페이지에서 bucket과 credential 설정이 모두 저장되었는지 먼저 확인합니다.
+- `Delete Artifacts`와 `Delete Stashes`는 기본적으로 비활성화합니다.
+  삭제 동기화는 Jenkins 메타데이터와 S3 오브젝트 정합성이
+  어긋날 수 있어, 보관 정리는 MinIO lifecycle 정책으로
+  관리하는 편이 안전합니다.
+- `Cloud Artifact Storage` 또는 `Artifact Manager on S3` 관련
+  경고가 보이면, 이 페이지에서 bucket과 credential 설정이
+  모두 저장되었는지 먼저 확인합니다.
 
 ### 5. [Jenkins Web UI] Pipeline 검증
 
@@ -213,8 +240,12 @@ pipeline {
 
 - 별도 Git 저장소 연결 없이 Jenkins 내부 테스트용 Pipeline으로 검증할 수 있습니다.
 - `archiveArtifacts` 단계가 성공하면 Jenkins가 MinIO bucket에 artifact 업로드를 시도합니다.
-- build 로그에 `Still waiting to schedule task` 또는 `Waiting for next available executor`가 보이면 MinIO 문제가 아니라 Jenkins executor 부족 상태일 수 있습니다.
-- 이 경우 `Manage Jenkins -> Nodes`에서 built-in node 또는 연결된 agent가 `online` 상태인지, executor 수가 `1` 이상인지 먼저 확인합니다.
+- build 로그에 `Still waiting to schedule task` 또는
+  `Waiting for next available executor`가 보이면
+  MinIO 문제가 아니라 Jenkins executor 부족 상태일 수 있습니다.
+- 이 경우 `Manage Jenkins -> Nodes`에서 built-in node 또는
+  연결된 agent가 `online` 상태인지, executor 수가 `1` 이상인지
+  먼저 확인합니다.
 
 ### 6. 연동 검증
 
@@ -253,8 +284,10 @@ mc find local/jenkins-artifacts --name '*.txt'
 
 확인 순서:
 
-1. `Manage Jenkins -> System -> Artifact Management for Builds`에서 Cloud Provider가 `Amazon S3`로 저장되어 있는지 확인합니다.
-2. `Manage Jenkins -> Amazon Web Services Configuration`에서 bucket과 credential 설정이 저장되어 있는지 다시 확인합니다.
+1. `Manage Jenkins -> System -> Artifact Management for Builds`에서
+   Cloud Provider가 `Amazon S3`로 저장되어 있는지 확인합니다.
+2. `Manage Jenkins -> Amazon Web Services Configuration`에서
+   bucket과 credential 설정이 저장되어 있는지 다시 확인합니다.
 3. Jenkins VM에서 아래 명령으로 로컬 archive 저장 여부를 확인합니다.
 
 ```bash
@@ -337,16 +370,20 @@ mc admin user info local svc-jenkins-s3
 
 확인 순서:
 
-1. `Manage Jenkins -> Amazon Web Services Configuration`에서 `Custom Endpoint`가 `minio-api.semtl.synology.me`처럼 외부에서 접근 가능한 S3 API 호스트명인지 확인합니다.
+1. `Manage Jenkins -> Amazon Web Services Configuration`에서
+   `Custom Endpoint`가 `s3.semtl.synology.me`처럼
+   외부에서 접근 가능한 S3 API 호스트명인지 확인합니다.
 2. `Use Insecure HTTP`를 `OFF`로 두고 HTTPS endpoint를 사용합니다.
-3. `minio-api.semtl.synology.me`가 MinIO S3 API endpoint로 연결되는지 확인합니다.
+3. `s3.semtl.synology.me`가 MinIO S3 API endpoint로 연결되는지 확인합니다.
 4. 설정 변경 후 새 build를 다시 실행하고 artifact 다운로드를 재검증합니다.
 
 ### `405 Not Allowed`로 업로드 실패
 
 의미:
 
-- Jenkins가 reverse proxy 앞단으로 업로드를 시도했지만, 요청이 HTTPS가 아닌 HTTP로 나가거나 reverse proxy가 S3 업로드 메서드를 허용하지 않은 상태입니다.
+- Jenkins가 reverse proxy 앞단으로 업로드를 시도했지만,
+  요청이 HTTPS가 아닌 HTTP로 나가거나 reverse proxy가
+  S3 업로드 메서드를 허용하지 않은 상태입니다.
 
 주요 원인:
 
@@ -356,9 +393,13 @@ mc admin user info local svc-jenkins-s3
 
 확인 순서:
 
-1. build 로그의 업로드 URL이 `http://minio-api.semtl.synology.me/...`인지 `https://minio-api.semtl.synology.me/...`인지 확인합니다.
-2. `Manage Jenkins -> Amazon Web Services Configuration`에서 `Use Insecure HTTP`를 `OFF`로 저장합니다.
-3. Jenkins 설정 저장 후 새 build를 다시 실행해 업로드 URL이 `https://...`로 바뀌는지 확인합니다.
+1. build 로그의 업로드 URL이
+   `http://s3.semtl.synology.me/...`인지
+   `https://s3.semtl.synology.me/...`인지 확인합니다.
+2. `Manage Jenkins -> Amazon Web Services Configuration`에서
+   `Use Insecure HTTP`를 `OFF`로 저장합니다.
+3. Jenkins 설정 저장 후 새 build를 다시 실행해
+   업로드 URL이 `https://...`로 바뀌는지 확인합니다.
 4. reverse proxy가 `PUT`, `HEAD`, `DELETE` 메서드를 허용하고, 대상이 MinIO S3 API인지 확인합니다.
 
 참고:
@@ -400,7 +441,8 @@ mc du local/jenkins-artifacts --depth 1
 
 ### [Jenkins Web UI] 테스트 Job build 이력 초기화
 
-테스트 Job `minio-artifact-test`를 다시 `#1`부터 검증하고 싶다면 Jenkins Script Console에서 build 이력을 초기화할 수 있습니다.
+테스트 Job `minio-artifact-test`를 다시 `#1`부터 검증하고 싶다면
+Jenkins Script Console에서 build 이력을 초기화할 수 있습니다.
 
 Jenkins UI 경로:
 
