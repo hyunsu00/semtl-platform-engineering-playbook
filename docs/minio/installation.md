@@ -136,7 +136,9 @@ sudo apt update && sudo apt -y upgrade
 ### 2.2 MinIO 바이너리 설치
 
 ```bash
-MINIO_VERSION="RELEASE.2025-09-07T16-13-09Z"
+# 최신 MinIO 버전에서 Console SSO 버튼 미노출 이슈가 있어
+# Keycloak SSO 검증용으로 2025-03-12 릴리스를 사용
+MINIO_VERSION="RELEASE.2025-03-12T18-04-18Z"
 MC_VERSION="RELEASE.2025-08-13T08-35-41Z"
 
 sudo useradd --system --home /var/lib/minio --shell /sbin/nologin minio || true

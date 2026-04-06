@@ -94,7 +94,9 @@ make link-check
   (Synology NFS 기반 `nfs-client` StorageClass 설치)
 - `docs/k8s/external-api-ha.md`
   (CT-LB1/CT-LB2, HAProxy, Keepalived 기반 외부 API VIP 구성)
-- `docs/keycloak/sso-integration.md`
+- `docs/keycloak/installation.md`
+- `docs/keycloak/group-and-role-strategy.md` (Keycloak 공통 그룹/권한 전략)
+- `docs/keycloak/minio-oidc-integration.md` (Keycloak-MinIO OIDC 연동)
 - `docs/prometheus/monitoring-basics.md`
 - `docs/grafana/dashboard-guide.md`
 - `docs/loki/installation.md`

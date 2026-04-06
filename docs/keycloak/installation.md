@@ -206,25 +206,26 @@ cat /dev/null > ~/.bash_history && history -c
 OIDC 문서는 Keycloak 측(Client/Realm)과 서비스 측(redirect/callback)의
 정합성 검증 절차를 반드시 포함해야 합니다.
 
-### MinIO OIDC 설정 표준
+### 앱별 OIDC 문서 분리 원칙
 
-- Realm: `semtl`
-- Client ID: `minio`
-- Discovery URL: `https://auth.semtl.synology.me/realms/semtl/.well-known/openid-configuration`
-- 정책 claim: `policy` 권장, 필요 시 `groups`
+OIDC/SSO는 앱별 callback URL, claim 전략, 권한 매핑 방식이 달라지므로
+`docs/keycloak/` 하위에 앱별 문서로 분리해 관리합니다.
 
-Keycloak 최신 버전(21+)에서는 사용자 임의 attribute 입력이 제한될 수 있습니다.
-이 경우 `Realm settings -> User profile`에서 `policy` attribute를 먼저 정의합니다.
+현재 작성된 문서:
 
-권장 attribute 설정:
+- [그룹/역할 전략](./group-and-role-strategy.md)
+- [MinIO OIDC 연동](./minio-oidc-integration.md)
 
-- Name: `policy`
-- Multivalued: `OFF`
-- Required: `OFF`
-- Who can edit: `Admin`
-- Who can view: `Admin`
+공통 기준:
 
-그 다음 `Users -> <user> -> Details`에서 `policy=readwrite`를 부여합니다.
+- Realm은 `semtl` 사용
+- 공통 그룹은 `oidc-devops`, `oidc-developers`, `oidc-viewers`를 우선 사용
+- Client ID는 서비스 이름과 일치
+- Keycloak `Redirect URI`와 서비스 측 callback URL은 정확히 일치
+- 변경 후 discovery, login, 권한 반영까지 함께 검증
+
+공통 계정 운영에서는 사용자 개별 attribute보다 그룹 기반 권한 모델을 우선 사용합니다.
+앱별 문서에서는 이 공통 그룹을 각 서비스 권한으로 매핑합니다.
 
 ## 백업 및 복구
 
