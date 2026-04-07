@@ -321,6 +321,75 @@ sudo systemctl restart keepalived
 sudo systemctl status keepalived --no-pager
 ```
 
+### 부팅 직후 `keepalived` FAULT 대응
+
+LXC 환경에서는 부팅 직후 네트워크 인터페이스가 완전히 준비되기 전에
+`keepalived`가 먼저 시작되어 VIP가 올라오지 않는 경우가 있습니다.
+
+대표 증상:
+
+- `sudo systemctl restart keepalived` 이후에는 VIP가 정상 생성됨
+- 부팅 직후에는 VIP가 없음
+- `journalctl`에 `bind unicast_src ... failed` 또는
+  `Cannot assign requested address`가 보임
+
+진단 예시:
+
+```bash
+sudo journalctl -u keepalived -n 50 --no-pager
+ip a | grep 192.168.0.180
+```
+
+이 경우 두 CT 모두 `keepalived`를 `network-online.target` 이후에 시작하도록
+systemd override를 추가하는 것을 권장합니다.
+
+```bash
+sudo systemctl edit keepalived
+```
+
+아래 내용을 입력합니다.
+
+```ini
+[Unit]
+Wants=network-online.target
+After=network-online.target
+```
+
+적용:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart keepalived
+systemctl cat keepalived
+```
+
+여전히 부팅 타이밍이 불안정하면 시작 전 짧은 지연을 추가할 수 있습니다.
+
+```bash
+sudo systemctl edit keepalived
+```
+
+```ini
+[Unit]
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecStartPre=/bin/sleep 3
+```
+
+적용:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart keepalived
+```
+운영 기준:
+
+- 기본적으로는 `network-online.target` override만 먼저 적용합니다.
+- 그래도 재부팅 후 VIP가 간헐적으로 누락되면 `ExecStartPre=/bin/sleep 3`를 추가합니다.
+- 수동 재시작 시 VIP가 정상 생성된다면 설정 오류보다 부팅 타이밍 문제일 가능성이 큽니다.
+
 ## 6. 외부 API VIP 확인
 
 VIP는 두 CT 중 한 대에만 보여야 합니다.
@@ -332,13 +401,17 @@ ip a | grep 192.168.0.180
 `vm-admin`에서 VIP 포트 확인:
 
 ```bash
+ping -c 2 192.168.0.180
 nc -vz 192.168.0.180 6443
+curl -k https://192.168.0.180:6443/version
 ```
 
 정상 기준:
 
 - `192.168.0.180` VIP가 `ct-lb1` 또는 `ct-lb2` 한 대에만 바인딩됨
 - `nc -vz 192.168.0.180 6443` 연결 성공
+- `curl -k https://192.168.0.180:6443/version` 응답 확인 가능
+- standby 노드에는 VIP가 없어야 함
 
 ## 7. `vm-admin` kubeconfig 전환
 
