@@ -207,4 +207,4 @@ lvs
 
 - [Proxmox 설치 가이드](./installation.md)
 - [Proxmox 개요](./overview.md)
-- [Kubernetes 설치 가이드](../k8s/installation.md)
+- [RKE2 설치 가이드](../rke2/installation.md)

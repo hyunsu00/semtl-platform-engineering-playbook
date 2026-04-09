@@ -105,13 +105,13 @@ server: https://10.10.10.11:6443
 운영 기준에서는 이 값을 그대로 사용하면 안 됩니다.
 
 - `vm-admin`: 외부망 NIC 1개
-- K8s Control Plane/Worker: 외부망 `192.168.0.x` + 내부망 `10.10.10.x`
+- RKE2 Control Plane/Worker: 운영망 기준 IP 대역 사용
 
 따라서 `vm-admin`은 외부망 `192.168.0.x`를 통해
 Control Plane API에 접근해야 합니다.
 
 `2.3` 이후 `kubectl` 접속에 문제가 발생하면
-[Kubernetes Installation](../k8s/installation.md)을 참고해
+[RKE2 Installation](../rke2/installation.md)을 참고해
 API 접근 경로 또는 apiserver SAN을 먼저 재설정해야 합니다.
 
 재설정이 끝나면 `vm-admin`의 kubeconfig를 먼저 백업한 뒤

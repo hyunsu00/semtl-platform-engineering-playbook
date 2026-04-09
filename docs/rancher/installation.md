@@ -7,7 +7,7 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`k8s 설치 문서`](../k8s/installation.md) 기준으로 이미 구축되어 있습니다.
+- 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로 이미 구축되어 있습니다.
 - Ingress Controller는 `ingress-nginx`를 사용합니다.
 - 외부 TLS 종료는 현재 `Synology Reverse Proxy`에서 처리합니다.
 - `Rancher`는 `cattle-system` 네임스페이스에 설치합니다.
@@ -316,7 +316,7 @@ Synology Reverse Proxy 사용자 지정 헤더 예시:
   `Host`, `X-Forwarded-Proto`, `X-Forwarded-Port`만 수동으로 넣고,
   `X-Forwarded-For`는 자동 전달을 사용합니다.
 - 추가로 `ingress-nginx` 쪽에도 `use-forwarded-headers=true`가 설정되어 있어야 합니다.
-- 이 설정은 [`../k8s/installation.md`](../k8s/installation.md)의
+- 이 설정은 [`../rke2/installation.md`](../rke2/installation.md)의
   `ingress-nginx` 설치 단계에 포함합니다.
 
 검증 항목:
@@ -492,7 +492,7 @@ kubectl get ingress -A | grep rancher
 
 ## 참고
 
-- Kubernetes 기본 설치: [`../k8s/installation.md`](../k8s/installation.md)
+- Kubernetes 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - Argo CD 설치: [`../argocd/installation.md`](../argocd/installation.md)
 - cert-manager 설치: [`../cert-manager/installation.md`](../cert-manager/installation.md)
 - [Rancher Helm Chart Options](https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade/installation-references/helm-chart-options)

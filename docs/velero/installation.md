@@ -7,8 +7,8 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`k8s 설치 문서`](../k8s/installation.md) 기준으로 이미 구축되어 있습니다.
-- 스토리지 기준은 [`K8s Storage Guide`](../k8s/storage-guide.md)를 따릅니다.
+- 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로 이미 구축되어 있습니다.
+- 스토리지 기준은 현재 사용하는 StorageClass 정책에 맞춰 별도 운영 기준으로 관리합니다.
 - 운영 핵심 스택 PVC는 `Longhorn`을 사용합니다.
 - Velero 백업 저장소는 `MinIO`의 S3 호환 API를 사용합니다.
 - 초기 설치는 `node-agent` 기반 파일시스템 백업을 기본값으로 사용합니다.
@@ -426,8 +426,7 @@ kubectl describe node <node-name>
 
 ## 참고
 
-- Kubernetes 클러스터 기본 설치: [`../k8s/installation.md`](../k8s/installation.md)
-- 스토리지 역할 구분: [`../k8s/storage-guide.md`](../k8s/storage-guide.md)
+- Kubernetes 클러스터 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - MinIO 설치: [`../minio/installation.md`](../minio/installation.md)
 - [Velero 개요](https://velero.io/docs/main/)
 - [Velero Basic Install](https://velero.io/docs/main/basic-install/)

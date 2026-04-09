@@ -45,15 +45,8 @@ nav:
       - GitLab 연동: minio/gitlab-integration.md
       - Jenkins 연동: minio/jenkins-integration.md
       - n8n 연동: minio/n8n-integration.md
-  - Kubernetes:
-      - 개요: k8s/overview.md
-      - 설치: k8s/installation.md
-      - 스토리지 가이드: k8s/storage-guide.md
-      - Longhorn 설치: k8s/longhorn-installation.md
-      - NFS StorageClass 설치: k8s/nfs-storageclass.md
-      - 외부 API HA: k8s/external-api-ha.md
-      - 운영 가이드: k8s/operation-guide.md
-      - 트러블슈팅: k8s/troubleshooting.md
+  - RKE2:
+      - 설치: rke2/installation.md
   - VM-ADMIN:
       - 설치: vm-admin/installation.md
   - GitLab:

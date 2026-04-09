@@ -7,7 +7,7 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`k8s 설치 문서`](../k8s/installation.md) 기준으로 이미 구축되어 있습니다.
+- 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로 이미 구축되어 있습니다.
 - Ingress Controller는 `ingress-nginx`를 사용합니다.
 - 외부 진입점은 `MetalLB`가 할당한 `ingress-nginx` 서비스 IP를 사용합니다.
 - Prometheus는 `prometheus` 네임스페이스에 설치합니다.
@@ -19,7 +19,7 @@
 이번 문서의 목표는 실패 사례를 배제하고, 최소 설정으로 한 번에 설치가 끝나는
 성공 경로를 제공하는 것입니다.
 
-스토리지 기준은 먼저 [`K8s Storage Guide`](../k8s/storage-guide.md)를 확인합니다.
+스토리지 기준은 현재 사용하는 StorageClass 정책에 맞춰 함께 검토합니다.
 이 문서는 운영 핵심 스택 표준에 맞춰 `Longhorn` 기반 설치를 기준으로 작성합니다.
 
 Prometheus와 Grafana를 분리 설치하는 이유:
@@ -127,7 +127,7 @@ helm search repo prometheus-community/kube-prometheus-stack
 ### 3. Longhorn StorageClass 확인
 
 이 문서는 `Longhorn`이 이미 준비되어 있다는 전제로 진행합니다.
-Longhorn 설치와 스토리지 역할 구분은 [`K8s Storage Guide`](../k8s/storage-guide.md)를 먼저 확인합니다.
+Longhorn 설치와 스토리지 역할 구분은 현재 사용하는 StorageClass 정책 기준으로 먼저 확인합니다.
 
 확인 명령:
 
@@ -620,7 +620,7 @@ kubectl -n prometheus get svc
 - 실제 생성된 Ingress 이름과 host 값을 다시 확인합니다.
 - Synology Reverse Proxy 대상이 실제 `EXTERNAL-IP`로 향하는지 확인합니다.
 - `EXTERNAL-IP`가 보이는데도 `80/443` 연결이 거부되면
-  [`K8s Troubleshooting`](../k8s/troubleshooting.md)의
+  [`RKE2 설치 문서`](../rke2/installation.md)의
   `Ingress EXTERNAL-IP는 보이지만 80/443 연결 거부` 항목을 확인합니다.
 - 필요하면 `port-forward` 접속으로 서버 자체 정상 여부를 먼저 분리 진단합니다.
 
@@ -668,6 +668,6 @@ kubectl get ingress -A | grep prometheus
 
 ## 참고
 
-- Kubernetes 클러스터 기본 설치: [`../k8s/installation.md`](../k8s/installation.md)
+- Kubernetes 클러스터 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - 공식 Helm chart 저장소: `https://prometheus-community.github.io/helm-charts`
 - 공식 Prometheus 문서: `https://prometheus.io/docs/`

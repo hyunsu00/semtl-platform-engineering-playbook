@@ -7,8 +7,8 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`k8s 설치 문서`](../k8s/installation.md) 기준으로 이미 구축되어 있습니다.
-- 스토리지 기준은 [`K8s Storage Guide`](../k8s/storage-guide.md)를 따릅니다.
+- 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로 이미 구축되어 있습니다.
+- 스토리지 기준은 현재 사용하는 StorageClass 정책에 맞춰 별도 운영 기준으로 관리합니다.
 - `Grafana`와 `Prometheus`는 이미 분리 설치되어 있습니다.
 - Loki는 작은 메타 모니터링 스택에 적합한 `SingleBinary` 모드로 설치합니다.
 - 장기 로그 저장소는 `MinIO`의 S3 호환 API를 사용합니다.
@@ -509,7 +509,7 @@ kubectl -n loki describe pod -l app.kubernetes.io/name=loki
 
 ## 참고
 
-- Kubernetes 기본 설치: [`../k8s/installation.md`](../k8s/installation.md)
+- Kubernetes 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - MinIO 설치: [`../minio/installation.md`](../minio/installation.md)
 - Grafana 설치: [`../grafana/installation.md`](../grafana/installation.md)
 - Prometheus 설치: [`../prometheus/installation.md`](../prometheus/installation.md)

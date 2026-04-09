@@ -7,7 +7,7 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`k8s 설치 문서`](../k8s/installation.md) 기준으로 이미 구축되어 있습니다.
+- 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로 이미 구축되어 있습니다.
 - Ingress Controller는 `ingress-nginx`를 사용합니다.
 - 현재 외부 HTTPS 종단은 Kubernetes가 아니라 `Synology Reverse Proxy`에서 처리합니다.
 - `Prometheus`, `Grafana`, `Argo CD` 같은 앱은 같은 `ingress-nginx` 외부 IP를 host 기반으로 공유합니다.
@@ -261,7 +261,7 @@ kubectl -n cert-manager describe pod -l app.kubernetes.io/component=webhook
 
 ## 참고
 
-- Kubernetes 기본 설치: [`../k8s/installation.md`](../k8s/installation.md)
+- Kubernetes 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - Prometheus 설치: [`../prometheus/installation.md`](../prometheus/installation.md)
 - Grafana 설치: [`../grafana/installation.md`](../grafana/installation.md)
 - Argo CD 설치: [`../argocd/installation.md`](../argocd/installation.md)

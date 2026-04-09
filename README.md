@@ -1,7 +1,7 @@
 # SEMTL Platform Engineering Playbook
 
 Synology, AdGuard Home, Proxmox, MinIO, Jenkins, n8n, Harbor, GitLab,
-Kubernetes, VM-ADMIN, Keycloak, Prometheus, Grafana, Argo CD 등 플랫폼 엔지니어링 영역의
+RKE2, VM-ADMIN, Keycloak, Prometheus, Grafana, Argo CD 등 플랫폼 엔지니어링 영역의
 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
 
 ## 목적
@@ -85,15 +85,8 @@ make link-check
 - `docs/harbor/installation.md`
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)
 - `docs/gitlab/backup-and-restore.md`
-- `docs/k8s/cluster-bootstrap.md`
-- `docs/k8s/storage-guide.md`
-  (Longhorn, NFS, local 역할 구분과 앱별 권장 StorageClass 기준)
-- `docs/k8s/longhorn-installation.md`
-  (운영 핵심 스택용 Longhorn 설치 및 `longhorn` StorageClass 준비)
-- `docs/k8s/nfs-storageclass.md`
-  (Synology NFS 기반 `nfs-client` StorageClass 설치)
-- `docs/k8s/external-api-ha.md`
-  (CT-LB1/CT-LB2, HAProxy, Keepalived 기반 외부 API VIP 구성)
+- `docs/rke2/installation.md`
+  (RKE2 단일 control-plane, worker 3대 기준 설치 및 초기 검증)
 - `docs/keycloak/installation.md`
 - `docs/keycloak/group-and-role-strategy.md` (Keycloak 공통 그룹/권한 전략)
 - `docs/keycloak/minio-oidc-integration.md` (Keycloak-MinIO OIDC 연동)

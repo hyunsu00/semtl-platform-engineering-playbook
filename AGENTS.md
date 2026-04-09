@@ -7,9 +7,11 @@
 - `docs/<component>/operation-guide.md`
 - `docs/<component>/troubleshooting.md`
 
-현재 운영 컴포넌트 예시: `synology`, `adguardhome`, `proxmox`, `minio`, `k8s`, `gitlab`, `harbor`, `jenkins`, `n8n`, `keycloak`, `prometheus`, `grafana`, `argocd`
+현재 운영 컴포넌트 예시: `synology`, `adguardhome`, `proxmox`, `minio`, `rke2`, `gitlab`, `harbor`, `jenkins`, `n8n`, `keycloak`, `prometheus`, `grafana`, `argocd`
 
 문서에서 참조하는 다이어그램/스크린샷은 `assets/images/`를 사용합니다. 기본 뼈대는 `templates/how-to-template.md`를 재사용합니다. `scripts/`는 자동화 유틸리티용 디렉터리이며(현재는 최소 구성), 기여자가 실행할 공통 명령은 `Makefile`을 기준으로 합니다.
+
+`backup/` 디렉터리는 보존용이므로 수정하지 않습니다. 기존 내용 확인은 가능하지만, 파일 추가/변경/삭제는 금지합니다.
 
 참고 원본 문서(벤더 가이드, 티켓 첨부, 임시 덤프)는 형상관리 대상이 아닙니다. 로컬 전용 경로인 `.local/` 아래에만 저장합니다.
 - `.local/references/vendor/`

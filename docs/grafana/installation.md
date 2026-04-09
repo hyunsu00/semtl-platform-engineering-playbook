@@ -7,7 +7,7 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`k8s 설치 문서`](../k8s/installation.md) 기준으로 이미 구축되어 있습니다.
+- 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로 이미 구축되어 있습니다.
 - Ingress Controller는 `ingress-nginx`를 사용합니다.
 - 외부 진입점은 `MetalLB`가 할당한 `ingress-nginx` 서비스 IP를 사용합니다.
 - Grafana는 `grafana` 네임스페이스에 설치합니다.
@@ -16,7 +16,7 @@
 이 문서에서는 브라우저 접속과 운영 편의성을 위해
 `Ingress`를 통한 HTTPS 노출을 기본값으로 사용합니다.
 
-스토리지 기준은 먼저 [`K8s Storage Guide`](../k8s/storage-guide.md)를 확인합니다.
+스토리지 기준은 현재 사용하는 StorageClass 정책에 맞춰 함께 검토합니다.
 Grafana의 영속 스토리지는 운영 핵심 스택 기준에 맞춰 `Longhorn`을 기본값으로 사용합니다.
 
 Grafana와 Prometheus를 분리 설치하는 이유:
@@ -606,6 +606,6 @@ kubectl -n grafana get ingress
 
 ## 참고
 
-- Kubernetes 클러스터 기본 설치: [`../k8s/installation.md`](../k8s/installation.md)
+- Kubernetes 클러스터 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - 공식 Helm chart 저장소: `https://grafana.github.io/helm-charts`
 - 공식 Grafana 문서: `https://grafana.com/docs/`

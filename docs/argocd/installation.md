@@ -7,7 +7,7 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`k8s 설치 문서`](../k8s/installation.md) 기준으로
+- 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로
   이미 구축되어 있습니다.
 - Ingress Controller는 `ingress-nginx`를 사용합니다.
 - 외부 TLS 종료는 현재 `Synology Reverse Proxy`에서 처리합니다.
@@ -540,6 +540,6 @@ kubectl get ingress -A | grep argocd
 
 ## 참고
 
-- Kubernetes 클러스터 기본 설치: [`../k8s/installation.md`](../k8s/installation.md)
+- Kubernetes 클러스터 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - 공식 문서: `https://argo-cd.readthedocs.io/`
 - Helm chart 저장소: `https://argoproj.github.io/argo-helm`
