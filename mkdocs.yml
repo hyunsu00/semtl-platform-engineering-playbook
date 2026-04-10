@@ -47,6 +47,8 @@ nav:
       - n8n 연동: minio/n8n-integration.md
   - RKE2:
       - 설치: rke2/installation.md
+  - MetalLB:
+      - 설치: metallb/installation.md
   - VM-ADMIN:
       - 설치: vm-admin/installation.md
   - GitLab:

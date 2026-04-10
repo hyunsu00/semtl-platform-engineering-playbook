@@ -87,6 +87,8 @@ make link-check
 - `docs/gitlab/backup-and-restore.md`
 - `docs/rke2/installation.md`
   (RKE2 단일 control-plane, worker 3대 기준 설치 및 초기 검증)
+- `docs/metallb/installation.md`
+  (RKE2 설치 직후 MetalLB L2 구성, `ingress-nginx` 외부 IP 할당)
 - `docs/keycloak/installation.md`
 - `docs/keycloak/group-and-role-strategy.md` (Keycloak 공통 그룹/권한 전략)
 - `docs/keycloak/minio-oidc-integration.md` (Keycloak-MinIO OIDC 연동)
