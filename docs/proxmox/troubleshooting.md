@@ -98,6 +98,67 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
 - 상세 문서:
   - [Intel AMT Watchdog And Alerting](./amt-watchdog-and-alerting.md)
 
+### 이슈 7: Proxmox Host의 `vmbr0` IP는 살아 있는데 같은 대역 통신이 모두 실패함
+
+- 증상:
+  - AMT 콘솔로는 Proxmox Host 접속 가능
+  - `ip -br addr` 기준 `vmbr0`에 관리 IP가 정상 설정됨
+  - `ethtool nic0` 기준 `Link detected: yes`
+  - 그런데 `ping 192.168.0.1`, `ping 192.168.0.2` 같은 같은 대역 통신이 모두 실패
+  - `ip neigh`에 `192.168.0.x dev vmbr0 FAILED`가 반복됨
+- 가장 가능성 높은 원인:
+  - Proxmox Host의 `vmbr0`/`nic0` ARP 또는 L2 상태가 일시적으로 꼬인 경우
+  - 스위치 포트/VLAN/포트 보안 문제 가능성도 함께 고려
+  - Longhorn, NFS StorageClass 설치 같은 Kubernetes 내부 작업이 직접 원인일 가능성은 낮음
+  - 이유: 이번 증상은 Proxmox Host 자체가 같은 LAN에서 ARP 해석을 못 하는 상태였기 때문
+- 확인:
+
+  ```bash
+  ip -br addr
+  ip route
+  ip -br link
+  bridge link
+  cat /etc/network/interfaces
+  ethtool nic0
+  ip neigh
+  ping -c 2 192.168.0.1
+  ping -c 2 192.168.0.2
+  ```
+
+- 판단 포인트:
+  - `nic0`가 `UP`, `LOWER_UP`이고 `ethtool`에서 `Link detected: yes`면 물리 링크는 살아 있음
+  - `vmbr0`에 관리 IP와 gateway가 정상인데 `ip neigh`가 `FAILED`면 L2/ARP 문제 가능성이 큼
+  - `/etc/network/interfaces`에서 `bridge-ports nic0`가 정상이면
+    Proxmox 설정 자체 문제 가능성은 낮아짐
+- 즉시 조치:
+
+  ```bash
+  ifreload -a
+  systemctl restart networking
+  ip link set nic0 down
+  ip link set nic0 up
+  ip link set vmbr0 down
+  ip link set vmbr0 up
+  ip neigh flush all
+  ping -c 2 192.168.0.1
+  ping -c 2 192.168.0.2
+  ip neigh
+  ```
+
+- 이번 사례 결과:
+  - 위 조치 후 `192.168.0.1`, `192.168.0.2` ping이 즉시 복구됨
+  - `ip neigh` 상태도 `FAILED`에서 `REACHABLE`로 전환됨
+  - 따라서 근본 원인은 Kubernetes 스토리지 설치보다는 Proxmox Host 네트워크 상태 꼬임 쪽으로 판단
+- 후속 점검:
+  - 스위치 포트 VLAN/native VLAN 설정 확인
+  - 포트 보안, MAC 제한, err-disabled 여부 확인
+  - 재발 시 아래 로그를 함께 수집
+
+  ```bash
+  journalctl -b | grep -Ei "nic0|vmbr0|bridge|link|network"
+  dmesg -T | grep -Ei "nic0|link|reset|timeout|bridge"
+  ```
+
 ## 에스컬레이션 기준
 
 - 15분 이상 서비스 영향 지속
