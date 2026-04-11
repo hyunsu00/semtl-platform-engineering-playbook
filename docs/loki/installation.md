@@ -511,8 +511,7 @@ kubectl -n loki describe pod -l app.kubernetes.io/name=loki
 
 - Kubernetes 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
 - MinIO 설치: [`../minio/installation.md`](../minio/installation.md)
-- Grafana 설치: [`../grafana/installation.md`](../grafana/installation.md)
-- Prometheus 설치: [`../prometheus/installation.md`](../prometheus/installation.md)
+- Monitoring 설치: [`../monitoring/installation.md`](../monitoring/installation.md)
 - [Install Grafana Loki with Helm](https://grafana.com/docs/loki/latest/setup/install/helm/)
 - [Install monolithic Loki](https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/)
 - [Loki Helm chart concepts](https://grafana.com/docs/loki/latest/setup/install/helm/concepts/)

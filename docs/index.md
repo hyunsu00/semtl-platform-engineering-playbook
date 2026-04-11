@@ -74,10 +74,8 @@
   [Installation](./vm-admin/installation.md)
 - Keycloak:
   [Installation](./keycloak/installation.md)
-- Prometheus:
-  [Installation](./prometheus/installation.md)
-- Grafana:
-  [Installation](./grafana/installation.md)
+- Monitoring:
+  [Installation](./monitoring/installation.md)
 - Loki:
   [Installation](./loki/installation.md)
 - Rancher:

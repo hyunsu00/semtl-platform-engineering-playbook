@@ -64,10 +64,8 @@ nav:
       - 설치: keycloak/installation.md
       - 그룹/권한 전략: keycloak/group-and-role-strategy.md
       - MinIO OIDC 연동: keycloak/minio-oidc-integration.md
-  - Prometheus:
-      - 설치: prometheus/installation.md
-  - Grafana:
-      - 설치: grafana/installation.md
+  - Monitoring:
+      - 설치: monitoring/installation.md
   - Loki:
       - 설치: loki/installation.md
   - Rancher:

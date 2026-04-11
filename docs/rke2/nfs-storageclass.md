@@ -296,4 +296,4 @@ VM별 권장 설명:
 
 - Kubernetes 기본 설치: [`./installation.md`](./installation.md)
 - Longhorn 설치: [`./longhorn-installation.md`](./longhorn-installation.md)
-- Prometheus 설치: [`../prometheus/installation.md`](../prometheus/installation.md)
+- Monitoring 설치: [`../monitoring/installation.md`](../monitoring/installation.md)

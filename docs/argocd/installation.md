@@ -362,6 +362,14 @@ ingress 진입 주소로 사용합니다.
 - 좌측 메뉴(`Applications`, `Settings`) 정상 노출
 - `Settings > Clusters`에서 `in-cluster` 상태 확인
 
+참고:
+
+- 설치 직후 `in-cluster`가 `Unknown`으로 보일 수 있습니다.
+- `Cluster has no applications and is not being monitored.` 메시지라면
+  클러스터 등록 자체가 깨진 것이 아니라, 아직 연결된 `Application`이 없어
+  적극 모니터링하지 않는 상태일 수 있습니다.
+- 이후 실제 `Application`을 하나 이상 등록하면 상태가 더 명확하게 반영됩니다.
+
 CLI도 함께 사용할 계획이면 `vm-admin` 같은 운영 노드에 설치합니다.
 
 Ubuntu/Linux 예시:

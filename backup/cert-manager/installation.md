@@ -262,8 +262,7 @@ kubectl -n cert-manager describe pod -l app.kubernetes.io/component=webhook
 ## 참고
 
 - Kubernetes 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
-- Prometheus 설치: [`../prometheus/installation.md`](../prometheus/installation.md)
-- Grafana 설치: [`../grafana/installation.md`](../grafana/installation.md)
+- Monitoring 설치: [`../monitoring/installation.md`](../monitoring/installation.md)
 - Argo CD 설치: [`../argocd/installation.md`](../argocd/installation.md)
 - [cert-manager Installation](https://cert-manager.io/docs/installation/)
 - [cert-manager Helm Install](https://cert-manager.io/docs/installation/helm/)

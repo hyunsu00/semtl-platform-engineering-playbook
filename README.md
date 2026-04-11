@@ -1,7 +1,7 @@
 # SEMTL Platform Engineering Playbook
 
 Synology, AdGuard Home, Proxmox, MinIO, Jenkins, n8n, Harbor, GitLab,
-RKE2, VM-ADMIN, Keycloak, Prometheus, Grafana, Argo CD 등 플랫폼 엔지니어링 영역의
+RKE2, VM-ADMIN, Keycloak, Monitoring, Argo CD 등 플랫폼 엔지니어링 영역의
 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
 
 ## 목적
@@ -92,8 +92,8 @@ make link-check
 - `docs/keycloak/installation.md`
 - `docs/keycloak/group-and-role-strategy.md` (Keycloak 공통 그룹/권한 전략)
 - `docs/keycloak/minio-oidc-integration.md` (Keycloak-MinIO OIDC 연동)
-- `docs/prometheus/monitoring-basics.md`
-- `docs/grafana/dashboard-guide.md`
+- `docs/monitoring/installation.md`
+  (`kube-prometheus-stack` 기반 Prometheus, Grafana, Alertmanager 통합 설치)
 - `docs/loki/installation.md`
   (MinIO object storage 기반 Loki 설치, Grafana 데이터소스 연결, 초기 로그 조회 검증)
 - `docs/rancher/installation.md`
