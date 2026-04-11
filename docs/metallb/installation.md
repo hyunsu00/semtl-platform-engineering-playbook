@@ -85,25 +85,27 @@ kubectl -n metallb-system get pods
 `192.168.0.200-192.168.0.220` 대역을 MetalLB 관리 IP 풀로 등록합니다.
 
 ```bash
-cat <<'EOF' > ~/metallb-pool.yaml
+mkdir -p ~/rke2/metallb
+
+cat <<'EOF' > ~/rke2/metallb/metallb-pool.yaml
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: first-pool
+  name: metallb-address-pool
   namespace: metallb-system
 spec:
   addresses:
     - 192.168.0.200-192.168.0.220
 EOF
 
-kubectl apply -f ~/metallb-pool.yaml
+kubectl apply -f ~/rke2/metallb/metallb-pool.yaml
 ```
 
 확인:
 
 ```bash
 kubectl -n metallb-system get ipaddresspool
-kubectl -n metallb-system describe ipaddresspool first-pool
+kubectl -n metallb-system describe ipaddresspool metallb-address-pool
 ```
 
 ### 3. L2Advertisement 생성
@@ -111,25 +113,27 @@ kubectl -n metallb-system describe ipaddresspool first-pool
 L2 모드 광고를 활성화합니다.
 
 ```bash
-cat <<'EOF' > ~/metallb-l2advertisement.yaml
+mkdir -p ~/rke2/metallb
+
+cat <<'EOF' > ~/rke2/metallb/metallb-l2advertisement.yaml
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
-  name: first-pool
+  name: metallb-l2-announce
   namespace: metallb-system
 spec:
   ipAddressPools:
-    - first-pool
+    - metallb-address-pool
 EOF
 
-kubectl apply -f ~/metallb-l2advertisement.yaml
+kubectl apply -f ~/rke2/metallb/metallb-l2advertisement.yaml
 ```
 
 확인:
 
 ```bash
 kubectl -n metallb-system get l2advertisement
-kubectl -n metallb-system describe l2advertisement first-pool
+kubectl -n metallb-system describe l2advertisement metallb-l2-announce
 ```
 
 ### 4. `ingress-nginx` 외부 노출

@@ -2,38 +2,46 @@
 
 ## 문서 목적
 
-이 문서는 `vm-admin`를 운영 전용 관리 노드로 구성하면서 실제로 성공한 절차만 정리한 기록입니다. 아래 항목만 확인되었습니다.
+이 문서는 `vm-admin`를 운영 전용 관리 노드로 구성하는 절차를 정리합니다.
+현재 기준은 [`RKE2 Installation`](../rke2/installation.md) 문서의 단일 control-plane,
+단일 네트워크 구성에 맞춘 결과만 반영합니다.
 
-- `kubectl` 설치 및 Kubernetes 원격 제어 성공
-- `mc` 설치 및 MinIO(`192.168.0.171`) 관리 성공
-- `k9s`는 바이너리 방식 사용, `snap` 기반 설치는 운영 경로에서 제외
+이 문서에서 확인한 범위는 다음과 같습니다.
 
-실패했던 시도나 중간 가설은 제외하고, 최종적으로 동작이 확인된 흐름만 남깁니다.
+- `kubectl` 설치 및 RKE2 원격 제어
+- `helm` 설치 및 차트 배포 준비
+- `mc` 설치 및 MinIO(`192.168.0.171`) 관리
+- `k9s` 바이너리 설치
+- 운영 경로에서 사용하지 않는 `snap` 정리
+
+실패했던 시도나 이전 가설은 제외하고,
+현재 운영 기준에서 재현 가능한 흐름만 남깁니다.
 
 ## 구성 요약
 
 - 관리 노드: `vm-admin`
-- VM-ADMIN 네트워크:
-  - 외부망 NIC 1개
+- 관리 노드 네트워크:
+  - NIC 1개
   - `192.168.0.x` 대역으로만 직접 접근
-- Kubernetes Control Plane:
+- RKE2 Control Plane:
+  - `vm-rke2-cp1`
   - `192.168.0.181`
-  - `192.168.0.182`
-  - `192.168.0.183`
-  - 각 노드는 외부망/내부망 NIC 2개 구성
-- Kubernetes Worker:
-  - `192.168.0.191`
-  - `192.168.0.192`
-- Kubernetes 내부 API 접근망:
-  - `10.10.10.11:6443`
-  - Control Plane 내부 통신용
+- RKE2 Worker:
+  - `vm-rke2-w1`: `192.168.0.191`
+  - `vm-rke2-w2`: `192.168.0.192`
+  - `vm-rke2-w3`: `192.168.0.193`
+- Kubernetes API:
+  - `https://192.168.0.181:6443`
 - MinIO:
   - API: `http://192.168.0.171:9000`
   - Console: `http://192.168.0.171:9001`
 
+이 문서는 별도 내부망 `10.10.10.x`를 사용하지 않습니다.
+RKE2 노드와 `vm-admin` 모두 `192.168.0.0/24` 단일 네트워크 기준입니다.
+
 ## 1. kubectl 설치
 
-`vm-admin`에서 `kubectl`은 공식 Kubernetes apt 저장소로 설치했습니다.
+`vm-admin`에서 `kubectl`은 공식 Kubernetes apt 저장소로 설치합니다.
 
 ```bash
 sudo apt update
@@ -55,110 +63,101 @@ kubectl version --client
 
 ## 2. kubeconfig 복사
 
-직접 `scp`로 `/etc/kubernetes/admin.conf`를 가져오면 권한 문제로
-실패했습니다. 성공한 방식은 Control Plane 1번 노드에서 임시 파일을
-만든 뒤 `vm-admin`으로 복사하는 절차입니다.
+`vm-admin`에서는 `vm-rke2-cp1`의 RKE2 kubeconfig를 복사해 사용합니다.
+이 문서 기준으로는 `vm-rke2-cp1`의 사용자 kubeconfig인
+`/home/semtl/.kube/config`를 직접 복사합니다.
 
-### 2.1 CP1에서 임시 파일 준비
-
-CP1(`192.168.0.181`)에 접속해서 아래를 실행합니다.
-
-```bash
-sudo -i
-install -m 600 /etc/kubernetes/admin.conf /home/semtl/admin.conf
-chown semtl:semtl /home/semtl/admin.conf
-exit
-```
-
-### 2.2 VM-ADMIN으로 kubeconfig 복사
+### 2.1 VM-ADMIN으로 kubeconfig 복사
 
 `vm-admin`에서 아래를 실행합니다.
 
 ```bash
 mkdir -p ~/.kube
-scp semtl@192.168.0.181:/home/semtl/admin.conf ~/.kube/config
+scp semtl@192.168.0.181:/home/semtl/.kube/config ~/.kube/config
 chmod 600 ~/.kube/config
 ```
 
-### 2.3 CP1 임시 파일 정리
+사전 조건:
 
-복사가 끝나면 CP1에서 임시 파일을 삭제합니다.
+- `vm-rke2-cp1`의 `semtl` 계정 홈에 `~/.kube/config`가 이미 준비되어 있어야 합니다.
+- 해당 파일은 `semtl` 계정으로 읽을 수 있어야 합니다.
 
-```bash
-rm -f /home/semtl/admin.conf
-```
+## 3. kubeconfig 서버 주소 확인 및 수정
 
-## 3. kubeconfig 서버 주소 확인
-
-초기 kubeconfig에는 내부망 API 주소가 포함될 수 있습니다.
+RKE2가 생성한 kubeconfig에는 기본적으로 loopback 주소가 들어 있습니다.
 
 ```bash
-cat ~/.kube/config | grep server
+grep server ~/.kube/config
 ```
 
 예시:
 
 ```text
-server: https://10.10.10.11:6443
+server: https://127.0.0.1:6443
 ```
 
-운영 기준에서는 이 값을 그대로 사용하면 안 됩니다.
+이 값을 그대로 두면 `vm-admin`에서는 API 서버에 접속할 수 없습니다.
+`vm-admin`은 외부에서 `vm-rke2-cp1`의 실제 주소인
+`192.168.0.181:6443`로 접속해야 합니다.
 
-- `vm-admin`: 외부망 NIC 1개
-- RKE2 Control Plane/Worker: 운영망 기준 IP 대역 사용
-
-따라서 `vm-admin`은 외부망 `192.168.0.x`를 통해
-Control Plane API에 접근해야 합니다.
-
-`2.3` 이후 `kubectl` 접속에 문제가 발생하면
-[RKE2 Installation](../rke2/installation.md)을 참고해
-API 접근 경로 또는 apiserver SAN을 먼저 재설정해야 합니다.
-
-재설정이 끝나면 `vm-admin`의 kubeconfig를 먼저 백업한 뒤
-`server:` 값을 외부 운영 접속 VIP로 변경해야 합니다.
+`rke2-server` 설정의 `tls-san`에 `192.168.0.181`이 포함되어 있어야 하며,
+이 기준은 [`RKE2 Installation`](../rke2/installation.md) 문서와 동일합니다.
 
 ### 3.1 kubeconfig 백업 및 server 변경
 
 ```bash
 cp ~/.kube/config ~/.kube/config.bak
+OLD_SERVER='server: https://127.0.0.1:6443'
+NEW_SERVER='server: https://192.168.0.181:6443'
 sed -i \
-  's#server: https://10\.10\.10\.11:6443#server: https://192.168.0.180:6443#g' \
+  "s#${OLD_SERVER}#${NEW_SERVER}#g" \
   ~/.kube/config
 grep server ~/.kube/config
-kubectl get nodes -o wide
 ```
 
-운영 기준으로는 `192.168.0.180:6443` 같은 외부망 VIP를 사용해야 합니다.
+기대 결과:
+
+```text
+server: https://192.168.0.181:6443
+```
 
 ## 4. kubectl 동작 검증
 
 ```bash
 kubectl get nodes -o wide
+kubectl get pods -A
 ```
 
-Control Plane이 내부망 IP를 `INTERNAL-IP`로 표시하는 것은 정상입니다.
-향후 외부망 SAN 또는 외부망 VIP 구성을 마친 뒤 `vm-admin`이 외부망 API로
-접속하더라도, 노드 정보에는 클러스터 내부 통신망인 `10.10.10.x`가
-출력될 수 있습니다.
+확인 예시:
 
-확인된 결과 예시:
+- `vm-rke2-cp1`: `Ready`, `control-plane`, `192.168.0.181`
+- `vm-rke2-w1`: `Ready`, `192.168.0.191`
+- `vm-rke2-w2`: `Ready`, `192.168.0.192`
+- `vm-rke2-w3`: `Ready`, `192.168.0.193`
 
-- `k8s-cp1`: `Ready`, `control-plane`, `10.10.10.11`, `v1.29.15`
-- `k8s-cp2`: `Ready`, `control-plane`, `10.10.10.12`, `v1.29.15`
-- `k8s-cp3`: `Ready`, `control-plane`, `10.10.10.13`, `v1.29.15`
-- `k8s-w1`: `Ready`, `10.10.10.21`, `v1.29.15`
-- `k8s-w2`: `Ready`, `10.10.10.22`, `v1.29.15`
-- 공통 OS: `Ubuntu 22.04.5 LTS`
-- 공통 Runtime: `containerd://1.7.28`
+위 결과가 보이면 `vm-admin`에서 RKE2 원격 제어가 가능한 상태입니다.
 
-위 결과는 클러스터 자체가 정상 동작하고 있음을 보여주는 예시입니다.
-`vm-admin`에서 외부망 API로 정상 접속하려면 외부망 주소가 apiserver
-인증서 SAN에 포함되어 있어야 합니다.
+문제가 있으면 다음을 먼저 확인합니다.
 
-## 5. MinIO 관리용 mc 설치
+- `vm-admin`에서 `192.168.0.181:6443`로 네트워크 접근 가능한지
+- `vm-rke2-cp1`의 `/etc/rancher/rke2/config.yaml`에 `tls-san`이 올바르게 들어갔는지
+- 복사한 kubeconfig의 `server:` 값이 `127.0.0.1`로 남아 있지 않은지
 
-MinIO 서버는 별도 VM(`192.168.0.171`)에 두고, `vm-admin`에는
-관리 클라이언트 `mc`만 설치했습니다.
+## 5. Helm 설치
+
+`vm-admin`은 Kubernetes 운영 전용 노드이므로 `helm`도 함께 설치합니다.
+
+```bash
+curl -fsSL \
+  https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
+  | bash
+helm version
+```
+
+## 6. MinIO 관리용 mc 설치
+
+MinIO 서버는 별도 VM(`192.168.0.171`)에 두고,
+`vm-admin`에는 관리 클라이언트 `mc`만 설치합니다.
 
 ```bash
 curl -fsSL https://dl.min.io/client/mc/release/linux-amd64/mc -o mc
@@ -167,7 +166,7 @@ sudo mv mc /usr/local/bin/
 mc --version
 ```
 
-## 6. MinIO alias 등록
+## 7. MinIO alias 등록
 
 ```bash
 mc alias set minio http://192.168.0.171:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
@@ -186,37 +185,23 @@ mc admin info minio
 mc ls minio
 ```
 
-위 절차로 `vm-admin`에서 MinIO 관리 연결이 성공했습니다.
+## 8. 운영 편의 설정
 
-## 7. 운영 편의 설정
-
-`kubectl`과 `mc`를 자주 사용하는 운영 노드이므로 아래 alias를 적용했습니다.
+`kubectl`, `helm`, `mc`를 자주 사용하는 운영 노드이므로
+아래 alias와 completion을 적용합니다.
 
 ```bash
 echo 'alias k=kubectl' >> ~/.bashrc
+echo 'alias h=helm' >> ~/.bashrc
+echo 'alias m=mc' >> ~/.bashrc
 echo 'source <(kubectl completion bash)' >> ~/.bashrc
 echo 'complete -o default -F __start_kubectl k' >> ~/.bashrc
-echo 'alias m=mc' >> ~/.bashrc
 source ~/.bashrc
-```
-
-## 8. Helm 설치
-
-`vm-admin`은 Kubernetes 운영 전용 노드이므로 `helm`도 함께 설치해야 합니다.
-
-```bash
-curl -fsSL \
-  https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
-  | bash
-helm version
 ```
 
 ## 9. k9s 설치
 
-`snap` 설치 방식은 명령 노출 문제가 있어,
-최종적으로는 바이너리 설치본을 사용하는 방향으로 정리해야 합니다.
-
-예시:
+이 환경에서는 `snap` 기반 설치 대신 바이너리 직접 설치를 사용합니다.
 
 ```bash
 K9S_VERSION="v0.50.18"
@@ -227,18 +212,10 @@ sudo install -m 0755 /tmp/k9s /usr/local/bin/k9s
 k9s version
 ```
 
-## 10. k9s 및 snap 정리
+## 10. snap 정리
 
-이 환경에서는 `snap install k9s` 자체는 성공 메시지가 나왔지만,
-`/snap/bin/k9s`가 정상 노출되지 않아 운영 경로로는 적합하지 않았습니다.
-
-최종적으로 확인된 방향은 다음과 같습니다.
-
-- `k9s`는 바이너리 직접 설치본 사용
-- `snap` 기반 `k9s`는 제거
-- 관리 전용 노드 특성상 `snap` 자체도 정리
-
-`snap` 제거 절차:
+이 환경에서는 `snap install k9s`가 운영 경로로 적합하지 않아
+최종적으로 `snap` 기반 설치를 제거합니다.
 
 ```bash
 sudo snap remove k9s --purge
@@ -268,15 +245,16 @@ snap version
 
 ## 11. 최종 상태
 
-최종적으로 `vm-admin`은 아래 역할만 수행하도록 정리했습니다.
+최종적으로 `vm-admin`은 아래 역할만 수행하도록 유지합니다.
 
-- `kubectl`로 Kubernetes 원격 제어
+- `kubectl`로 RKE2 원격 제어
 - `helm`으로 패키지 배포 관리
 - `mc`로 MinIO 원격 관리
 - `k9s` 바이너리 사용
 - 불필요한 `snap` 제거
 
-즉, `vm-admin`은 애플리케이션 실행 노드가 아니라 운영 도구만 두는 관리 전용 VM으로 유지합니다.
+즉, `vm-admin`은 애플리케이션 실행 노드가 아니라
+운영 도구만 두는 관리 전용 VM입니다.
 
 ## 12. 성공 체크리스트
 

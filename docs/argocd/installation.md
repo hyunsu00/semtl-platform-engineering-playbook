@@ -9,7 +9,7 @@
 
 - 대상 클러스터는 [`RKE2 설치 문서`](../rke2/installation.md) 기준으로
   이미 구축되어 있습니다.
-- Ingress Controller는 `ingress-nginx`를 사용합니다.
+- Ingress Controller는 RKE2 기본 포함 `ingress-nginx`를 사용합니다.
 - 외부 TLS 종료는 현재 `Synology Reverse Proxy`에서 처리합니다.
 - Argo CD는 `argocd` 네임스페이스에 설치합니다.
 - 설치 방식은 공식 Helm chart를 사용합니다.
@@ -46,33 +46,32 @@
 
 - Kubernetes 클러스터가 정상이며 `kubectl` 접근이 가능합니다.
 - `helm` CLI가 설치되어 있습니다.
-- `MetalLB`와 `ingress-nginx`가 이미 설치되어 있습니다.
+- RKE2 기본 `ingress-nginx`가 정상 기동 중이어야 합니다.
+- 외부 TLS 종료를 사용할 경우 `ingress-nginx`에
+  `use-forwarded-headers: "true"`가 적용되어 있어야 합니다.
 - 운영 도메인 예시: `argocd.semtl.synology.me`
-- DNS가 `ingress-nginx` 외부 IP를 가리키도록 준비되어 있습니다.
+- Argo CD를 붙이기 전에 `ingress-nginx`의 실제 노출 방식이 확인되어 있어야 합니다.
+- DNS는 위에서 확인한 ingress 진입 주소를 가리키도록 준비되어 있어야 합니다.
 
 사전 확인 명령:
 
 ```bash
 kubectl get nodes
-kubectl -n ingress-nginx get pods
-kubectl -n ingress-nginx get svc ingress-nginx-controller
+kubectl -n kube-system get pods | grep ingress-nginx
+kubectl -n kube-system get svc | grep ingress-nginx
 helm version
 ```
 
 정상 기준:
 
 - 모든 노드가 `Ready`
-- `ingress-nginx-controller` 파드가 `Running`
-- `ingress-nginx-controller` 서비스의 `EXTERNAL-IP`가 할당됨
+- `rke2-ingress-nginx` 관련 파드가 `Running`
+- ingress 진입에 사용할 서비스 또는 노드 주소가 확인됨
 - `helm version`이 정상 응답
 
 운영 기준 예시 DNS:
 
-- `argocd.semtl.synology.me` -> 현재 `ingress-nginx-controller`의 `EXTERNAL-IP`
-
-예:
-
-- `argocd.semtl.synology.me` -> `192.168.0.200`
+- `argocd.semtl.synology.me` -> 현재 ingress 진입 주소
 
 ## 배치 원칙
 
@@ -90,9 +89,11 @@ helm version
 - 외부 HTTPS는 `Synology Reverse Proxy`가 종료합니다.
 - Argo CD 내부는 `server.insecure: true`로 HTTP 기준으로 동작시킵니다.
 - 현재 구조에서는 `Argo CD`, `Prometheus`, `Grafana`, `Rancher`가 같은
-  `ingress-nginx` 외부 IP를 공유할 수 있습니다.
+  ingress 진입 주소를 공유할 수 있습니다.
 - 서비스별 구분은 별도 IP가 아니라
   `argocd.semtl.synology.me` 같은 host 기준으로 처리합니다.
+- `MetalLB`가 없으면 별도 `LoadBalancer` IP 대신
+  `ingress-nginx`가 떠 있는 `Ready` 노드 IP를 진입점으로 사용합니다.
 
 ## 설치 절차
 
@@ -123,12 +124,12 @@ kubectl get ns argocd
 
 ### 3. 홈랩용 values 파일 작성
 
-운영 기준 값을 `~/k8s/argocd/values-argocd-homelab.yaml`로 관리합니다.
+운영 기준 값을 `~/rke2/argocd/values-argocd-homelab.yaml`로 관리합니다.
 
 ```bash
-mkdir -p ~/k8s/argocd
+mkdir -p ~/rke2/argocd
 
-cat <<'EOF' > ~/k8s/argocd/values-argocd-homelab.yaml
+cat <<'EOF' > ~/rke2/argocd/values-argocd-homelab.yaml
 global:
   domain: argocd.semtl.synology.me
 
@@ -203,7 +204,7 @@ EOF
 ```bash
 helm upgrade --install argocd argo/argo-cd \
   -n argocd \
-  -f ~/k8s/argocd/values-argocd-homelab.yaml
+  -f ~/rke2/argocd/values-argocd-homelab.yaml
 ```
 
 설치 직후 확인:
@@ -285,7 +286,7 @@ curl -s http://127.0.0.1:8080/ | head -n 20
 Ingress는 파일로 만들어 관리합니다.
 
 ```bash
-cat <<'EOF' > ~/k8s/argocd/argocd-ingress.yaml
+cat <<'EOF' > ~/rke2/argocd/argocd-ingress.yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -310,7 +311,7 @@ spec:
                   number: 80
 EOF
 
-kubectl apply -f ~/k8s/argocd/argocd-ingress.yaml
+kubectl apply -f ~/rke2/argocd/argocd-ingress.yaml
 ```
 
 현재 구조 기준 설명:
@@ -331,14 +332,28 @@ kubectl -n argocd describe ingress argocd-server
 정상 기준:
 
 - `HOSTS`에 `argocd.semtl.synology.me`
-- `describe ingress` 기준 `Address`에 현재 `ingress-nginx` 외부 IP가 표시됨
-- backend가 `argocd-server:80`으로 연결됨
+- `describe ingress` 기준 backend가 `argocd-server:80`으로 연결됨
 
 ### 9. 브라우저와 CLI 접속 검증
 
 DNS 반영 후 아래 주소로 접속합니다.
 
 - `https://argocd.semtl.synology.me`
+
+현재 환경처럼 `MetalLB`가 없고 `LoadBalancer` 서비스도 없다면,
+`rke2-ingress-nginx-controller`가 떠 있는 `Ready` 노드 IP 중 하나를
+ingress 진입 주소로 사용합니다.
+
+예:
+
+- `vm-rke2-cp1` -> `192.168.0.181`
+- `vm-rke2-w1` -> `192.168.0.191`
+- `vm-rke2-w2` -> `192.168.0.192`
+- `vm-rke2-w3` -> `192.168.0.193`
+
+예를 들어 Synology Reverse Proxy 대상을 `vm-rke2-cp1`로 정했다면 DNS는 아래처럼 맞춥니다.
+
+- `argocd.semtl.synology.me` -> `192.168.0.181`
 
 검증 항목:
 
@@ -382,6 +397,10 @@ argocd app list
 
 - Ingress에서 TLS를 종료하는 구성에서는 `argocd` CLI에 `--grpc-web`이 필요할 수 있습니다.
 - CLI를 아직 설치하지 않았다면 브라우저 검증만 먼저 수행해도 됩니다.
+- 환경에 따라 `rke2-ingress-nginx-controller` 서비스가 없을 수 있습니다.
+- 이 경우에는 `rke2-ingress-nginx-controller`가 떠 있는 `Ready` 노드 IP를
+  Synology Reverse Proxy 대상으로 맞추면 됩니다.
+- 노드를 바꾸면 Reverse Proxy 대상도 함께 갱신해야 합니다.
 
 ### 10. 기존 설치를 당장 유지한 채 임시 경량화할 때
 
@@ -413,22 +432,22 @@ kubectl -n argocd scale statefulset argocd-redis-ha-server --replicas=0
 스냅샷 예시:
 
 ```bash
-mkdir -p ~/k8s/argocd/snapshot
+mkdir -p ~/rke2/argocd/snapshot
 SNAPSHOT_DATE=$(date +%F)
 
 kubectl -n argocd get pods -o wide \
-  > ~/k8s/argocd/snapshot/${SNAPSHOT_DATE}-argocd-pods.txt
+  > ~/rke2/argocd/snapshot/${SNAPSHOT_DATE}-argocd-pods.txt
 kubectl -n argocd get ingress \
-  > ~/k8s/argocd/snapshot/${SNAPSHOT_DATE}-argocd-ingress.txt
+  > ~/rke2/argocd/snapshot/${SNAPSHOT_DATE}-argocd-ingress.txt
 kubectl -n argocd get cm,secret \
-  > ~/k8s/argocd/snapshot/${SNAPSHOT_DATE}-argocd-config.txt
+  > ~/rke2/argocd/snapshot/${SNAPSHOT_DATE}-argocd-config.txt
 kubectl -n argocd get deployments,statefulsets \
-  > ~/k8s/argocd/snapshot/${SNAPSHOT_DATE}-argocd-workloads.txt
+  > ~/rke2/argocd/snapshot/${SNAPSHOT_DATE}-argocd-workloads.txt
 ```
 
 주의:
 
-- 스냅샷 파일은 `~/k8s/argocd/snapshot/` 아래에 보관하는 것을 권장합니다.
+- 스냅샷 파일은 `~/rke2/argocd/snapshot/` 아래에 보관하는 것을 권장합니다.
 - `Secret` 전체 YAML을 평문으로 보관할 때는 접근권한을 별도로 통제합니다.
 
 ## 설치 검증
