@@ -458,6 +458,140 @@ kubectl -n argocd get deployments,statefulsets \
 - 스냅샷 파일은 `~/rke2/argocd/snapshot/` 아래에 보관하는 것을 권장합니다.
 - `Secret` 전체 YAML을 평문으로 보관할 때는 접근권한을 별도로 통제합니다.
 
+## Argo CD 설치 완료 후 스냅샷 생성
+
+`rke2-monitoring-clean-v4` 이후 `Argo CD`까지 설치하고 기본 검증이 끝났으면
+Proxmox에서 각 `RKE2` VM의 다음 기준점을 남깁니다.
+
+이 스냅샷도 반드시 불필요 파일(찌꺼기) 정리 후 생성합니다.
+
+### 불필요 파일 정리 `[모든 노드]`
+
+각 노드에서 아래 정리 작업을 먼저 수행합니다.
+
+```bash
+# /tmp 전체 삭제
+sudo rm -rf /tmp/*
+
+# /var/tmp 전체 삭제
+sudo rm -rf /var/tmp/*
+
+# 미사용 패키지 정리
+sudo apt autoremove -y
+
+# APT 캐시 정리
+sudo apt clean
+
+# journal 로그 전체 정리
+sudo journalctl --vacuum-time=1s
+
+# 현재 사용자 bash 히스토리 비우기
+cat /dev/null > ~/.bash_history && history -c
+```
+
+### Proxmox 스냅샷 생성
+
+권장 시점:
+
+- `vm-rke2-cp1`, `vm-rke2-w1`, `vm-rke2-w2`, `vm-rke2-w3`가 모두 `Ready`
+- `kubectl get pods -A` 기준으로 핵심 파드가 모두 `Running`
+- `kubectl -n monitoring get pods -o wide` 기준 Monitoring 주요 파드가 모두
+  `Running`
+- `kubectl -n argocd get pods -o wide` 기준 Argo CD 주요 파드가 모두 `Running`
+- `kubectl -n argocd get ingress` 기준 `argocd-server` Ingress가 생성됨
+- 브라우저 로그인과 `Applications` 화면 진입 확인 완료
+- `argocd cluster list`, `argocd app list` 같은 기본 CLI 검증 완료
+- 이후 Git 저장소 추가, AppProject 구성, SSO/OIDC 연동 같은 후속 작업 적용 전
+
+확인 예시:
+
+```bash
+kubectl get nodes
+kubectl get pods -A
+kubectl -n monitoring get pods -o wide
+kubectl -n argocd get pods -o wide
+kubectl -n argocd get svc
+kubectl -n argocd get ingress
+kubectl -n argocd logs deploy/argocd-server --tail=100
+argocd cluster list
+argocd app list
+```
+
+Proxmox Web UI 절차:
+
+1. 대상 VM 선택
+1. `스냅샷`
+1. `스냅샷 생성`
+1. 이름과 설명 입력 후 생성
+
+권장 대상:
+
+- `vm-rke2-cp1`
+- `vm-rke2-w1`
+- `vm-rke2-w2`
+- `vm-rke2-w3`
+
+권장 예시:
+
+- `Name`: `rke2-argocd-clean-v4`
+- 설명은 노드 역할이 드러나도록 VM별로 다르게 기록합니다.
+
+VM별 권장 설명:
+
+- `vm-rke2-cp1`:
+  `[argocd]`
+  `- chart : argo-cd`
+  `- role : control-plane`
+  `- hostname : vm-rke2-cp1`
+  `- node ip : 192.168.0.181`
+  `- monitoring : installed`
+  `- argocd-server : installed`
+  `- repo-server : installed`
+  `- ingress : argocd.semtl.synology.me`
+  `- status : kubectl get nodes 기준 Ready`
+- `vm-rke2-w1`:
+  `[argocd]`
+  `- chart : argo-cd`
+  `- role : worker-1`
+  `- hostname : vm-rke2-w1`
+  `- node ip : 192.168.0.191`
+  `- argocd workload target : available`
+  `- ingress target : available`
+  `- monitoring target : available`
+  `- status : kubectl get nodes 기준 Ready`
+- `vm-rke2-w2`:
+  `[argocd]`
+  `- chart : argo-cd`
+  `- role : worker-2`
+  `- hostname : vm-rke2-w2`
+  `- node ip : 192.168.0.192`
+  `- argocd workload target : available`
+  `- ingress target : available`
+  `- monitoring target : available`
+  `- status : kubectl get nodes 기준 Ready`
+- `vm-rke2-w3`:
+  `[argocd]`
+  `- chart : argo-cd`
+  `- role : worker-3`
+  `- hostname : vm-rke2-w3`
+  `- node ip : 192.168.0.193`
+  `- argocd workload target : available`
+  `- ingress target : available`
+  `- monitoring target : available`
+  `- status : kubectl get nodes 기준 Ready`
+
+- `Include RAM`은 비활성화(권장)
+
+운영 메모:
+
+- 이 스냅샷은 `rke2-monitoring-clean-v4` 이후 `Argo CD`까지 완료된 기준점으로
+  사용합니다.
+- 스냅샷 이름은 4대 VM 모두 동일하게 `rke2-argocd-clean-v5`로 맞추는 것을
+  권장합니다.
+- 이후 Git 저장소 연동, 애플리케이션 등록, SSO 구성 전 기준점으로 두기 좋습니다.
+- 실제 운영 데이터와 설정이 본격적으로 쌓이기 시작하면 스냅샷보다는 백업 정책을
+  우선합니다.
+
 ## 설치 검증
 
 아래 검증을 모두 통과하면 기본 설치 완료로 판단합니다.

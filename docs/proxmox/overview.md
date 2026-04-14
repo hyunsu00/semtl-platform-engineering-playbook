@@ -5,6 +5,9 @@
 이 문서는 Proxmox 기반 DevOps 인프라의
 구성 원칙과 구축 순서를 정의합니다.
 
+현재 `vm-devtools`는 Proxmox가 아니라 Synology `Virtual Machine Manager`에서
+별도 VM으로 운영합니다.
+
 ## 기준 아키텍처
 
 - 상태 저장 서비스: VM에 배치
@@ -33,7 +36,6 @@
 | --- | --- |
 | `121` | `ct-lb1` |
 | `122` | `ct-lb2` |
-| `131` | `ct-devtools` |
 
 ### DevOps VM 리소스
 
@@ -93,12 +95,11 @@
 | --- | --- | --- | --- |
 | `ct-lb1` (`121`) | 1 | `512MB` | `512MB` |
 | `ct-lb2` (`122`) | 1 | `512MB` | `512MB` |
-| `ct-devtools` (`131`) | 2 | `2GB` | `1GB` |
 
 합계:
 
-- CPU: `4 vCPU`
-- RAM: `3GB`
+- CPU: `2 vCPU`
+- RAM: `1GB`
 
 하드웨어 상세:
 
@@ -106,7 +107,6 @@
 | --- | --- | --- |
 | `ct-lb1` (`121`) | `8GB` | `vmct-service` |
 | `ct-lb2` (`122`) | `8GB` | `vmct-service` |
-| `ct-devtools` (`131`) | `40GB` | `vmct-service` |
 
 ### DevOps VM
 

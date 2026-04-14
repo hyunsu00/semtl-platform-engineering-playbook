@@ -75,7 +75,7 @@ helm version
 - 외부 노출: `Ingress`
 - 내부 서비스 타입: `ClusterIP`
 - 외부 HTTPS는 `Synology Reverse Proxy`가 종료합니다.
-- 현재 구조에서는 `Rancher`, `Argo CD`, 모니터링 스택이 같은 ingress 진입 주소를 공유할 수 있습니다.
+- 현재 구조에서는 `Argo CD`와 모니터링 스택이 같은 ingress 진입 주소를 공유할 수 있습니다.
 - 서비스별 구분은 host 기준으로 처리합니다.
 - `MetalLB`가 없으면 별도 `LoadBalancer` IP 대신
   `ingress-nginx`가 떠 있는 `Ready` 노드 IP를 진입점으로 사용합니다.
@@ -305,6 +305,144 @@ curl -k -s -o /dev/null -w "%{http_code}\n" https://alertmanager.semtl.synology.
 - `Home` 대시보드 진입
 - `Connections > Data sources`에서 Prometheus 기본 데이터소스 존재
 - `Dashboards` 접근 가능
+
+## Monitoring 설치 완료 후 스냅샷 생성
+
+`rke2-rancher-clean-v3` 이후 Monitoring까지 설치하고 기본 검증이 끝났으면
+Proxmox에서 각 `RKE2` VM의 다음 기준점을 남깁니다.
+
+이 스냅샷도 반드시 불필요 파일(찌꺼기) 정리 후 생성합니다.
+
+### 불필요 파일 정리 `[모든 노드]`
+
+각 노드에서 아래 정리 작업을 먼저 수행합니다.
+
+```bash
+# /tmp 전체 삭제
+sudo rm -rf /tmp/*
+
+# /var/tmp 전체 삭제
+sudo rm -rf /var/tmp/*
+
+# 미사용 패키지 정리
+sudo apt autoremove -y
+
+# APT 캐시 정리
+sudo apt clean
+
+# journal 로그 전체 정리
+sudo journalctl --vacuum-time=1s
+
+# 현재 사용자 bash 히스토리 비우기
+cat /dev/null > ~/.bash_history && history -c
+```
+
+### Proxmox 스냅샷 생성
+
+권장 시점:
+
+- `vm-rke2-cp1`, `vm-rke2-w1`, `vm-rke2-w2`, `vm-rke2-w3`가 모두 `Ready`
+- `kubectl get pods -A` 기준으로 핵심 파드가 모두 `Running`
+- `kubectl -n monitoring get pods -o wide` 기준 Monitoring 주요 파드가 모두
+  `Running`
+- `kubectl -n monitoring get ingress` 기준 `Prometheus`, `Grafana`,
+  `Alertmanager` Ingress가 모두 생성됨
+- `kubectl -n monitoring get pvc` 기준 Monitoring 관련 PVC가 모두 `Bound`
+- `monitoring` 네임스페이스 주요 파드가 모두 `Running`
+- `Prometheus`, `Grafana`, `Alertmanager` 브라우저 접속 확인 완료
+- `Grafana` 초기 로그인 및 기본 데이터소스 확인 완료
+- `launcher`를 제외한 현재 Monitoring 구성이 반영된 상태 확인 완료
+- 이후 대시보드 추가, 알림 룰 수정, OIDC 연동 같은 후속 작업 적용 전
+
+확인 예시:
+
+```bash
+kubectl get nodes
+kubectl get pods -A
+kubectl -n monitoring get pods -o wide
+kubectl -n monitoring get svc
+kubectl -n monitoring get ingress
+kubectl -n monitoring get pvc
+curl -k -s -o /dev/null -w "%{http_code}\n" https://prometheus.semtl.synology.me/
+curl -k -I https://grafana.semtl.synology.me/login
+curl -k -s -o /dev/null -w "%{http_code}\n" https://alertmanager.semtl.synology.me/
+```
+
+Proxmox Web UI 절차:
+
+1. 대상 VM 선택
+1. `스냅샷`
+1. `스냅샷 생성`
+1. 이름과 설명 입력 후 생성
+
+권장 대상:
+
+- `vm-rke2-cp1`
+- `vm-rke2-w1`
+- `vm-rke2-w2`
+- `vm-rke2-w3`
+
+권장 예시:
+
+- `Name`: `rke2-monitoring-clean-v3`
+- 설명은 노드 역할이 드러나도록 VM별로 다르게 기록합니다.
+
+VM별 권장 설명:
+
+- `vm-rke2-cp1`:
+  `[monitoring]`
+  `- chart : kube-prometheus-stack`
+  `- role : control-plane`
+  `- hostname : vm-rke2-cp1`
+  `- node ip : 192.168.0.181`
+  `- prometheus : installed`
+  `- grafana : installed`
+  `- alertmanager : installed`
+  `- launcher : removed`
+  `- status : kubectl get nodes 기준 Ready`
+- `vm-rke2-w1`:
+  `[monitoring]`
+  `- chart : kube-prometheus-stack`
+  `- role : worker-1`
+  `- hostname : vm-rke2-w1`
+  `- node ip : 192.168.0.191`
+  `- prometheus target : available`
+  `- grafana ingress target : available`
+  `- alertmanager ingress target : available`
+  `- status : kubectl get nodes 기준 Ready`
+- `vm-rke2-w2`:
+  `[monitoring]`
+  `- chart : kube-prometheus-stack`
+  `- role : worker-2`
+  `- hostname : vm-rke2-w2`
+  `- node ip : 192.168.0.192`
+  `- prometheus target : available`
+  `- grafana ingress target : available`
+  `- alertmanager ingress target : available`
+  `- status : kubectl get nodes 기준 Ready`
+- `vm-rke2-w3`:
+  `[monitoring]`
+  `- chart : kube-prometheus-stack`
+  `- role : worker-3`
+  `- hostname : vm-rke2-w3`
+  `- node ip : 192.168.0.193`
+  `- prometheus target : available`
+  `- grafana ingress target : available`
+  `- alertmanager ingress target : available`
+  `- status : kubectl get nodes 기준 Ready`
+
+- `Include RAM`은 비활성화(권장)
+
+운영 메모:
+
+- 이 스냅샷은 `rke2-rancher-clean-v3` 이후 Monitoring까지 완료된 기준점으로
+  사용합니다.
+- 스냅샷 이름은 4대 VM 모두 동일하게 `rke2-monitoring-clean-v4`로 맞추는 것을
+  권장합니다.
+- 이후 `Loki`, `Argo CD`, `Keycloak OIDC` 같은 후속 구성 적용 전 기준점으로 두기
+  좋습니다.
+- 실제 운영 데이터가 본격적으로 쌓이기 시작하면 스냅샷보다는 백업 정책을
+  우선합니다.
 
 ## 설치 검증
 
