@@ -30,6 +30,8 @@ nav:
       - 트러블슈팅: proxmox/troubleshooting.md
   - VM-DEVTOOLS:
       - 설치: vm-devtools/installation.md
+  - VM-OMADA:
+      - 설치: vm-omada/installation.md
   - ttyd:
       - 설치: ttyd/installation.md
   - Upsnap:

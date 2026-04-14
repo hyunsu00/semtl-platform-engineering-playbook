@@ -46,6 +46,8 @@
   [Troubleshooting](./proxmox/troubleshooting.md)
 - VM-DEVTOOLS:
   [Installation](./vm-devtools/installation.md)
+- VM-OMADA:
+  [Installation](./vm-omada/installation.md)
 - ttyd:
   [Installation](./ttyd/installation.md)
 - Upsnap:

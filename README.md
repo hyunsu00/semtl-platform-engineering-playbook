@@ -1,7 +1,7 @@
 # SEMTL Platform Engineering Playbook
 
 Synology, AdGuard Home, Proxmox, MinIO, Jenkins, n8n, Harbor, GitLab,
-RKE2, VM-ADMIN, Keycloak, Monitoring, Argo CD 등 플랫폼 엔지니어링 영역의
+RKE2, VM-ADMIN, VM-OMADA, Keycloak, Monitoring, Argo CD 등 플랫폼 엔지니어링 영역의
 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
 
 ## 목적
@@ -53,6 +53,8 @@ make link-check
 - `docs/vm-devtools/installation.md`
   (Synology VMM 기반 vm-devtools VM 생성, semtl 계정, SSH, Docker,
   Homepage/Uptime Kuma/Dozzle 구성)
+- `docs/vm-omada/installation.md`
+  (Ubuntu 22.04 VM 기반 Omada Controller 설치, Docker 구성, 초기 접속 확인)
 - `docs/proxmox/vm-template-guide.md`
   (Proxmox VM 템플릿 등록, Cloud-Init 기반 복제 절차)
 - `docs/proxmox/storage-and-network-expansion.md`
