@@ -5,7 +5,7 @@
 이 문서는 VM 기반 Jenkins 네이티브 설치(`apt` + `systemd`) 절차를 정의합니다.
 
 설치가 가장 중요한 기준 문서이므로, 구축 직후 필요한 검증, 초기 스냅샷,
-기본 운영 기준, Kubernetes Agent 연동, 자주 발생하는 이슈까지 이 문서에 포함합니다.
+기본 운영 기준, 자주 발생하는 이슈까지 이 문서에 포함합니다.
 
 ## 사전 조건
 
@@ -27,7 +27,7 @@
 ## 배치 원칙
 
 - Jenkins Controller는 VM에 단독 배치
-- Jenkins Agent는 Kubernetes에서 실행
+- Jenkins Agent는 `RKE2` 클러스터에서 실행
 - Artifact, Backup, Object Storage는 MinIO 연동
 - 메모리는 `4GB`를 기본 할당으로 두고 필요 시 `8GB`까지 확장
 
@@ -55,12 +55,12 @@ https://pkg.jenkins.io/debian-stable binary/" \
   | sudo tee /etc/apt/sources.list.d/jenkins.list >/dev/null
 
 # NO_PUBKEY 7198F4B714ABFC68 대응(키 병합)
-gpg --no-default-keyring --keyring ./jenkins-extra.gpg \
+gpg --no-default-keyring --keyring /tmp/jenkins-extra.gpg \
   --keyserver hkps://keyserver.ubuntu.com \
   --recv-keys 7198F4B714ABFC68
-gpg --no-default-keyring --keyring ./jenkins-extra.gpg --export \
+gpg --no-default-keyring --keyring /tmp/jenkins-extra.gpg --export \
   | sudo tee -a /etc/apt/keyrings/jenkins-keyring.gpg >/dev/null
-rm -f ./jenkins-extra.gpg
+rm -f /tmp/jenkins-extra.gpg
 sudo chmod a+r /etc/apt/keyrings/jenkins-keyring.gpg
 ```
 
@@ -80,6 +80,13 @@ sudo apt install -y jenkins=2.516.1
 sudo systemctl enable jenkins
 sudo systemctl stop jenkins || true
 ```
+
+설명:
+
+- Debian/Ubuntu 기준 `jenkins` 패키지를 설치하면 `jenkins` 시스템 계정과
+  기본 홈 디렉터리 `/var/lib/jenkins`가 함께 생성됩니다.
+- 이후 단계에서 사용하는 `chown jenkins:jenkins`, `sudo -u jenkins`,
+  `systemctl start jenkins`는 이 패키지 설치 결과를 전제로 합니다.
 
 ### 3. 초기 관리자 계정 및 비밀번호 사전 지정
 
@@ -152,8 +159,8 @@ sudo chown jenkins:jenkins \
 
 ### 4. 플러그인 목록 준비
 
-기본 설치에서는 Kubernetes 관련 플러그인을 포함하지 않습니다.
-Kubernetes 플러그인은 Agent 연동 시점에 추가 설치합니다.
+기본 설치에서는 `RKE2` Agent 연동용 Kubernetes 플러그인을 포함하지 않습니다.
+관련 플러그인은 Agent 연동 시점에 추가 설치합니다.
 
 ```bash
 # Jenkins 플러그인 목록 생성
@@ -310,7 +317,7 @@ cat /dev/null > ~/.bash_history && history -c
 
 - Jenkins Controller는 VM에 단독 배치
 - Controller의 executor는 `0`으로 유지
-- 실제 빌드는 Kubernetes Agent에서 수행
+- 실제 빌드는 `RKE2` Agent에서 수행
 - 빌드 산출물 외부 스토리지는 MinIO 연동을 기본으로 사용
 - 계정, 권한, 구성 변경은 변경 이력과 함께 관리
 
@@ -342,7 +349,7 @@ Jenkins UI 상단에 보안 경고 배너가 표시될 수 있습니다.
 - 보안 경고 배너 노출 자체를 즉시 장애로 판단하지 않습니다.
 - 대신 외부 직접 노출 금지, Reverse Proxy 경유 노출, 관리자 계정 최소화,
   강한 비밀번호 또는 SSO 적용, 정기 백업 및 스냅샷 유지로 보완 통제를 적용합니다.
-- Controller executor는 `0`으로 유지하고 실제 빌드는 Kubernetes Agent에서 수행합니다.
+- Controller executor는 `0`으로 유지하고 실제 빌드는 `RKE2` Agent에서 수행합니다.
 
 ### 백업 및 복구
 
@@ -356,62 +363,12 @@ Jenkins UI 상단에 보안 경고 배너가 표시될 수 있습니다.
   - 로그인 가능 여부
   - 주요 플러그인 및 Job 설정 복원 여부
 
-## Kubernetes Agent 연동
+## RKE2 Agent 연동
 
-기본 설치 단계에서는 Kubernetes 플러그인을 설치하지 않고,
-아래 절차에서 추가합니다.
+Jenkins Agent를 `RKE2`에 동적으로 생성하는 표준 절차는
+아래 분리 문서를 사용합니다.
 
-### 연동 사전 조건
-
-- Jenkins 기본 설치 완료
-- Jenkins 관리자 계정 준비
-- Kubernetes API 접근 가능한 `kubeconfig` 준비
-
-### 1. Kubernetes 플러그인 목록 준비
-
-```bash
-sudo tee /var/lib/jenkins/plugins-k8s.txt >/dev/null <<'EOF'
-kubernetes
-kubernetes-credentials
-kubernetes-credentials-provider
-EOF
-
-sudo chown jenkins:jenkins /var/lib/jenkins/plugins-k8s.txt
-```
-
-### 2. kubeconfig 배치
-
-```bash
-sudo install -d -m 700 -o jenkins -g jenkins /var/lib/jenkins/.kube
-sudo cp ~/.kube/config /var/lib/jenkins/.kube/config
-sudo chown jenkins:jenkins /var/lib/jenkins/.kube/config
-sudo chmod 600 /var/lib/jenkins/.kube/config
-```
-
-### 3. Kubernetes 플러그인 설치
-
-```bash
-JENKINS_ADMIN_ID=$(sudo sed -n "s/^JENKINS_ADMIN_ID='\\(.*\\)'$/\\1/p" \
-  /var/lib/jenkins/jenkins-admin.env)
-JENKINS_ADMIN_PASSWORD=$(
-  sudo sed -n "s/^JENKINS_ADMIN_PASSWORD='\\(.*\\)'$/\\1/p" \
-  /var/lib/jenkins/jenkins-admin.env
-)
-
-PLUGINS_K8S="$(tr '\n' ' ' </var/lib/jenkins/plugins-k8s.txt)"
-java -jar /tmp/jenkins-cli.jar -http \
-  -s http://127.0.0.1:8080/ \
-  -auth "${JENKINS_ADMIN_ID}:${JENKINS_ADMIN_PASSWORD}" \
-  install-plugin ${PLUGINS_K8S} -restart
-```
-
-### 검증
-
-```bash
-curl -fsSL --user "${JENKINS_ADMIN_ID}:${JENKINS_ADMIN_PASSWORD}" \
-  "http://127.0.0.1:8080/pluginManager/api/json?depth=1" \
-  | grep -E '"shortName":"(kubernetes|kubernetes-credentials|kubernetes-credentials-provider)"'
-```
+- [Jenkins RKE2 Agent 설치](./kubernetes-agent-installation.md)
 
 ## 자주 발생하는 이슈
 

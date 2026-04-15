@@ -84,6 +84,8 @@ make link-check
 - `docs/vm-admin/installation.md`
   (운영 전용 관리 노드 구성, kubectl 원격 제어, MinIO mc 관리, snap 정리)
 - `docs/jenkins/installation.md`
+- `docs/jenkins/kubernetes-agent-installation.md`
+  (Jenkins Controller와 RKE2 클러스터 연동, 동적 Agent Pod 실행)
 - `docs/n8n/installation.md`
 - `docs/harbor/installation.md`
 - `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)

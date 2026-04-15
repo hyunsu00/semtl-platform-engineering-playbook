@@ -313,7 +313,141 @@ Synology NAS 작업 기록 예시:
 - 스냅샷 설명에는 `IP: 192.168.0.20`도 함께 남기면 추적이 편합니다.
 - `Omada URL: https://192.168.0.20:8043`도 같이 적어두면 확인이 쉽습니다.
 
-## 12. 트러블슈팅
+## 12. `wg-route` 연결 서비스 등록
+
+Omada 기본 설치와 스냅샷 생성까지 끝낸 뒤,
+원격 WireGuard 대역 연결이 필요하면 `wg-route`를 `systemd` 서비스로 등록합니다.
+
+이 섹션은 아래 상황에서 사용합니다.
+
+- Omada VM에서 원격 관리망 또는 원격 장비 대역으로 고정 경로가 필요한 경우
+- 수동 `ip route add ...` 대신 재부팅 후 자동 복구가 필요한 경우
+- 부팅 순서에 따라 네트워크가 늦게 올라와도 반복 가능하게 유지하고 싶은 경우
+
+예시 운영값:
+
+- 로컬 NIC: `enp3s0`
+- 로컬 LAN: `192.168.0.0/24`
+- 로컬 게이트웨이: `192.168.0.1`
+- 원격 WireGuard 대역: `10.99.0.0/24`
+- 원격 사설망 범위: `192.168.0.0/16`
+- Alpine WireGuard VM IP: `192.168.0.10`
+
+### 12-1. 라우트 대상 확인
+
+먼저 실제 인터페이스와 기본 경로를 확인합니다.
+
+```bash
+ip -br addr
+ip route
+```
+
+판단 기준:
+
+- `dev enp3s0` 같은 실제 NIC 이름을 확인합니다.
+- `default via ...` 출력에서 현재 기본 게이트웨이를 확인합니다.
+- `wg-route`가 붙일 대상 대역을 정확히 정리합니다.
+
+### 12-2. `wg-route` 스크립트 작성
+
+`/usr/local/bin/wg-route.sh`를 생성합니다.
+
+```bash
+sudo tee /usr/local/bin/wg-route.sh >/dev/null <<'EOF'
+#!/usr/bin/env bash
+set -eu
+
+WG_GATEWAY="192.168.0.10"
+WG_DEVICE="enp3s0"
+TARGET_ROUTES=(
+  "10.99.0.0/24"
+  "192.168.0.0/16"
+)
+
+for route in "${TARGET_ROUTES[@]}"; do
+  ip route replace "${route}" via "${WG_GATEWAY}" dev "${WG_DEVICE}"
+done
+EOF
+sudo chmod 755 /usr/local/bin/wg-route.sh
+```
+
+운영 메모:
+
+- 이 문서 예시는 로컬 LAN `192.168.0.0/24`, Alpine WireGuard VM `192.168.0.10`,
+  Omada VM NIC `enp3s0` 기준입니다.
+- Ubuntu 기본 환경에서는 `/usr/local/bin`이 이미 있으므로 별도 생성 없이 진행해도 됩니다.
+- `WG_GATEWAY`는 실제 WireGuard VM 또는 상위 라우터 IP로 바꿉니다.
+- `WG_DEVICE`는 `enp3s0`, `ens18`, `eth0` 등 실제 인터페이스명으로 바꿉니다.
+- 여러 원격 대역이 있으면 `TARGET_ROUTES`에 계속 추가합니다.
+- `ip route replace`를 사용하면 재실행 시에도 중복 오류 없이 덮어쓸 수 있습니다.
+- 로컬망이 `192.168.0.0/24`로 직접 붙어 있다면 더 구체적인 경로가 우선하므로
+  `192.168.0.x`는 로컬로 남고, 그 외 `192.168.x.x`는 `wg-route`로 보낼 수 있습니다.
+
+### 12-3. `systemd` 서비스 등록
+
+`/etc/systemd/system/wg-route.service`를 생성합니다.
+
+```bash
+sudo tee /etc/systemd/system/wg-route.service >/dev/null <<'EOF'
+[Unit]
+Description=Apply static routes for WireGuard-connected networks
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/wg-route.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+서비스를 활성화합니다.
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now wg-route.service
+```
+
+### 12-4. 상태 확인
+
+```bash
+systemctl status wg-route.service --no-pager
+ip route
+```
+
+기대 결과:
+
+- `wg-route.service`가 `active (exited)` 상태
+- `10.99.0.0/24 via 192.168.0.10 dev enp3s0` 같은 경로 확인
+- `192.168.0.0/16 via 192.168.0.10 dev enp3s0` 같은 경로 확인
+- `ip route get 192.168.0.20`는 로컬 NIC를 사용
+- `ip route get 192.168.200.10`는 `via 192.168.0.10 dev enp3s0`로 표시
+
+### 12-5. 재부팅 검증
+
+```bash
+sudo reboot
+```
+
+재접속 후 다시 확인합니다.
+
+```bash
+systemctl status wg-route.service --no-pager
+ip route
+ip route get 192.168.0.20
+ip route get 192.168.200.10
+```
+
+운영 메모:
+
+- 재부팅 후에도 경로가 남아 있어야 서비스화가 완료된 것입니다.
+- WireGuard 터널 자체를 Omada VM에서 직접 올리는 구조라면
+  `wg-quick@wg0.service`와 실행 순서를 함께 점검합니다.
+
+## 13. 트러블슈팅
 
 ### `tpeap status`가 정상 상태가 아님
 
@@ -334,6 +468,13 @@ Synology NAS 작업 기록 예시:
 
 - VM과 Omada 장비가 같은 L2 또는 라우팅 가능한 네트워크에 있는지 확인합니다.
 - 상위 방화벽에서 Omada 관련 UDP 브로드캐스트가 차단되지 않았는지 확인합니다.
+
+### `wg-route.service`가 기대대로 동작하지 않음
+
+- `systemctl cat wg-route.service`로 실제 등록 내용을 다시 확인합니다.
+- `journalctl -u wg-route.service -b --no-pager`로 부팅 시점 오류를 확인합니다.
+- `ip -br addr`, `ip route`로 `WG_DEVICE`, `WG_GATEWAY` 값이 실제 환경과 맞는지 확인합니다.
+- WireGuard 피어가 별도 장비라면 해당 장비에서 대상 대역 포워딩이 가능한지도 함께 확인합니다.
 
 ## 참고
 

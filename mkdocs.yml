@@ -58,6 +58,7 @@ nav:
       - Harbor 연동: gitlab/harbor-integration.md
   - Jenkins:
       - 설치: jenkins/installation.md
+      - RKE2 Agent 설치: jenkins/kubernetes-agent-installation.md
   - n8n:
       - 설치: n8n/installation.md
   - Harbor:
