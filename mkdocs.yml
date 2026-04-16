@@ -59,6 +59,7 @@ nav:
   - Jenkins:
       - 설치: jenkins/installation.md
       - RKE2 Agent 설치: jenkins/kubernetes-agent-installation.md
+      - Harbor 연동: jenkins/harbor-integration.md
   - n8n:
       - 설치: n8n/installation.md
   - Harbor:

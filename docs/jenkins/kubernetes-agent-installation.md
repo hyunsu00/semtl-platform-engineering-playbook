@@ -498,14 +498,65 @@ Tool Locations: OFF
   `jnlp` 단일 컨테이너 대신 팀 표준 빌드 이미지를 별도 추가합니다.
 - 운영 안정성을 위해 `latest` 계열 태그 대신 검증된 사내 표준 태그로 고정하는 것을 권장합니다.
 
-## 8. 검증용 Pipeline 생성
+## 8. Jenkins devops Folder 생성
 
-Jenkins UI에서 새 Pipeline Job을 생성합니다.
+Jenkins UI에서 운영 Job을 묶을 `devops` Folder를 생성합니다.
+
+Jenkins UI 경로:
+
+`Dashboard -> New Item`
+
+입력값:
+
+- Item name: `devops`
+- Job type: `Folder`
+
+입력 후 `OK`를 선택합니다.
+
+Folder 설정 입력값:
+
+- Display Name: `devops`
+- Description: `DevOps CI jobs and Kubernetes agent tests`
+- Health metrics: 기본값 유지
+- Docker Label: 비움
+- Docker registry URL: 비움
+- Registry credentials: `- none -`
+- Pipeline libraries: 추가하지 않음
+- Kubernetes: `-- none --`
+
+입력 후 `Save`를 선택합니다.
+
+생성 확인:
+
+- Jenkins Dashboard에 `devops` Folder가 표시됨
+- `devops` Folder 상세 화면에 진입 가능
+
+운영 메모:
+
+- GitLab group, Harbor project 이름과 맞춰 `devops`를 사용합니다.
+- Folder 단위로 Job, Credential, 권한을 묶으면 운영 범위를 이해하기 쉽습니다.
+- `Docker registry URL`과 `Registry credentials`는 Folder 기본값으로 쓰는 항목입니다.
+  개별 Pipeline에서 Credential을 직접 사용할 경우 비워 둡니다.
+- `Kubernetes` 제한 항목은 특정 Cloud만 허용할 때 사용합니다.
+  기본 검증 Job은 `agent { label 'k8s' }`로 Agent를 선택하므로 기본값을 유지합니다.
+- Jenkins Folder 항목이 보이지 않으면 `CloudBees Folder` 플러그인 설치 여부를 확인합니다.
+
+## 9. 검증용 Pipeline 생성
+
+Jenkins UI에서 `devops` Folder 안에 새 Pipeline Job을 생성합니다.
+
+Jenkins UI 경로:
+
+`Dashboard -> devops -> New Item`
 
 권장값:
 
 - Item name: `k8s-agent-smoke-test`
 - Job type: `Pipeline`
+
+운영 메모:
+
+- Job 전체 경로는 `devops/k8s-agent-smoke-test`입니다.
 
 Pipeline 스크립트 예시:
 
@@ -544,11 +595,13 @@ sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config \
 기대 결과:
 
 - 빌드 시작 시 `jenkins-agent` Pod가 생성됨
-- `Console Output`에 `Agent <pod-name> is provisioned from template k8s-default`가 출력됨
+- `Console Output`에 `Agent <pod-name> is provisioned from template k8s-default`가
+  출력됨
 - `Running on <pod-name> in /home/jenkins/agent/workspace/<job-name>`가 출력됨
 - `Console Output`에 shell 명령 결과가 출력됨
 - `id` 결과에 `uid=1000(jenkins) gid=1000(jenkins)`가 출력됨
-- `pwd` 결과가 `/home/jenkins/agent/workspace/k8s-agent-smoke-test`로 출력됨
+- `pwd` 결과가 `/home/jenkins/agent/workspace/devops/k8s-agent-smoke-test`
+  또는 Jenkins가 Folder 경로를 인코딩한 workspace 경로로 출력됨
 - `printenv` 결과에 `JENKINS_URL`, `JOB_NAME`, `NODE_NAME`이 표시됨
 - 마지막에 `Finished: SUCCESS`가 출력됨
 - 빌드 종료 후 Pod가 자동 삭제되거나 `Completed` 후 정리됨
@@ -563,7 +616,8 @@ sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config \
   문서에서 설정한 `Run As User ID`, `Run As Group ID`가 기대대로 적용됐는지 확인할 수 있습니다.
 - `JENKINS_URL=...`, `JOB_NAME=...`, `NODE_NAME=...`
   Jenkins agent가 Controller와 연결된 상태로 필요한 환경변수를 전달받았는지 확인할 수 있습니다.
-- `kubectl get pods -w`에서 마지막 상태가 `Error`로 보여도 Jenkins 콘솔이 `Finished: SUCCESS`면 정상 완료로 봅니다.
+- `kubectl get pods -w`에서 마지막 상태가 `Error`로 보여도
+  Jenkins 콘솔이 `Finished: SUCCESS`면 정상 완료로 봅니다.
 
 실패 예시와 해석:
 
@@ -580,8 +634,9 @@ sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config \
 아래 항목을 모두 확인합니다.
 
 - Jenkins UI `Clouds`의 `Test Connection` 성공
-- `k8s-agent-smoke-test` Job 성공
-- `sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config -n jenkins-agents get pods`에서 Agent Pod 생성 이력 확인
+- `devops/k8s-agent-smoke-test` Job 성공
+- `sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config`
+  명령으로 Agent Pod 생성 이력 확인
 - Controller에서 실제 빌드가 실행되지 않고 `RKE2` Pod에서만 실행됨
 
 ## 참고

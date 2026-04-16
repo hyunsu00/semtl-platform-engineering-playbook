@@ -86,6 +86,8 @@ make link-check
 - `docs/jenkins/installation.md`
 - `docs/jenkins/kubernetes-agent-installation.md`
   (Jenkins Controller와 RKE2 클러스터 연동, 동적 Agent Pod 실행)
+- `docs/jenkins/harbor-integration.md`
+  (Jenkins RKE2 Agent에서 Harbor 이미지 push/pull 검증 Job 실행)
 - `docs/n8n/installation.md`
 - `docs/harbor/installation.md`
 - `docs/gitlab/runner-installation.md`

@@ -63,7 +63,9 @@
   [GitLab Integration](./minio/gitlab-integration.md) |
   [Jenkins Integration](./minio/jenkins-integration.md)
 - Jenkins:
-  [Installation](./jenkins/installation.md)
+  [Installation](./jenkins/installation.md) |
+  [RKE2 Agent Installation](./jenkins/kubernetes-agent-installation.md) |
+  [Harbor Integration](./jenkins/harbor-integration.md)
 - n8n:
   [Installation](./n8n/installation.md)
 - Harbor:
