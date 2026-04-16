@@ -88,7 +88,8 @@ make link-check
   (Jenkins Controller와 RKE2 클러스터 연동, 동적 Agent Pod 실행)
 - `docs/n8n/installation.md`
 - `docs/harbor/installation.md`
-- `docs/gitlab/harbor-integration.md` (GitLab-Harbor Registry 연동)
+- `docs/gitlab/runner-installation.md`
+  (GitLab VM과 RKE2 클러스터 연동, Runner 설치 및 Harbor Registry 연동)
 - `docs/gitlab/backup-and-restore.md`
 - `docs/rke2/installation.md`
   (RKE2 단일 control-plane, worker 3대 기준 설치 및 초기 검증)

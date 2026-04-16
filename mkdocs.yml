@@ -55,7 +55,7 @@ nav:
       - 설치: vm-admin/installation.md
   - GitLab:
       - 설치: gitlab/installation.md
-      - Harbor 연동: gitlab/harbor-integration.md
+      - Runner 및 Harbor 연동: gitlab/runner-installation.md
   - Jenkins:
       - 설치: jenkins/installation.md
       - RKE2 Agent 설치: jenkins/kubernetes-agent-installation.md

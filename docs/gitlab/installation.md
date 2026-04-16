@@ -238,7 +238,7 @@ cat /dev/null > ~/.bash_history && history -c
 - GitLab Object Storage bucket 목록과 `gitlab.rb` 매핑 기준은
   [MinIO GitLab 연동](../minio/gitlab-integration.md) 문서를 따릅니다.
 - [MinIO GitLab 연동](../minio/gitlab-integration.md)
-- [GitLab Harbor 연동](./harbor-integration.md)
+- [GitLab Runner 및 Harbor 연동](./runner-installation.md)
 
 ## Runner 운영 절차
 

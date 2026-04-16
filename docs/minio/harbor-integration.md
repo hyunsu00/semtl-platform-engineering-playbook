@@ -51,7 +51,8 @@ cat > /tmp/policy-harbor-s3.json <<'EOF'
       "Effect": "Allow",
       "Action": [
         "s3:ListBucket",
-        "s3:GetBucketLocation"
+        "s3:GetBucketLocation",
+        "s3:ListBucketMultipartUploads"
       ],
       "Resource": [
         "arn:aws:s3:::harbor"
@@ -62,7 +63,9 @@ cat > /tmp/policy-harbor-s3.json <<'EOF'
       "Action": [
         "s3:GetObject",
         "s3:PutObject",
-        "s3:DeleteObject"
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
       ],
       "Resource": [
         "arn:aws:s3:::harbor/*"
@@ -80,6 +83,8 @@ mc admin user add local svc-harbor-s3 'replace-with-strong-password'
 mc admin policy attach local policy-harbor-s3 --user svc-harbor-s3
 # bucket 생성 결과 확인
 mc ls local/harbor
+# Harbor 서비스 계정 정책 연결 상태 확인
+mc admin user info local svc-harbor-s3
 ```
 
 운영 기준:
@@ -87,6 +92,46 @@ mc ls local/harbor
 - Harbor 전용 계정 `svc-harbor-s3`를 사용합니다.
 - bucket은 `harbor` 단일 bucket으로 시작합니다.
 - 공용 `readwrite` 대신 `policy-harbor-s3`로 `harbor/*` 범위만 허용합니다.
+- Docker image layer push는 multipart upload를 사용할 수 있으므로
+  `s3:AbortMultipartUpload`, `s3:ListMultipartUploadParts`,
+  `s3:ListBucketMultipartUploads` 권한을 포함합니다.
+
+### 1.1 [MinIO VM] Harbor 계정 쓰기 권한 검증
+
+아래 명령은 `MinIO VM`에서 실행합니다.
+`replace-with-strong-password`는 앞 단계에서 생성한 `svc-harbor-s3`
+비밀번호와 같은 값으로 입력합니다.
+
+```bash
+# Harbor 서비스 계정으로 별칭 등록
+mc alias set harbor-s3 \
+  http://127.0.0.1:9000 \
+  svc-harbor-s3 \
+  'replace-with-strong-password'
+
+# 쓰기 테스트
+printf 'harbor write test\n' | mc pipe harbor-s3/harbor/harbor-write-test.txt
+
+# 읽기 테스트
+mc cat harbor-s3/harbor/harbor-write-test.txt
+
+# 삭제 테스트
+mc rm harbor-s3/harbor/harbor-write-test.txt
+```
+
+기대 결과:
+
+- `mc pipe` 성공
+- `mc cat`에서 `harbor write test` 출력
+- `mc rm` 성공
+- `AccessDenied`가 발생하지 않음
+
+운영 메모:
+
+- 이 검증이 실패하면 Harbor에서 image push 시
+  `s3aws: AccessDenied` 또는 `500 Internal Server Error`가 발생할 수 있습니다.
+- Secret이 외부에 노출된 경우 `svc-harbor-s3` 비밀번호를 재설정하고
+  `harbor.yml`의 `storage_service.s3.secretkey`도 함께 갱신합니다.
 
 ### 2. [Harbor VM] Harbor 설정 파일 백업
 
