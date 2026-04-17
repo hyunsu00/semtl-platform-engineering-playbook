@@ -222,6 +222,9 @@ Jenkins UI 경로:
 
 테스트용 Pipeline 스크립트:
 
+`RKE2` Kubernetes Agent를 아직 설치하지 않은 상태에서 MinIO 연동만 먼저
+검증하려면 built-in node executor를 임시로 `1`로 올리고 아래 예제를 사용합니다.
+
 ```groovy
 pipeline {
   agent any
@@ -236,6 +239,36 @@ pipeline {
 }
 ```
 
+`agent any`는 실행 가능한 Jenkins node가 필요하므로 built-in node executor가 `0`이면
+대기 상태가 될 수 있습니다. 이 방식은 MinIO 연동 확인을 위한 임시 검증용입니다.
+
+`RKE2` Kubernetes Agent 설치가 끝난 뒤에는 built-in node executor를 다시 `0`으로
+내리고, Pipeline은 Kubernetes Agent label을 명시합니다.
+
+```groovy
+pipeline {
+  agent { label 'k8s' }
+
+  stages {
+    stage('build') {
+      steps {
+        sh 'mkdir -p dist && echo hello-minio > dist/result.txt'
+        archiveArtifacts artifacts: 'dist/*.txt', fingerprint: true
+      }
+    }
+  }
+}
+```
+
+운영 기준:
+
+- MinIO 연동만 단독으로 먼저 검증할 때는 built-in node executor를 임시로 `1`로 둡니다.
+- 검증 후에는 built-in node executor를 다시 `0`으로 되돌립니다.
+- Kubernetes Agent 설치 이후에는 `agent { label 'k8s' }`를 사용합니다.
+- built-in node는 Jenkins Controller 자체이므로 운영 build를 실행하지 않습니다.
+- Controller에서 build script가 실행되면 Jenkins home, credential, plugin data에
+  접근할 수 있어 보안 위험이 커집니다.
+
 참고:
 
 - 별도 Git 저장소 연결 없이 Jenkins 내부 테스트용 Pipeline으로 검증할 수 있습니다.
@@ -243,9 +276,10 @@ pipeline {
 - build 로그에 `Still waiting to schedule task` 또는
   `Waiting for next available executor`가 보이면
   MinIO 문제가 아니라 Jenkins executor 부족 상태일 수 있습니다.
-- 이 경우 `Manage Jenkins -> Nodes`에서 built-in node 또는
-  연결된 agent가 `online` 상태인지, executor 수가 `1` 이상인지
-  먼저 확인합니다.
+- MinIO 단독 검증 단계라면 `Manage Jenkins -> Nodes`에서 built-in node가
+  `online` 상태인지, executor 수가 임시로 `1`인지 확인합니다.
+- Kubernetes Agent 설치 이후라면 built-in node executor는 `0`으로 유지하고,
+  Pipeline의 `agent`가 `agent { label 'k8s' }`인지 확인합니다.
 
 ### 6. 연동 검증
 

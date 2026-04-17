@@ -148,7 +148,7 @@ rules:
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get"]
+    verbs: ["get", "list", "watch"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -196,6 +196,10 @@ kubectl -n jenkins-agents get sa,role,rolebinding,secret
 운영 메모:
 
 - 이 문서는 빌드용 Agent를 `jenkins-agents` namespace 안에만 띄우는 기준입니다.
+- `secrets`의 `list`, `watch` 권한은 `kubernetes-credentials-provider`
+  플러그인이 Kubernetes Secret을 Jenkins Credential로 감시할 때 필요합니다.
+  이 권한이 없으면 Jenkins UI에 `Credentials from Kubernetes Secrets will not be
+  available` 경고가 표시될 수 있습니다.
 - 다른 namespace에도 Agent를 띄워야 하면 `Role/RoleBinding` 범위를 별도로 설계합니다.
 - 장기 토큰을 쓰는 대신 kubeconfig를 정기적으로 재발급하는 운영 기준을 함께 두는 편이 안전합니다.
 
@@ -208,6 +212,26 @@ Jenkins 전용 kubeconfig를 만듭니다.
 APISERVER=$(kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.server}')
 CA_DATA=$(kubectl config view --raw --minify -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
 
+echo "${APISERVER}"
+```
+
+확인:
+
+- `APISERVER`는 Jenkins VM에서 접근 가능한 `RKE2` API 서버 주소여야 합니다.
+- 예: `https://192.168.0.181:6443`
+- `https://kubernetes.default.svc`처럼 Kubernetes 클러스터 내부 DNS 이름이면
+  Jenkins VM에서는 해석할 수 없으므로 사용하지 않습니다.
+
+관리 노드의 kubeconfig가 클러스터 내부 주소를 가리킨다면 Jenkins VM에서 접근 가능한
+주소로 직접 지정합니다.
+
+```bash
+APISERVER="https://192.168.0.181:6443"
+```
+
+ServiceAccount 토큰을 읽어 kubeconfig를 생성합니다.
+
+```bash
 until kubectl -n jenkins-agents get secret jenkins-agent-token \
   -o jsonpath='{.data.token}' | grep -q .; do
   sleep 2
@@ -290,24 +314,63 @@ sudo chown jenkins:jenkins /var/lib/jenkins/.kube/config
 sudo chmod 600 /var/lib/jenkins/.kube/config
 ```
 
+Jenkins JVM이 같은 kubeconfig를 명시적으로 사용하도록 systemd 환경 변수를 설정합니다.
+이 설정은 `kubernetes-credentials-provider` 플러그인이 기본값인
+`kubernetes.default.svc`로 빠지지 않게 하는 데 중요합니다.
+
+```bash
+sudo systemctl edit jenkins
+```
+
+아래 내용을 입력합니다.
+
+```ini
+[Service]
+Environment="HOME=/var/lib/jenkins"
+Environment="KUBECONFIG=/var/lib/jenkins/.kube/config"
+```
+
+설정을 적용하고 Jenkins를 재시작합니다.
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart jenkins
+```
+
 검증:
 
 ```bash
+sudo systemctl show jenkins -p Environment
+
+sudo -u jenkins KUBECONFIG=/var/lib/jenkins/.kube/config \
+  kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}{"\n"}'
 sudo -u jenkins KUBECONFIG=/var/lib/jenkins/.kube/config \
   kubectl auth can-i create pods -n jenkins-agents
+sudo -u jenkins KUBECONFIG=/var/lib/jenkins/.kube/config \
+  kubectl auth can-i list secrets -n jenkins-agents
+sudo -u jenkins KUBECONFIG=/var/lib/jenkins/.kube/config \
+  kubectl auth can-i watch secrets -n jenkins-agents
 sudo -u jenkins KUBECONFIG=/var/lib/jenkins/.kube/config \
   kubectl get pods -n jenkins-agents
 ```
 
 기대 결과:
 
+- `Environment=`에 `HOME=/var/lib/jenkins`와
+  `KUBECONFIG=/var/lib/jenkins/.kube/config`가 포함됨
+- Kubernetes API 서버 주소가 `https://192.168.0.181:6443`처럼
+  Jenkins VM에서 접근 가능한 주소로 출력됨
 - `yes`가 출력됨
+- Secret 목록 권한 확인도 `yes`가 출력됨
 - `No resources found in jenkins-agents namespace.` 또는 Pod 목록이 출력됨
 
 운영 메모:
 
 - `kubectl get ns`는 cluster-scope 권한이 필요하므로 이 문서의 최소권한
   `ServiceAccount` 검증 명령으로는 사용하지 않습니다.
+- `kubernetes-credentials-provider`를 설치한 상태에서는 Jenkins 재시작 후
+  `Manage Jenkins -> System Log`에서 `kubernetes.default.svc` 관련
+  `UnknownHostException`이 더 이상 발생하지 않아야 합니다.
 
 ## 6. [Jenkins Web UI] Kubernetes Cloud 설정
 
@@ -628,6 +691,16 @@ sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config \
   `Command to run`, `Arguments to pass to the command`가 비어 있는지 확인합니다.
 - `sleep 9999999`처럼 값을 넣어 이미지 기본 엔트리포인트를 덮어쓰면
   컨테이너는 떠 있어도 Jenkins inbound agent 프로세스가 시작되지 않습니다.
+- Jenkins 로그에 `java.net.UnknownHostException: kubernetes.default.svc`와
+  `Credentials from Kubernetes Secrets will not be available`가 함께 표시되면
+  Jenkins JVM이 `/var/lib/jenkins/.kube/config`를 읽지 못하고 Kubernetes 내부
+  기본 주소로 API 서버를 찾는 상태입니다.
+- 이 경우 `sudo systemctl show jenkins -p Environment` 결과에
+  `HOME=/var/lib/jenkins`와 `KUBECONFIG=/var/lib/jenkins/.kube/config`가
+  포함되어 있는지 확인하고, kubeconfig의 `server` 값이
+  `https://192.168.0.181:6443`처럼 Jenkins VM에서 접근 가능한 주소인지 확인합니다.
+- `kubernetes-credentials-provider`를 사용하는 경우 `jenkins-agent`
+  ServiceAccount에 `secrets`의 `get`, `list`, `watch` 권한이 있어야 합니다.
 
 ## 검증 방법
 
