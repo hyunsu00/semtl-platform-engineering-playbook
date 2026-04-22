@@ -59,7 +59,7 @@ Ubuntu 22.04 Server 기반 VM을 생성합니다.
 
 권장 리소스:
 
-- vCPU: `2`
+- vCPU: `1`
 - RAM: `4GB`
 - Disk: `40GB`
 
@@ -288,16 +288,9 @@ Synology NAS 작업 기록 예시:
 ```text
 #2. VM-OMADA [SEMTL-NAS]
 - OpenJDK 17, jsvc 설치
-==> sudo apt install -y openjdk-17-jre-headless jsvc
 - MongoDB 8 설치
-==> sudo apt install -y mongodb-org
-==> sudo systemctl enable --now mongod
 - Omada 설치 파일 다운로드
-==> curl -fLo Omada_SDN_Controller_v6.2.0.17_linux_x64.deb \
-    "https://static.tp-link.com/upload/software/2026/202604/20260402/Omada_Network_Application_v6.2.0.17_linux_x64_20260331104746.deb"
 - Omada Controller 설치
-==> sudo dpkg --ignore-depends=jsvc -i Omada_SDN_Controller_v6.2.0.17_linux_x64.deb
-==> sudo apt -f install -y
 - Omada 서비스 확인
 ==> sudo tpeap status
 ==> curl -I http://localhost:8088

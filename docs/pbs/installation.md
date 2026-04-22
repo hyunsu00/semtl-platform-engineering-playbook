@@ -17,7 +17,7 @@
 - 이 환경에서는 `*.internal.semtl.synology.me` 체계를 사용
 - PBS short hostname 권장: `vm-pbs`
 - PBS 권장 FQDN: `pbs.internal.semtl.synology.me`
-- PBS 관리 IP 예시: `192.168.0.253`
+- PBS 관리 IP 예시: `192.168.0.252`
 - Synology DNS Server IP 예시: `192.168.0.2`
 - Gateway 예시: `192.168.0.1`
 
@@ -39,7 +39,7 @@
 - PBS 고정 IP 및 FQDN 계획
 
 예시 PBS IP:
-`192.168.0.253`
+`192.168.0.252`
 
 예시 FQDN:
 `pbs.internal.semtl.synology.me`
@@ -112,7 +112,7 @@ VM 콘솔에서 부팅 후 설치를 진행합니다.
 
 - `Management Interface`: `nic0 - bc:24:11:fc:70:3f (virtio_net)`
 - `Hostname`: `pbs.internal.semtl.synology.me`
-- `IP`: `192.168.0.253`
+- `IP`: `192.168.0.252`
 - `CIDR`: `24`
 - `Gateway`: `192.168.0.1`
 - `DNS`: `192.168.0.2`
@@ -285,14 +285,14 @@ systemctl status ssh --no-pager
 접속 검증:
 
 ```bash
-ssh semtl@192.168.0.253
-ssh root@192.168.0.253
+ssh semtl@192.168.0.252
+ssh root@192.168.0.252
 ```
 
 기대 결과:
 
-- `ssh semtl@192.168.0.253` 접속 성공
-- `ssh root@192.168.0.253` 접속 실패
+- `ssh semtl@192.168.0.252` 접속 성공
+- `ssh root@192.168.0.252` 접속 실패
 - PBS Web UI 로그인은 계속 사용 가능
 
 추가 권장:
@@ -321,7 +321,7 @@ hostnamectl set-hostname vm-pbs
 
 ```text
 127.0.0.1 localhost
-192.168.0.253 pbs.internal.semtl.synology.me vm-pbs
+192.168.0.252 pbs.internal.semtl.synology.me vm-pbs
 ```
 
 먼저 현재 설정이 의도한 값과 일치하는지 확인합니다.
@@ -338,7 +338,7 @@ cat /etc/resolv.conf
 
 - `hostname`: `vm-pbs`
 - `hostname -f`: `pbs.internal.semtl.synology.me`
-- `/etc/hosts`: `192.168.0.253 pbs.internal.semtl.synology.me vm-pbs`
+- `/etc/hosts`: `192.168.0.252 pbs.internal.semtl.synology.me vm-pbs`
 - `/etc/resolv.conf`: `nameserver 192.168.0.2`
 
 운영 메모:
@@ -356,7 +356,7 @@ cat /etc/resolv.conf
 
 ```text
 iface <NIC> inet static
-    address 192.168.0.253/24
+    address 192.168.0.252/24
     gateway 192.168.0.1
     dns-nameservers 192.168.0.2 1.1.1.1
 ```
@@ -414,7 +414,7 @@ proxmox-backup-manager acl list
 PBS는 설치 후 브라우저에서 관리합니다.
 
 - URL: `https://pbs.internal.semtl.synology.me:8007`
-- 또는 `https://192.168.0.253:8007`
+- 또는 `https://192.168.0.252:8007`
 - Username: `admin@pbs`
 - Password: `admin@pbs` 생성 시 설정한 비밀번호
 

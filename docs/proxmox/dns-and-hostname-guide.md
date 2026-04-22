@@ -33,7 +33,7 @@ Synology `DNS Server` 확인 항목:
 
 - `proxmox.internal.semtl.synology.me -> 192.168.0.254`
 - `minio.internal.semtl.synology.me -> 192.168.0.x`
-- `pbs.semtl.synology.me -> 192.168.0.253`
+- `pbs.semtl.synology.me -> 192.168.0.252`
 
 ## Proxmox Host 표준
 
@@ -116,7 +116,7 @@ nslookup proxmox.internal.semtl.synology.me
 예시:
 
 ```text
-192.168.0.253 pbs.semtl.synology.me pbs
+192.168.0.252 pbs.semtl.synology.me pbs
 192.168.0.171 harbor.semtl.synology.me vm-harbor
 ```
 

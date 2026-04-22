@@ -36,7 +36,7 @@ Proxmox Web UI에서 PBS를 Storage로 등록합니다.
 - PBS UI 접속 가능 (`https://pbs.internal.semtl.synology.me:8007`)
 - `hostname` 결과가 `vm-pbs`
 - `hostname -f` 결과가 `pbs.internal.semtl.synology.me`
-- `nslookup pbs.internal.semtl.synology.me` 결과가 `192.168.0.253`
+- `nslookup pbs.internal.semtl.synology.me` 결과가 `192.168.0.252`
 - `nslookup google.com` 정상 응답
 - Datastore 상태 정상
 - Proxmox에서 PBS Storage 접근 가능
@@ -64,7 +64,7 @@ Proxmox Web UI에서 PBS를 Storage로 등록합니다.
 - 확인: `hostname`, `hostname -f`, `/etc/hosts`
 - 조치: `hostnamectl set-hostname vm-pbs`
 - 조치: `/etc/hosts`에
-  `192.168.0.253 pbs.internal.semtl.synology.me vm-pbs` 반영
+  `192.168.0.252 pbs.internal.semtl.synology.me vm-pbs` 반영
 
 ### PBS ACL 명령 옵션 오류
 
