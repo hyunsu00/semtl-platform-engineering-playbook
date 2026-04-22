@@ -165,9 +165,9 @@ lvs
 현재 적용 기준:
 
 - 외부/관리 브리지: `vmbr0`
-- `vmbr0` 주소: `192.168.0.254/24`
+- `vmbr0` 주소: `192.168.0.253/24`
 - `vmbr0` 게이트웨이: `192.168.0.1`
-- `vmbr0` 포트: `nic0`
+- `vmbr0` 포트: `eth1`
 - 내부 브리지: `vmbr1`
 - `vmbr1` 주소: `10.10.10.1/24`
 - `vmbr1` 설명: `k8s internal network`
@@ -200,7 +200,7 @@ lvs
 - `Datacenter -> Storage`에 `local-lvm`이 없어짐
 - `k8s-service` 스토리지가 생성됨
 - `vmct-service` 스토리지가 생성됨
-- `vmbr0`가 `192.168.0.254/24`, gateway `192.168.0.1`, port `nic0`로 설정됨
+- `vmbr0`가 `192.168.0.253/24`, gateway `192.168.0.1`, port `eth1`로 설정됨
 - `vmbr1`가 생성됨
 
 ## 참고

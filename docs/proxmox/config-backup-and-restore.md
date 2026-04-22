@@ -623,7 +623,7 @@ tar -xOf /root/proxmox-config-backups/latest.tar.gz backup/etc/network/interface
 ```text
 auto vmbr0
 iface vmbr0 inet static
-    address 192.168.0.254/24
+    address 192.168.0.253/24
     gateway 192.168.0.1
 ```
 

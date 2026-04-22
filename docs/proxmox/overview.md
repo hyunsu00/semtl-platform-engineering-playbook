@@ -13,9 +13,11 @@
 - 상태 저장 서비스: VM에 배치
 - 변동 부하 서비스: Kubernetes에 배치
 - 외부 노출: Synology Reverse Proxy 단일 진입점
-- 관리/서비스 브리지: `vmbr0` (`192.168.0.254/24`, gateway `192.168.0.1`)
+- 관리/서비스 브리지: `vmbr0` (`192.168.0.253/24`, gateway `192.168.0.1`)
 - 내부 Kubernetes 브리지: `vmbr1` (`10.10.10.1/24`, gateway 없음)
-- 업링크 NIC: `nic0` (`enp0s31f6` 계열 장치)
+- 업링크 NIC: `eth1` (USB LAN, `enx3c18a025c940` 계열 장치)
+- AMT 전용 NIC: `nic0` (`enp0s31f6`, `00:2b:67:55:01:fc`,
+  AMT IP `192.168.0.254`)
 
 ## 구축 순서 (고정)
 
@@ -64,18 +66,20 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 물리 NIC | `nic0` |
-| Linux 이름 | `enp0s31f6` |
+| 물리 NIC | USB LAN |
+| Linux 이름 | `eth1` |
 | 브리지 1 | `vmbr0` |
 | `vmbr0` 용도 | 관리망 + 일반 VM/CT 서비스망 |
-| `vmbr0` 주소 | `192.168.0.254/24` |
+| `vmbr0` 주소 | `192.168.0.253/24` |
 | `vmbr0` 게이트웨이 | `192.168.0.1` |
-| `vmbr0` bridge-port | `nic0` |
+| `vmbr0` bridge-port | `eth1` |
 | 브리지 2 | `vmbr1` |
 | `vmbr1` 용도 | Kubernetes 내부 전용망 |
 | `vmbr1` 주소 | `10.10.10.1/24` |
 | `vmbr1` 게이트웨이 | 없음 |
 | `vmbr1` bridge-port | 없음 |
+| AMT 전용 NIC | `nic0` (`enp0s31f6`, `00:2b:67:55:01:fc`) |
+| AMT 관리 IP | `192.168.0.254` |
 
 운영 원칙:
 
@@ -83,6 +87,7 @@
 - Kubernetes 노드는 `vmbr0`와 `vmbr1`를 함께 연결합니다.
 - `vmbr1`는 내부 전용 브리지이므로 물리 NIC를 연결하지 않습니다.
 - Proxmox 호스트의 기본 라우팅은 `vmbr0`를 통해 외부망으로 나갑니다.
+- `nic0`는 AMT 전용으로 유지하고 `vmbr0`의 bridge-port로 사용하지 않습니다.
 
 ## 최종 리소스 계획
 

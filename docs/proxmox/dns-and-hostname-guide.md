@@ -10,7 +10,7 @@
 - Gateway: `192.168.0.1`
 - 내부 DNS: `192.168.0.2` (Synology `DNS Server`, Master Zone)
 - 내부 도메인: `semtl.synology.me`
-- Proxmox Host: `192.168.0.254`
+- Proxmox Host: `192.168.0.253`
 
 ## DNS 토폴로지 기준
 
@@ -31,7 +31,7 @@ Synology `DNS Server` 확인 항목:
 
 예시:
 
-- `proxmox.internal.semtl.synology.me -> 192.168.0.254`
+- `proxmox.internal.semtl.synology.me -> 192.168.0.253`
 - `minio.internal.semtl.synology.me -> 192.168.0.x`
 - `pbs.semtl.synology.me -> 192.168.0.252`
 
@@ -49,13 +49,13 @@ Synology `DNS Server` 확인 항목:
 
 - `hostname` -> `proxmox`
 - `hostname -f` -> `proxmox.internal.semtl.synology.me`
-- `/etc/hosts` -> `192.168.0.254 proxmox.internal.semtl.synology.me proxmox`
+- `/etc/hosts` -> `192.168.0.253 proxmox.internal.semtl.synology.me proxmox`
 
 예시:
 
 ```text
 127.0.0.1 localhost.localdomain localhost
-192.168.0.254 proxmox.internal.semtl.synology.me proxmox
+192.168.0.253 proxmox.internal.semtl.synology.me proxmox
 ```
 
 검증 명령:
