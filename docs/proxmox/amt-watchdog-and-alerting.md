@@ -228,13 +228,11 @@ nc -zv 192.168.0.254 16992
 `BOT_TOKEN`과 `CHAT_ID`는 예시 값을 쓰지 말고 실제 운영 환경 값으로 직접 치환합니다.
 
 ```bash
-IP="192.168.0.254"
+TARGETS="192.168.0.254 192.168.0.253"
 PORT="16992"
 
 BOT_TOKEN="<telegram-bot-token>"
 CHAT_ID="<telegram-chat-id>"
-
-STATE_FILE="/tmp/amt_watchdog_192_168_0_254.state"
 
 send_telegram() {
     MSG="$1"
@@ -247,40 +245,44 @@ is_up() {
     nc -z -w 3 "$IP" "$PORT" >/dev/null 2>&1
 }
 
-# 초기 상태 파일 없으면 현재 상태로 생성만 하고 알림은 안 보냄
-if [ ! -f "$STATE_FILE" ]; then
-    if is_up; then
-        echo "UP" > "$STATE_FILE"
-    else
-        echo "DOWN" > "$STATE_FILE"
+for IP in $TARGETS; do
+    STATE_FILE="/tmp/amt_watchdog_$(echo "$IP" | tr '.' '_').state"
+
+    # 초기 상태 파일 없으면 현재 상태로 생성만 하고 알림은 안 보냄
+    if [ ! -f "$STATE_FILE" ]; then
+        if is_up; then
+            echo "UP" > "$STATE_FILE"
+        else
+            echo "DOWN" > "$STATE_FILE"
+        fi
+        continue
     fi
-    exit 0
-fi
 
-PREV_STATE="$(cat "$STATE_FILE" 2>/dev/null)"
+    PREV_STATE="$(cat "$STATE_FILE" 2>/dev/null)"
 
-if is_up; then
-    CUR_STATE="UP"
-else
-    sleep 5
     if is_up; then
         CUR_STATE="UP"
     else
-        CUR_STATE="DOWN"
+        sleep 5
+        if is_up; then
+            CUR_STATE="UP"
+        else
+            CUR_STATE="DOWN"
+        fi
     fi
-fi
 
-if [ "$PREV_STATE" = "UP" ] && [ "$CUR_STATE" = "DOWN" ]; then
-    MSG="AMT DOWN on $IP:$PORT"
-    /usr/syno/bin/synologset1 sys error 0x11800000 "$MSG"
-    send_telegram "$MSG"
-    echo "DOWN" > "$STATE_FILE"
-elif [ "$PREV_STATE" = "DOWN" ] && [ "$CUR_STATE" = "UP" ]; then
-    MSG="AMT UP on $IP:$PORT"
-    /usr/syno/bin/synologset1 sys info 0x11800000 "$MSG"
-    send_telegram "$MSG"
-    echo "UP" > "$STATE_FILE"
-fi
+    if [ "$PREV_STATE" = "UP" ] && [ "$CUR_STATE" = "DOWN" ]; then
+        MSG="AMT DOWN on $IP:$PORT"
+        /usr/syno/bin/synologset1 sys error 0x11800000 "$MSG"
+        send_telegram "$MSG"
+        echo "DOWN" > "$STATE_FILE"
+    elif [ "$PREV_STATE" = "DOWN" ] && [ "$CUR_STATE" = "UP" ]; then
+        MSG="AMT UP on $IP:$PORT"
+        /usr/syno/bin/synologset1 sys info 0x11800000 "$MSG"
+        send_telegram "$MSG"
+        echo "UP" > "$STATE_FILE"
+    fi
+done
 ```
 
 동작 방식:
