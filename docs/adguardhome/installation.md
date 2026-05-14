@@ -282,7 +282,7 @@ Maximum TTL: 86400
 admin.internal.semtl.synology.me    -> 192.168.0.41
 auth.internal.semtl.synology.me     -> 192.168.0.31
 proxmox.internal.semtl.synology.me  -> 192.168.0.254
-pbs.internal.semtl.synology.me      -> 192.168.0.253
+pbs.internal.semtl.synology.me      -> 192.168.0.241
 haos.internal.semtl.synology.me     -> 192.168.0.21
 nas.internal.semtl.synology.me      -> 192.168.0.2
 n8n.internal.semtl.synology.me      -> 192.168.0.175

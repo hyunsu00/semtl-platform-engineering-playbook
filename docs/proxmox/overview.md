@@ -13,7 +13,7 @@
 - 상태 저장 서비스: VM에 배치
 - 변동 부하 서비스: Kubernetes에 배치
 - 외부 노출: Synology Reverse Proxy 단일 진입점
-- 관리/서비스 브리지: `vmbr0` (`192.168.0.253/24`, gateway `192.168.0.1`)
+- 관리/서비스 브리지: `vmbr0` (`192.168.0.241/24`, gateway `192.168.0.1`)
 - 내부 Kubernetes 브리지: `vmbr1` (`10.10.10.1/24`, gateway 없음)
 - 업링크 NIC: `eth1` (USB LAN, `enx3c18a025c940` 계열 장치)
 - AMT 전용 NIC: `nic0` (`enp0s31f6`, `00:2b:67:55:01:fc`,
@@ -70,7 +70,7 @@
 | Linux 이름 | `eth1` |
 | 브리지 1 | `vmbr0` |
 | `vmbr0` 용도 | 관리망 + 일반 VM/CT 서비스망 |
-| `vmbr0` 주소 | `192.168.0.253/24` |
+| `vmbr0` 주소 | `192.168.0.241/24` |
 | `vmbr0` 게이트웨이 | `192.168.0.1` |
 | `vmbr0` bridge-port | `eth1` |
 | 브리지 2 | `vmbr1` |
@@ -164,11 +164,13 @@
 
 하드웨어 상세:
 
+<!-- markdownlint-disable MD013 -->
 | VM | BIOS/Machine | Storage | Network | 추가 설정 |
 | --- | --- | --- | --- | --- |
 | `k8s-cp1` (`201`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
 | `k8s-cp2` (`202`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
 | `k8s-cp3` (`203`) | `UEFI/q35` | `60GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
+<!-- markdownlint-enable MD013 -->
 
 ### Kubernetes Worker 리소스
 
@@ -184,10 +186,12 @@
 
 하드웨어 상세:
 
+<!-- markdownlint-disable MD013 -->
 | VM | BIOS/Machine | Storage | Network | 추가 설정 |
 | --- | --- | --- | --- | --- |
 | `k8s-w1` (`211`) | `UEFI/q35` | `200GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
 | `k8s-w2` (`212`) | `UEFI/q35` | `200GB` / `k8s-service` | `vmbr0+vmbr1` | `balloon=0`, `allow-ksm=0` |
+<!-- markdownlint-enable MD013 -->
 
 ### 전체 리소스 합계
 

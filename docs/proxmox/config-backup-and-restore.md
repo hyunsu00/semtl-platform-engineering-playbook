@@ -464,7 +464,7 @@ find /root/restore-test
 tar -xOf /root/proxmox-config-backups/latest.tar.gz meta/vm-snapshots/100.snapshot.txt
 ```
 
-### 6) VM 설정 확인
+### 6) 특정 VM 설정 확인
 
 ```bash
 tar -xOf /root/proxmox-config-backups/latest.tar.gz meta/vm-configs/100.conf.txt
@@ -623,7 +623,7 @@ tar -xOf /root/proxmox-config-backups/latest.tar.gz backup/etc/network/interface
 ```text
 auto vmbr0
 iface vmbr0 inet static
-    address 192.168.0.253/24
+    address 192.168.0.241/24
     gateway 192.168.0.1
 ```
 

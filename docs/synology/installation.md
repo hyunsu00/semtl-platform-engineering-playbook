@@ -15,7 +15,7 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 - Synology DNS Server IP: `192.168.0.2`
 - Gateway: `192.168.0.1`
 - PBS FQDN: `pbs.semtl.synology.me`
-- PBS IP: `192.168.0.253`
+- PBS IP: `192.168.0.170`
 - PBS NFS Export: `192.168.0.2:/volume2/lab-data`
 
 ## 사전 조건
@@ -44,7 +44,7 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 
 - Name: `pbs`
 - FQDN: `pbs.semtl.synology.me`
-- IP: `192.168.0.253`
+- IP: `192.168.0.170`
 
 ## 4) 해상도(Resolution)와 전달자 설정
 
@@ -88,7 +88,7 @@ ASUS 공유기 예시:
 
 - 공유 폴더: `lab-data`
 - Export 경로: `/volume2/lab-data`
-- 허용 클라이언트: `192.168.0.253`
+- 허용 클라이언트: `192.168.0.170`
 - 권한: `Read/Write`
 
 확인 포인트:
@@ -113,7 +113,7 @@ showmount -e 192.168.0.2
 
 정상 기준:
 
-- `pbs.semtl.synology.me`가 `192.168.0.253`으로 응답
+- `pbs.semtl.synology.me`가 `192.168.0.170`으로 응답
 - 외부 도메인 조회도 Synology DNS를 통해 정상 응답
 - PBS IP가 NFS Export 허용 목록에 포함
 

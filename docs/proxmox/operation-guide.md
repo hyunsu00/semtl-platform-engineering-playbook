@@ -89,7 +89,8 @@ curl -k -b "PVEAuthCookie=<ticket>" \
 설정 확인:
 
 ```bash
-grep -RinE "PermitRootLogin|AllowUsers" /etc/ssh/sshd_config /etc/ssh/sshd_config.d 2>/dev/null
+grep -RinE "PermitRootLogin|AllowUsers" \
+  /etc/ssh/sshd_config /etc/ssh/sshd_config.d 2>/dev/null
 ```
 
 결과 해석:
@@ -164,14 +165,14 @@ Proxmox Host 예시:
 ```text
 /etc/hosts
 127.0.0.1 localhost.localdomain localhost
-192.168.0.253 proxmox.internal.semtl.synology.me proxmox
+192.168.0.241 proxmox.internal.semtl.synology.me proxmox
 ```
 
 정상 예시:
 
 - `hostname` -> `proxmox`
 - `hostname -f` -> `proxmox.internal.semtl.synology.me`
-- `nslookup proxmox.internal.semtl.synology.me` -> `192.168.0.253`
+- `nslookup proxmox.internal.semtl.synology.me` -> `192.168.0.241`
 
 운영 메모:
 
