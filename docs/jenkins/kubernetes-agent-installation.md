@@ -561,7 +561,191 @@ Tool Locations: OFF
   `jnlp` 단일 컨테이너 대신 팀 표준 빌드 이미지를 별도 추가합니다.
 - 운영 안정성을 위해 `latest` 계열 태그 대신 검증된 사내 표준 태그로 고정하는 것을 권장합니다.
 
-## 8. Jenkins devops Folder 생성
+## 8. jenkins-cmake-agent 이미지 생성 및 Harbor push
+
+`k8s-cmake` Pod Template는 사전에 빌드 도구가 포함된 Jenkins Agent 이미지를
+Harbor에 올려 둔 상태를 전제로 합니다.
+
+이 단계는 Docker가 가능한 작업용 호스트에서 실행합니다.
+
+예시 값:
+
+- 이미지 이름: `harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest`
+- 베이스 이미지: `jenkins/inbound-agent:latest`
+- 포함 도구: `cmake`, `make`, `g++`, `git`
+
+작업 디렉터리를 만들고 `Dockerfile`을 작성합니다.
+
+```bash
+mkdir -p ~/jenkins/jenkins-cmake-agent
+cd ~/jenkins/jenkins-cmake-agent
+```
+
+```bash
+cat <<'EOF' > Dockerfile
+FROM jenkins/inbound-agent:latest
+
+USER root
+
+RUN apt-get update && apt-get install -y \
+    cmake \
+    make \
+    g++ \
+    git \
+ && rm -rf /var/lib/apt/lists/*
+
+USER jenkins
+EOF
+```
+
+이미지를 빌드하고 Harbor에 push합니다.
+
+```bash
+docker build -t harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest .
+docker push harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest
+```
+
+확인:
+
+```bash
+docker pull harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest
+docker run --rm harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest \
+  cmake --version
+```
+
+기대 결과:
+
+- Harbor `devops` 프로젝트에 `jenkins-cmake-agent` repository가 생성됨
+- `latest` tag가 표시됨
+- 컨테이너 안에서 `cmake --version`이 정상 출력됨
+
+운영 메모:
+
+- 최초 push 전에는 `docker login harbor.semtl.synology.me`가 필요할 수 있습니다.
+- 운영 환경에서는 `latest` 대신 날짜나 버전 기반 tag를 함께 운영하는 것을 권장합니다.
+- 추가 도구가 필요하면 같은 방식으로 Dockerfile에 패키지를 더 넣고 이미지를 재배포합니다.
+
+## 9. Private Harbor용 imagePullSecret 생성
+
+`k8s-cmake`처럼 사내 Harbor의 private 이미지를 Agent Pod에서 직접 pull하려면
+Kubernetes 쪽 인증 정보가 먼저 필요합니다.
+
+중요:
+
+- 이 작업은 Jenkins가 아니라 `kubectl`이 가능한 관리 노드에서 실행합니다.
+- Jenkins Credential에 Harbor Robot Account를 등록해도 Kubernetes Pod pull 인증은
+  별도로 필요합니다.
+- Namespace는 Pod Template과 동일한 `jenkins-agents`를 사용합니다.
+
+예시 값:
+
+- Harbor registry: `harbor.semtl.synology.me`
+- Harbor project/image: `devops/jenkins-cmake-agent`
+- Robot account: `robot$devops+jenkins-ci`
+- Secret name: `harbor-secret`
+
+```bash
+kubectl create secret docker-registry harbor-secret \
+  --docker-server=harbor.semtl.synology.me \
+  --docker-username='robot$devops+jenkins-ci' \
+  --docker-password='비밀번호' \
+  -n jenkins-agents
+
+kubectl get secret harbor-secret -n jenkins-agents
+```
+
+기대 결과:
+
+- `harbor-secret`이 `kubernetes.io/dockerconfigjson` 타입으로 생성됨
+
+운영 메모:
+
+- 이 문서는 Pod Template의 `ImagePullSecrets`에 `harbor-secret`을 직접 지정하는
+  기준으로 작성합니다.
+- `harbor-secret`은 Pod Template namespace와 동일한 `jenkins-agents`에 있어야 합니다.
+
+## 10. [Jenkins Web UI] k8s-cmake Pod Template 생성
+
+기본 `k8s-default` Template는 유지하고, C/C++ 또는 CMake 전용 Agent는
+별도 `k8s-cmake` Template로 분리하는 것을 권장합니다.
+
+분리 이유:
+
+- 기본 smoke test용 Template와 빌드 전용 이미지를 역할별로 나눌 수 있음
+- `cmake`, `make`, `g++`, `git` 등이 포함된 사내 표준 이미지를 안정적으로 고정 가능
+- `Execute shell` 단계마다 패키지를 설치하지 않아 빌드 시간이 짧고 재현성이 높음
+
+Jenkins UI 경로:
+
+`Manage Jenkins -> Clouds -> Kubernetes -> Pod Templates -> Add Pod Template`
+
+권장 입력값:
+
+- Name: `k8s-cmake`
+- Namespace: `jenkins-agents`
+- Labels: `k8s-cmake`
+- Usage: `Only build jobs with label expressions matching this node`
+- Pod template to inherit from: 비움
+- Name of the container that will run the Jenkins agent: `jnlp`
+- Inject Jenkins agent in agent container: `ON`
+- Containers:
+  - Name: `jnlp`
+  - Docker image: `harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest`
+  - Always pull image: `ON`
+  - Working directory: `/home/jenkins/agent`
+  - Command to run: 비움
+  - Arguments to pass to the command: 비움
+  - Allocate pseudo-TTY: `OFF`
+- Concurrency Limit: `10`
+- Pod Retention: `Never`
+- Time in minutes to retain agent when idle: `0`
+- Time in seconds for Pod deadline: `600`
+- Timeout in seconds for Jenkins connection: `100`
+- Raw YAML for the Pod: 비움
+- Yaml merge strategy: `Override`
+- Inherit yaml merge strategy: `OFF`
+- Show raw yaml in console: `OFF`
+- ImagePullSecrets: `harbor-secret`
+- Service Account: `jenkins-agent`
+- Run As User ID: `1000`
+- Run As Group ID: `1000`
+- Host Network: `OFF`
+- Workspace Volume: `Empty Dir Workspace Volume`
+- Size limit: `10Gi`
+- In Memory: `OFF`
+
+입력 기준:
+
+- `Container name`과 `Name of the container that will run the Jenkins agent`는
+  모두 `jnlp`로 맞춥니다.
+- `Inject Jenkins agent in agent container`는 반드시 켭니다.
+- `Command to run`, `Arguments to pass to the command`는 비워 둡니다.
+- `sleep`, `bash`, `tail -f`처럼 엔트리포인트를 덮어쓰면 Jenkins agent 연결이
+  깨질 수 있습니다.
+- `Always pull image`를 켜 두면 Harbor에 새 태그를 덮어쓴 경우 최신 이미지 반영이
+  쉬워집니다.
+- `Time in seconds for Pod deadline`는 비워 두지 말고 `600`을 명시적으로 입력합니다.
+- `Timeout in seconds for Jenkins connection`는 `100`을 사용합니다.
+
+최종 체크리스트:
+
+```text
+Name: k8s-cmake
+Label: k8s-cmake
+
+Container:
+  Name: jnlp
+  Image: harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest
+  Command: (비움)
+  Args: (비움)
+  Working dir: /home/jenkins/agent
+
+Inject Jenkins agent: ON
+ImagePullSecrets: harbor-secret
+Service Account: jenkins-agent
+```
+
+## 11. Jenkins devops Folder 생성
 
 Jenkins UI에서 운영 Job을 묶을 `devops` Folder를 생성합니다.
 
@@ -604,7 +788,7 @@ Folder 설정 입력값:
   기본 검증 Job은 `agent { label 'k8s' }`로 Agent를 선택하므로 기본값을 유지합니다.
 - Jenkins Folder 항목이 보이지 않으면 `CloudBees Folder` 플러그인 설치 여부를 확인합니다.
 
-## 9. 검증용 Pipeline 생성
+## 12. 검증용 Pipeline 생성
 
 Jenkins UI에서 `devops` Folder 안에 새 Pipeline Job을 생성합니다.
 
@@ -620,6 +804,8 @@ Jenkins UI 경로:
 운영 메모:
 
 - Job 전체 경로는 `devops/k8s-agent-smoke-test`입니다.
+- 기본 연결 검증은 `k8s-default` Template의 label `k8s`로 먼저 완료한 뒤,
+  아래 `k8s-cmake` Job을 추가하는 순서를 권장합니다.
 
 Pipeline 스크립트 예시:
 
@@ -701,6 +887,56 @@ sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config \
   `https://192.168.0.181:6443`처럼 Jenkins VM에서 접근 가능한 주소인지 확인합니다.
 - `kubernetes-credentials-provider`를 사용하는 경우 `jenkins-agent`
   ServiceAccount에 `secrets`의 `get`, `list`, `watch` 권한이 있어야 합니다.
+
+### 12-1. k8s-cmake Freestyle Job 예시
+
+`k8s-cmake` Template이 실제로 선택되는지 확인하려면 Freestyle Job을 하나 더 만듭니다.
+
+Jenkins UI 경로:
+
+`Dashboard -> devops -> New Item`
+
+권장값:
+
+- Item name: `cmake-smoke-test`
+- Job type: `Freestyle project`
+
+핵심 설정:
+
+- `Restrict where this project can be run`: `ON`
+- Label Expression: `k8s-cmake`
+
+`Execute shell` 예시:
+
+```bash
+set -e
+
+cmake --version
+make --version
+g++ --version
+git --version
+pwd
+id
+```
+
+기대 결과:
+
+- `Console Output`에 `Agent <pod-name> is provisioned from template k8s-cmake`가 출력됨
+- Harbor private 이미지가 정상 pull되면 `ErrImagePull`, `ImagePullBackOff` 없이
+  바로 빌드가 시작됨
+- `cmake`, `make`, `g++`, `git` 버전 정보가 출력됨
+- 마지막에 `Finished: SUCCESS`가 출력됨
+
+실패 시 우선 확인:
+
+- `ImagePullBackOff`, `ErrImagePull`
+  `harbor-secret` 존재 여부와 `ImagePullSecrets` 또는
+  `ServiceAccount imagePullSecrets` 연결 여부를 확인합니다.
+- `is offline`
+  `Command to run`, `Arguments to pass to the command`가 비어 있는지 확인합니다.
+- `cmake: not found`
+  `harbor.semtl.synology.me/devops/jenkins-cmake-agent:latest` 이미지 안에
+  빌드 도구가 실제 포함되어 있는지 확인합니다.
 
 ## 검증 방법
 
