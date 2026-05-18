@@ -12,7 +12,7 @@
 - CNI는 RKE2 기본값인 `canal`을 사용합니다.
 - Ingress Controller는 RKE2 기본 포함 `ingress-nginx`를 사용합니다.
 - MetalLB는 L2 모드로 구성합니다.
-- 외부에 할당할 IP 풀은 `192.168.0.200-192.168.0.220`을 사용합니다.
+- 외부에 할당할 IP 풀은 `192.168.77.200-192.168.77.220`을 사용합니다.
 
 이 문서의 목표는 설치 직후 바로 `ingress-nginx` 외부 IP를 확보해
 이후 `Argo CD`, `Grafana`, `Prometheus`, `Rancher` 같은 서비스를
@@ -23,7 +23,7 @@
 - Kubernetes 클러스터가 정상이며 `kubectl` 접근이 가능합니다.
 - 모든 노드가 `Ready` 상태여야 합니다.
 - `rke2-ingress-nginx`, `canal`, `coredns`, `metrics-server`가 정상이어야 합니다.
-- `192.168.0.200-192.168.0.220` 대역이 다른 DHCP, 정적 IP, 장비에서
+- `192.168.77.200-192.168.77.220` 대역이 다른 DHCP, 정적 IP, 장비에서
   사용되지 않도록 예약되어 있어야 합니다.
 
 사전 확인:
@@ -45,7 +45,7 @@ kubectl -n kube-system get svc
 
 - 네임스페이스: `metallb-system`
 - 동작 모드: `Layer2`
-- 외부 IP 풀: `192.168.0.200-192.168.0.220`
+- 외부 IP 풀: `192.168.77.200-192.168.77.220`
 - 운영 초기에는 단일 풀만 사용합니다.
 - 우선 `ingress-nginx-controller` 서비스에 외부 IP를 할당합니다.
 
@@ -82,7 +82,7 @@ kubectl -n metallb-system get pods
 
 ### 2. IPAddressPool 생성
 
-`192.168.0.200-192.168.0.220` 대역을 MetalLB 관리 IP 풀로 등록합니다.
+`192.168.77.200-192.168.77.220` 대역을 MetalLB 관리 IP 풀로 등록합니다.
 
 ```bash
 mkdir -p ~/rke2/metallb
@@ -95,7 +95,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-    - 192.168.0.200-192.168.0.220
+    - 192.168.77.200-192.168.77.220
 EOF
 
 kubectl apply -f ~/rke2/metallb/metallb-pool.yaml
@@ -167,13 +167,13 @@ kubectl -n kube-system get svc rke2-ingress-nginx-controller -o wide
 정상 기준:
 
 - `TYPE`이 `LoadBalancer`
-- `EXTERNAL-IP`가 `192.168.0.200-220` 범위 중 하나로 할당됨
+- `EXTERNAL-IP`가 `192.168.77.200-220` 범위 중 하나로 할당됨
 
 예시:
 
 ```text
 NAME                            TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)
-rke2-ingress-nginx-controller   LoadBalancer   10.43.144.219   192.168.0.200   80:xxxxx/TCP,443:xxxxx/TCP
+rke2-ingress-nginx-controller   LoadBalancer   10.43.144.219   192.168.77.200   80:xxxxx/TCP,443:xxxxx/TCP
 ```
 
 ### 5. 외부 접근 확인
@@ -181,13 +181,13 @@ rke2-ingress-nginx-controller   LoadBalancer   10.43.144.219   192.168.0.200   8
 먼저 네트워크 레벨에서 IP가 응답하는지 확인합니다.
 
 ```bash
-ping -c 2 192.168.0.200
+ping -c 2 192.168.77.200
 ```
 
 그다음 서비스 레벨을 확인합니다.
 
 ```bash
-curl -I http://192.168.0.200
+curl -I http://192.168.77.200
 ```
 
 운영 기준:
@@ -196,9 +196,9 @@ curl -I http://192.168.0.200
 
 예:
 
-- `argocd.example.internal` -> `192.168.0.200`
-- `grafana.example.internal` -> `192.168.0.200`
-- `prometheus.example.internal` -> `192.168.0.200`
+- `argocd.example.internal` -> `192.168.77.200`
+- `grafana.example.internal` -> `192.168.77.200`
+- `prometheus.example.internal` -> `192.168.77.200`
 
 ## 검증 방법
 
@@ -230,8 +230,8 @@ kubectl get svc -A | grep LoadBalancer
 관리자 단말 또는 같은 네트워크의 다른 장비에서 확인합니다.
 
 ```bash
-ping -c 2 192.168.0.200
-curl -I http://192.168.0.200
+ping -c 2 192.168.77.200
+curl -I http://192.168.77.200
 ```
 
 ## 트러블슈팅
@@ -259,7 +259,7 @@ kubectl -n kube-system get svc rke2-ingress-nginx-controller -o yaml
 ```bash
 kubectl get svc -A | grep LoadBalancer
 kubectl -n metallb-system get pods -o wide
-arp -an | grep 192.168.0.200
+arp -an | grep 192.168.77.200
 ```
 
 조치:

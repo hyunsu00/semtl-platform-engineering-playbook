@@ -29,9 +29,9 @@ Ubuntu 22.04 VM에서 OS 설치를 완료한 뒤, Proxmox에서 `1TB` 데이터 
 
 예시 구성:
 
-- MinIO VM: `192.168.0.171`
-- API endpoint: `http://192.168.0.171:9000`
-- Console endpoint: `http://192.168.0.171:9001`
+- MinIO VM: `192.168.77.171`
+- API endpoint: `http://192.168.77.171:9000`
+- Console endpoint: `http://192.168.77.171:9001`
 - Public S3 API endpoint: `https://s3.semtl.synology.me`
 - Public Console endpoint: `https://minio.semtl.synology.me`
 - SSO: Keycloak OIDC(`https://auth.semtl.synology.me/realms/semtl`)
@@ -39,7 +39,7 @@ Ubuntu 22.04 VM에서 OS 설치를 완료한 뒤, Proxmox에서 `1TB` 데이터 
 서비스별 endpoint 기준:
 
 - GitLab: `proxy_download: true` 기준이면 GitLab VM에서
-  MinIO 내부 API endpoint(`http://192.168.0.171:9000`)로
+  MinIO 내부 API endpoint(`http://192.168.77.171:9000`)로
   접근해도 됩니다.
 - Jenkins: 외부 브라우저 artifact 다운로드까지 고려하면
   `https://s3.semtl.synology.me` 같은 공개 S3 API endpoint를
@@ -48,13 +48,13 @@ Ubuntu 22.04 VM에서 OS 설치를 완료한 뒤, Proxmox에서 `1TB` 데이터 
   `https://s3.semtl.synology.me` 같은 공개 S3 API endpoint를
   권장합니다.
 - n8n: S3 external storage가 Enterprise 기능이므로 현재는 운영 적용 대상이 아니며,
-  향후 Enterprise 도입 시 내부 API endpoint(`http://192.168.0.171:9000`)부터 검토합니다.
+  향후 Enterprise 도입 시 내부 API endpoint(`http://192.168.77.171:9000`)부터 검토합니다.
 - 공용 Console 도메인(`https://minio.semtl.synology.me`)은 관리 UI용이고, 서비스 연동에는 사용하지 않습니다.
 
 ## 네트워크 기준
 
-- `net0` 단일 NIC 사용 (`192.168.0.x`)
-- 예시 VM IP: `192.168.0.171`
+- `net0` 단일 NIC 사용 (`192.168.77.x`)
+- 예시 VM IP: `192.168.77.171`
 
 ### DNS / hostname 기준
 
@@ -228,8 +228,8 @@ mc admin info local
 
 ## 설치 직후 운영 기준
 
-- endpoint는 `http://192.168.0.171:9000` 기준으로 사용합니다.
-- console은 `http://192.168.0.171:9001` 기준으로 사용합니다.
+- endpoint는 `http://192.168.77.171:9000` 기준으로 사용합니다.
+- console은 `http://192.168.77.171:9001` 기준으로 사용합니다.
 - data path는 `/data/minio`로 유지합니다.
 - Object Storage 주요 사용처는 Harbor, GitLab, Jenkins입니다.
 - 서비스별 전용 계정을 분리해 최소 권한으로 운영합니다.
@@ -373,8 +373,8 @@ docker compose up -d
 
 - Keycloak: `https://auth.semtl.synology.me`
 - Realm: `semtl`
-- MinIO S3 API endpoint: `http://192.168.0.171:9000`
-- MinIO Console: `http://192.168.0.171:9001`
+- MinIO S3 API endpoint: `http://192.168.77.171:9000`
+- MinIO Console: `http://192.168.77.171:9001`
 
 ### Keycloak Client 구성
 

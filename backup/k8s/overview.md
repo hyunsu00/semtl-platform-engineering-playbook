@@ -18,8 +18,8 @@ Proxmox 기반 Kubernetes HA 표준 구축/운영 기준을 정의합니다.
 - Runtime: `containerd`
 - CNI: `Cilium v1.15.5`
 - 내부 API HA: `kube-vip v0.8.2` (`10.10.10.100`)
-- 외부 API HA: `CT-LB1/CT-LB2 + Keepalived + HAProxy` (`192.168.0.180`)
-- LoadBalancer: `MetalLB` (`192.168.0.200-220`)
+- 외부 API HA: `CT-LB1/CT-LB2 + Keepalived + HAProxy` (`192.168.77.180`)
+- LoadBalancer: `MetalLB` (`192.168.77.200-220`)
 - Ingress: `ingress-nginx`
 - Control Plane: 3노드(stacked etcd)
 - Worker: 2노드
@@ -37,5 +37,5 @@ Proxmox 기반 Kubernetes HA 표준 구축/운영 기준을 정의합니다.
 - 내부 control-plane 엔드포인트:
   `10.10.10.100:6443` (`kube-vip`)
 - 외부 운영 접속 엔드포인트:
-  `192.168.0.180:6443` (`CT-LB1/CT-LB2 + Keepalived + HAProxy`)
+  `192.168.77.180:6443` (`CT-LB1/CT-LB2 + Keepalived + HAProxy`)
 - `vm-admin` 같은 운영 노드는 외부 운영 접속 엔드포인트를 사용합니다.

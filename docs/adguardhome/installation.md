@@ -37,7 +37,7 @@
 - NAS SSH 접속 가능 상태
 - ASUS 공유기 DHCP DNS 변경 권한
 - AdGuard에 할당할 NAS IP 확보
-  - 예시: `192.168.0.2`
+  - 예시: `192.168.77.2`
 
 ## 포트와 네트워크 기준
 
@@ -130,7 +130,7 @@ docker inspect adguardhome | grep -A3 '"NetworkMode"'
 브라우저에서 아래 주소로 접속합니다.
 
 ```text
-http://192.168.0.2:3000
+http://192.168.77.2:3000
 ```
 
 초기 마법사 권장값:
@@ -276,29 +276,29 @@ Maximum TTL: 86400
 
 ```text
 외부 서비스
-*.semtl.synology.me                 -> 192.168.0.2
+*.semtl.synology.me                 -> 192.168.77.2
 
 내부 서비스
-admin.internal.semtl.synology.me    -> 192.168.0.41
-auth.internal.semtl.synology.me     -> 192.168.0.31
-proxmox.internal.semtl.synology.me  -> 192.168.0.254
-pbs.internal.semtl.synology.me      -> 192.168.0.241
-haos.internal.semtl.synology.me     -> 192.168.0.21
-nas.internal.semtl.synology.me      -> 192.168.0.2
-n8n.internal.semtl.synology.me      -> 192.168.0.175
-jenkins.internal.semtl.synology.me  -> 192.168.0.174
-harbor.internal.semtl.synology.me   -> 192.168.0.173
-gitlab.internal.semtl.synology.me   -> 192.168.0.172
-minio.internal.semtl.synology.me    -> 192.168.0.171
-vm-win11.internal.semtl.synology.me -> 192.168.0.11
-k8s-cp1.internal.semtl.synology.me  -> 192.168.0.181
-k8s-cp2.internal.semtl.synology.me  -> 192.168.0.182
-k8s-cp3.internal.semtl.synology.me  -> 192.168.0.183
-k8s-w1.internal.semtl.synology.me   -> 192.168.0.191
-k8s-w2.internal.semtl.synology.me   -> 192.168.0.192
-k8s-cp.internal.semtl.synology.me   -> 192.168.0.180
-router.internal.semtl.synology.me   -> 192.168.0.1
-adguard.internal.semtl.synology.me  -> 192.168.0.2
+admin.internal.semtl.synology.me    -> 192.168.77.41
+auth.internal.semtl.synology.me     -> 192.168.77.31
+proxmox.internal.semtl.synology.me  -> 192.168.77.254
+pbs.internal.semtl.synology.me      -> 192.168.77.241
+haos.internal.semtl.synology.me     -> 192.168.77.21
+nas.internal.semtl.synology.me      -> 192.168.77.2
+n8n.internal.semtl.synology.me      -> 192.168.77.175
+jenkins.internal.semtl.synology.me  -> 192.168.77.174
+harbor.internal.semtl.synology.me   -> 192.168.77.173
+gitlab.internal.semtl.synology.me   -> 192.168.77.172
+minio.internal.semtl.synology.me    -> 192.168.77.171
+vm-win11.internal.semtl.synology.me -> 192.168.77.11
+k8s-cp1.internal.semtl.synology.me  -> 192.168.77.181
+k8s-cp2.internal.semtl.synology.me  -> 192.168.77.182
+k8s-cp3.internal.semtl.synology.me  -> 192.168.77.183
+k8s-w1.internal.semtl.synology.me   -> 192.168.77.191
+k8s-w2.internal.semtl.synology.me   -> 192.168.77.192
+k8s-cp.internal.semtl.synology.me   -> 192.168.77.180
+router.internal.semtl.synology.me   -> 192.168.77.1
+adguard.internal.semtl.synology.me  -> 192.168.77.2
 ```
 
 권장 기준:
@@ -340,7 +340,7 @@ ASUS 공유기 기준 메뉴 경로:
 
 권장값:
 
-- `DNS Server1`: `192.168.0.2`
+- `DNS Server1`: `192.168.77.2`
 - `DNS Server2`: `1.1.1.1`
 - `Advertise router's IP in addition to user-specified DNS`: `OFF`
 
@@ -354,9 +354,9 @@ ASUS 공유기 기준 메뉴 경로:
 DNS 응답 검증:
 
 ```bash
-nslookup google.com 192.168.0.2
-nslookup github.com 192.168.0.2
-nslookup gitlab.internal.semtl.synology.me 192.168.0.2
+nslookup google.com 192.168.77.2
+nslookup github.com 192.168.77.2
+nslookup gitlab.internal.semtl.synology.me 192.168.77.2
 ```
 
 정상 기준:

@@ -63,7 +63,7 @@ services:
       - TZ=Asia/Seoul # cron 스케줄에 대한 컨테이너 시간대를 설정합니다.
       - UPSNAP_HTTP_LISTEN=127.0.0.1:8090
       - UPSNAP_INTERVAL=*/30 * * * * * # 30초마다 체크
-      - UPSNAP_SCAN_RANGE=192.168.0.0/24
+      - UPSNAP_SCAN_RANGE=192.168.77.0/24
   #   - UPSNAP_SCAN_TIMEOUT=500ms
   #     스캔 타임아웃은 nmap host-timeout 값입니다.
   #   - UPSNAP_PING_PRIVILEGED=true
@@ -149,13 +149,13 @@ docker compose logs -f upsnap
 예시:
 
 - 이름: `vm-admin`
-- IP: `192.168.0.20`
+- IP: `192.168.77.20`
 - MAC: `AA:BB:CC:DD:EE:FF`
 - Ping Port: `22`
 
 ### 자동 스캔
 
-자동 스캔은 `UPSNAP_SCAN_RANGE=192.168.0.0/24` 대역을 기준으로 수행합니다.
+자동 스캔은 `UPSNAP_SCAN_RANGE=192.168.77.0/24` 대역을 기준으로 수행합니다.
 
 주의:
 

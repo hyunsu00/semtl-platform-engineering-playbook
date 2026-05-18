@@ -15,18 +15,18 @@
 - Synology NAS에서 NFS 서비스가 활성화되어 있어야 합니다.
 - 공유폴더 `nfs`와 하위 폴더 `k8s`가 준비되어 있어야 합니다.
 - 예시 NFS export는 `/volume2/nfs`
-- Kubernetes 노드는 `192.168.0.0/24` 대역 기준으로 NFS 접근이 가능해야 합니다.
+- Kubernetes 노드는 `192.168.77.0/24` 대역 기준으로 NFS 접근이 가능해야 합니다.
 - 각 노드에는 `nfs-common`이 설치되어 있어야 합니다.
 
 노드 확인:
 
 ```bash
-showmount -e 192.168.0.2
+showmount -e 192.168.77.2
 ```
 
 예상 결과:
 
-- `/volume2/nfs 192.168.0.0/24`
+- `/volume2/nfs 192.168.77.0/24`
 
 ## 설치 절차
 
@@ -34,7 +34,7 @@ showmount -e 192.168.0.2
 
 예시 기준:
 
-- NAS IP: `192.168.0.2`
+- NAS IP: `192.168.77.2`
 - 공유폴더: `nfs`
 - Kubernetes 하위 폴더: `/volume2/nfs/k8s`
 
@@ -69,7 +69,7 @@ kubectl get ns nfs-provisioner
 helm upgrade --install nfs-subdir-external-provisioner \
   nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
   --namespace nfs-provisioner \
-  --set nfs.server=192.168.0.2 \
+  --set nfs.server=192.168.77.2 \
   --set nfs.path=/volume2/nfs/k8s \
   --set storageClass.name=nfs-client \
   --set storageClass.defaultClass=false \
@@ -164,7 +164,7 @@ kubectl describe pvc <pvc-name> -n <namespace>
 
 조치:
 
-- `showmount -e 192.168.0.2` 결과를 다시 확인합니다.
+- `showmount -e 192.168.77.2` 결과를 다시 확인합니다.
 - `nfs-subdir-external-provisioner` 파드 상태를 확인합니다.
 - NFS path와 NAS 권한을 다시 검토합니다.
 

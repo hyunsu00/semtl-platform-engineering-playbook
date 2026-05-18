@@ -28,8 +28,8 @@
 
 ## 네트워크 기준
 
-- `net0` 단일 NIC 사용 (`192.168.0.x`)
-- 예시 VM IP: `192.168.0.172`
+- `net0` 단일 NIC 사용 (`192.168.77.x`)
+- 예시 VM IP: `192.168.77.172`
 
 ## 설치 절차
 
@@ -62,7 +62,7 @@ curl -fsSL "$REPO_SCRIPT_URL" | sudo bash
 
 ```bash
 # 초기 설치는 로컬 HTTP 엔드포인트로 진행
-sudo EXTERNAL_URL="http://192.168.0.172" \
+sudo EXTERNAL_URL="http://192.168.77.172" \
 apt install -y gitlab-ee=18.8.4-ee.0
 ```
 
@@ -91,8 +91,8 @@ nginx['listen_port'] = 80
 nginx['listen_https'] = false
 registry['enable'] = false
 gitlab_rails['registry_enabled'] = false
-gitlab_rails['trusted_proxies'] = ['192.168.0.0/24']
-nginx['real_ip_trusted_addresses'] = ['192.168.0.0/24']
+gitlab_rails['trusted_proxies'] = ['192.168.77.0/24']
+nginx['real_ip_trusted_addresses'] = ['192.168.77.0/24']
 nginx['real_ip_header'] = 'X-Forwarded-For'
 nginx['real_ip_recursive'] = 'on'
 # END semtl reverse-proxy policy
@@ -127,9 +127,9 @@ sudo gitlab-ctl status
 
 직접 IP 접속 참고:
 
-- `http://192.168.0.172`로 접속해도 `external_url` 정책에 따라
+- `http://192.168.77.172`로 접속해도 `external_url` 정책에 따라
   HTTPS 경로로 리다이렉트될 수 있음
-- `https://192.168.0.172` 직접 접속은 인증서 또는 SAN 불일치, VM `443` 비활성으로 실패 가능
+- `https://192.168.77.172` 직접 접속은 인증서 또는 SAN 불일치, VM `443` 비활성으로 실패 가능
 - 운영 검증은 반드시 `https://gitlab.semtl.synology.me` 기준으로 수행
 
 ## 설치 검증

@@ -178,12 +178,12 @@ sudo crictl ps --name kube-vip
 1. 즉시 재설치하지 말고 재시도 대기합니다.
 2. 장기 지속 시 DNS/egress 네트워크를 점검합니다.
 
-## 8. INTERNAL-IP가 외부망(192.168.0.x)으로 잡힘
+## 8. INTERNAL-IP가 외부망(192.168.77.x)으로 잡힘
 
 증상:
 
 - `kubectl get nodes -o wide`에서 `INTERNAL-IP`가
-  `10.10.10.x`가 아닌 `192.168.0.x`
+  `10.10.10.x`가 아닌 `192.168.77.x`
 
 원인:
 
@@ -239,7 +239,7 @@ networkctl status
 ```bash
 kubectl -n ingress-nginx patch configmap ingress-nginx-controller \
   --type merge \
-  -p '{"data":{"use-forwarded-headers":"true","compute-full-forwarded-for":"true","proxy-real-ip-cidr":"192.168.0.0/24"}}'
+  -p '{"data":{"use-forwarded-headers":"true","compute-full-forwarded-for":"true","proxy-real-ip-cidr":"192.168.77.0/24"}}'
 kubectl -n ingress-nginx rollout restart deploy/ingress-nginx-controller
 kubectl -n ingress-nginx rollout status deploy/ingress-nginx-controller --timeout=5m
 ```
@@ -257,7 +257,7 @@ curl -I \
   -H 'Host: rancher.semtl.synology.me' \
   -H 'X-Forwarded-Proto: https' \
   -H 'X-Forwarded-Port: 443' \
-  http://192.168.0.200/
+  http://192.168.77.200/
 curl -k -I https://rancher.semtl.synology.me/
 ```
 
@@ -295,9 +295,9 @@ kubectl -n ingress-nginx get pods -o wide
 kubectl -n ingress-nginx get endpoints ingress-nginx-controller
 kubectl -n ingress-nginx patch svc ingress-nginx-controller \
   -p '{"spec":{"externalTrafficPolicy":"Cluster"}}'
-nc -vz 192.168.0.200 80
-nc -vz 192.168.0.200 443
-curl -I -H 'Host: prometheus.semtl.synology.me' http://192.168.0.200
+nc -vz 192.168.77.200 80
+nc -vz 192.168.77.200 443
+curl -I -H 'Host: prometheus.semtl.synology.me' http://192.168.77.200
 ```
 
 참고:

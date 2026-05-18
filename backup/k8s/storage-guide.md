@@ -127,7 +127,7 @@ storageClassName: nfs-client
 
 이 저장소의 현재 예시 기준은 다음과 같습니다.
 
-- NFS 서버: `192.168.0.2`
+- NFS 서버: `192.168.77.2`
 - NFS export: `/volume2/nfs`
 - Kubernetes용 하위 폴더: `/volume2/nfs/k8s`
 - StorageClass 이름: `nfs-client`

@@ -255,22 +255,22 @@ ingress 진입 주소로 사용합니다.
 
 예:
 
-- `vm-rke2-cp1` -> `192.168.0.181`
-- `vm-rke2-w1` -> `192.168.0.191`
-- `vm-rke2-w2` -> `192.168.0.192`
-- `vm-rke2-w3` -> `192.168.0.193`
+- `vm-rke2-cp1` -> `192.168.77.181`
+- `vm-rke2-w1` -> `192.168.77.191`
+- `vm-rke2-w2` -> `192.168.77.192`
+- `vm-rke2-w3` -> `192.168.77.193`
 
 예를 들어 Synology Reverse Proxy 대상을 `vm-rke2-cp1`로 정했다면 DNS는 아래처럼 맞춥니다.
 
-- `prometheus.semtl.synology.me` -> `192.168.0.181`
-- `grafana.semtl.synology.me` -> `192.168.0.181`
-- `alertmanager.semtl.synology.me` -> `192.168.0.181`
+- `prometheus.semtl.synology.me` -> `192.168.77.181`
+- `grafana.semtl.synology.me` -> `192.168.77.181`
+- `alertmanager.semtl.synology.me` -> `192.168.77.181`
 
 Synology Reverse Proxy 예시:
 
-- `https://prometheus.semtl.synology.me` -> `http://192.168.0.181:80`
-- `https://grafana.semtl.synology.me` -> `http://192.168.0.181:80`
-- `https://alertmanager.semtl.synology.me` -> `http://192.168.0.181:80`
+- `https://prometheus.semtl.synology.me` -> `http://192.168.77.181:80`
+- `https://grafana.semtl.synology.me` -> `http://192.168.77.181:80`
+- `https://alertmanager.semtl.synology.me` -> `http://192.168.77.181:80`
 
 검증 항목:
 
@@ -394,7 +394,7 @@ VM별 권장 설명:
   `- chart : kube-prometheus-stack`
   `- role : control-plane`
   `- hostname : vm-rke2-cp1`
-  `- node ip : 192.168.0.181`
+  `- node ip : 192.168.77.181`
   `- prometheus : installed`
   `- grafana : installed`
   `- alertmanager : installed`
@@ -405,7 +405,7 @@ VM별 권장 설명:
   `- chart : kube-prometheus-stack`
   `- role : worker-1`
   `- hostname : vm-rke2-w1`
-  `- node ip : 192.168.0.191`
+  `- node ip : 192.168.77.191`
   `- prometheus target : available`
   `- grafana ingress target : available`
   `- alertmanager ingress target : available`
@@ -415,7 +415,7 @@ VM별 권장 설명:
   `- chart : kube-prometheus-stack`
   `- role : worker-2`
   `- hostname : vm-rke2-w2`
-  `- node ip : 192.168.0.192`
+  `- node ip : 192.168.77.192`
   `- prometheus target : available`
   `- grafana ingress target : available`
   `- alertmanager ingress target : available`
@@ -425,7 +425,7 @@ VM별 권장 설명:
   `- chart : kube-prometheus-stack`
   `- role : worker-3`
   `- hostname : vm-rke2-w3`
-  `- node ip : 192.168.0.193`
+  `- node ip : 192.168.77.193`
   `- prometheus target : available`
   `- grafana ingress target : available`
   `- alertmanager ingress target : available`

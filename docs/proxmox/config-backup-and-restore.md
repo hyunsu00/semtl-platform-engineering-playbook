@@ -623,8 +623,8 @@ tar -xOf /root/proxmox-config-backups/latest.tar.gz backup/etc/network/interface
 ```text
 auto vmbr0
 iface vmbr0 inet static
-    address 192.168.0.241/24
-    gateway 192.168.0.1
+    address 192.168.77.241/24
+    gateway 192.168.77.1
 ```
 
 ### 9) 스토리지 설정 확인

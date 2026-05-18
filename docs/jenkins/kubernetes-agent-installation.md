@@ -218,7 +218,7 @@ echo "${APISERVER}"
 확인:
 
 - `APISERVER`는 Jenkins VM에서 접근 가능한 `RKE2` API 서버 주소여야 합니다.
-- 예: `https://192.168.0.181:6443`
+- 예: `https://192.168.77.181:6443`
 - `https://kubernetes.default.svc`처럼 Kubernetes 클러스터 내부 DNS 이름이면
   Jenkins VM에서는 해석할 수 없으므로 사용하지 않습니다.
 
@@ -226,7 +226,7 @@ echo "${APISERVER}"
 주소로 직접 지정합니다.
 
 ```bash
-APISERVER="https://192.168.0.181:6443"
+APISERVER="https://192.168.77.181:6443"
 ```
 
 ServiceAccount 토큰을 읽어 kubeconfig를 생성합니다.
@@ -358,7 +358,7 @@ sudo -u jenkins KUBECONFIG=/var/lib/jenkins/.kube/config \
 
 - `Environment=`에 `HOME=/var/lib/jenkins`와
   `KUBECONFIG=/var/lib/jenkins/.kube/config`가 포함됨
-- Kubernetes API 서버 주소가 `https://192.168.0.181:6443`처럼
+- Kubernetes API 서버 주소가 `https://192.168.77.181:6443`처럼
   Jenkins VM에서 접근 가능한 주소로 출력됨
 - `yes`가 출력됨
 - Secret 목록 권한 확인도 `yes`가 출력됨
@@ -382,7 +382,7 @@ Jenkins UI 경로:
 
 ```text
 Name: kubernetes
-Kubernetes URL: https://192.168.0.181:6443
+Kubernetes URL: https://192.168.77.181:6443
 Use Jenkins Proxy: OFF
 Kubernetes server certificate key: (비움)
 Disable https certificate check: ON
@@ -413,7 +413,7 @@ Enable garbage collection: OFF
 입력 기준:
 
 - Name: `kubernetes`
-- Kubernetes URL: `https://192.168.0.181:6443`
+- Kubernetes URL: `https://192.168.77.181:6443`
 - Use Jenkins Proxy: `OFF`
 - Kubernetes server certificate key: 비움
 - Disable https certificate check: `ON`
@@ -884,7 +884,7 @@ sudo -u jenkins kubectl --kubeconfig /var/lib/jenkins/.kube/config \
 - 이 경우 `sudo systemctl show jenkins -p Environment` 결과에
   `HOME=/var/lib/jenkins`와 `KUBECONFIG=/var/lib/jenkins/.kube/config`가
   포함되어 있는지 확인하고, kubeconfig의 `server` 값이
-  `https://192.168.0.181:6443`처럼 Jenkins VM에서 접근 가능한 주소인지 확인합니다.
+  `https://192.168.77.181:6443`처럼 Jenkins VM에서 접근 가능한 주소인지 확인합니다.
 - `kubernetes-credentials-provider`를 사용하는 경우 `jenkins-agent`
   ServiceAccount에 `secrets`의 `get`, `list`, `watch` 권한이 있어야 합니다.
 

@@ -36,7 +36,7 @@ Proxmox Web UI에서 PBS를 Storage로 등록합니다.
 - PBS UI 접속 가능 (`https://pbs.internal.semtl.synology.me:8007`)
 - `hostname` 결과가 `vm-pbs`
 - `hostname -f` 결과가 `pbs.internal.semtl.synology.me`
-- `nslookup pbs.internal.semtl.synology.me` 결과가 `192.168.0.170`
+- `nslookup pbs.internal.semtl.synology.me` 결과가 `192.168.77.170`
 - `nslookup google.com` 정상 응답
 - Datastore 상태 정상
 - Proxmox에서 PBS Storage 접근 가능
@@ -46,25 +46,25 @@ Proxmox Web UI에서 PBS를 Storage로 등록합니다.
 
 ### 내부 DNS가 안 풀리거나 외부 조회가 느림
 
-- 확인: PBS의 DNS가 `192.168.0.2`를 우선 참조하는지 확인
+- 확인: PBS의 DNS가 `192.168.77.2`를 우선 참조하는지 확인
 - 확인: Synology `DNS Server > 해상도`에서 전달자가 `8.8.8.8`,
   `1.1.1.1`로 설정되었는지 확인
 - 확인: 공유기 DHCP가 Synology DNS를 배포하는지 확인
-- 조치: Synology 전달자에 공유기 IP(`192.168.0.1`)를 넣지 않음
+- 조치: Synology 전달자에 공유기 IP(`192.168.77.1`)를 넣지 않음
 
 ### PBS 설치 후 DNS를 잘못 입력함
 
 - 증상: `pbs.internal.semtl.synology.me` 조회 실패, GUI 접속은 IP로만 가능
 - 원인: 설치 중 `DNS Server`를 공유기로 입력
 - 조치: `/etc/network/interfaces`와 `/etc/resolv.conf`를 점검하여
-  `192.168.0.2`로 보정 후 재검증
+  `192.168.77.2`로 보정 후 재검증
 
 ### FQDN/hostname 불일치
 
 - 확인: `hostname`, `hostname -f`, `/etc/hosts`
 - 조치: `hostnamectl set-hostname vm-pbs`
 - 조치: `/etc/hosts`에
-  `192.168.0.170 pbs.internal.semtl.synology.me vm-pbs` 반영
+  `192.168.77.170 pbs.internal.semtl.synology.me vm-pbs` 반영
 
 ### PBS ACL 명령 옵션 오류
 

@@ -42,7 +42,7 @@
 
 - hostname: `vm-devtools`
 - Proxmox VM 이름: `vm-devtools`
-- IP: `192.168.0.231`
+- IP: `192.168.77.231`
 
 ## 사전 조건
 
@@ -168,7 +168,7 @@ ip -brief address
 다른 관리 PC에서 접속을 확인합니다.
 
 ```bash
-ssh semtl@192.168.0.231
+ssh semtl@192.168.77.231
 ```
 
 로그인 후 `sudo` 권한과 시간 동기화를 확인합니다.
@@ -540,7 +540,7 @@ systemctl --user restart gnome-remote-desktop
 방화벽을 사용하는 경우에만 RDP 포트를 허용합니다.
 
 ```bash
-sudo ufw allow from 192.168.0.0/24 to any port 3389 proto tcp
+sudo ufw allow from 192.168.77.0/24 to any port 3389 proto tcp
 ```
 
 검증:
@@ -552,7 +552,7 @@ ss -lntp | grep 3389
 
 다른 관리 PC에서 RDP 클라이언트로 접속합니다.
 
-- 접속 주소: `192.168.0.231:3389`
+- 접속 주소: `192.168.77.231:3389`
 - 계정: `semtl`
 - 비밀번호: `Remote Desktop`에서 설정한 `<RDP_PASSWORD>`
 
@@ -775,7 +775,7 @@ services:
       - ./homepage/config:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: 192.168.0.231:3000,localhost:3000
+      HOMEPAGE_ALLOWED_HOSTS: 192.168.77.231:3000,localhost:3000
     restart: unless-stopped
 
   uptime-kuma:
@@ -817,15 +817,15 @@ EOF
 cat > ~/docker/devtools/homepage/config/services.yaml <<'EOF'
 - DevTools:
   - Homepage:
-      href: http://192.168.0.231:3000
+      href: http://192.168.77.231:3000
       description: Main dashboard
   - Uptime Kuma:
-      href: http://192.168.0.231:3001
+      href: http://192.168.77.231:3001
       description: Service monitoring dashboard
       server: devtools-docker
       container: uptime-kuma
   - Dozzle:
-      href: http://192.168.0.231:3002
+      href: http://192.168.77.231:3002
       description: Container log viewer
       server: devtools-docker
       container: dozzle
@@ -863,9 +863,9 @@ docker compose logs --tail=100
 
 ## 14. 접속 확인
 
-- Homepage: `http://192.168.0.231:3000`
-- Uptime Kuma: `http://192.168.0.231:3001`
-- Dozzle: `http://192.168.0.231:3002`
+- Homepage: `http://192.168.77.231:3000`
+- Uptime Kuma: `http://192.168.77.231:3001`
+- Dozzle: `http://192.168.77.231:3002`
 
 ```bash
 ss -lntp

@@ -53,7 +53,7 @@ mc --version
 - 설치 네임스페이스: `velero`
 - 백업 저장소: `MinIO`
 - 백업 버킷 예시: `velero`
-- MinIO API endpoint 예시: `http://192.168.0.171:9000`
+- MinIO API endpoint 예시: `http://192.168.77.171:9000`
 - Velero provider: `aws` 플러그인
 - 볼륨 백업 방식: `node-agent` 기반 파일시스템 백업
 
@@ -72,7 +72,7 @@ mc --version
 예시:
 
 ```bash
-mc alias set local http://192.168.0.171:9000 admin '<change-required>'
+mc alias set local http://192.168.77.171:9000 admin '<change-required>'
 mc mb -p local/velero
 ```
 
@@ -185,7 +185,7 @@ configuration:
       config:
         region: minio
         s3ForcePathStyle: "true"
-        s3Url: http://192.168.0.171:9000
+        s3Url: http://192.168.77.171:9000
   volumeSnapshotLocation: []
   defaultVolumesToFsBackup: true
 

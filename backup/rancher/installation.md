@@ -163,7 +163,7 @@ kubectl -n kube-system rollout status ds/rke2-ingress-nginx-controller --timeout
 - 이 설정 적용 시 `rke2-ingress-nginx-controller` DaemonSet 롤링 업데이트가 발생할 수 있습니다.
 - Proxmox 호스트 네트워크가 불안정한 환경이라면 운영자가 즉시 관찰 가능한 시간에 적용하는 편이 안전합니다.
 - 가능하면 Proxmox SSH 또는 AMT 콘솔을 열어 둔 상태에서 진행하고,
-  적용 직후 `192.168.0.1`, `192.168.0.2` ping 상태를 함께 확인합니다.
+  적용 직후 `192.168.77.1`, `192.168.77.2` ping 상태를 함께 확인합니다.
 
 확인:
 
@@ -318,14 +318,14 @@ ingress 진입 주소로 사용합니다.
 
 예:
 
-- `vm-rke2-cp1` -> `192.168.0.181`
-- `vm-rke2-w1` -> `192.168.0.191`
-- `vm-rke2-w2` -> `192.168.0.192`
-- `vm-rke2-w3` -> `192.168.0.193`
+- `vm-rke2-cp1` -> `192.168.77.181`
+- `vm-rke2-w1` -> `192.168.77.191`
+- `vm-rke2-w2` -> `192.168.77.192`
+- `vm-rke2-w3` -> `192.168.77.193`
 
 예를 들어 Synology Reverse Proxy 대상을 `vm-rke2-cp1`로 정했다면 DNS는 아래처럼 맞춥니다.
 
-- `rancher.semtl.synology.me` -> `192.168.0.181`
+- `rancher.semtl.synology.me` -> `192.168.77.181`
 
 Synology Reverse Proxy 예시:
 
@@ -335,7 +335,7 @@ Synology Reverse Proxy 예시:
 예:
 
 - Reverse Proxy 대상 노드를 `vm-rke2-cp1`로 선택
-- Synology Reverse Proxy 대상: `http://192.168.0.181:80`
+- Synology Reverse Proxy 대상: `http://192.168.77.181:80`
 
 참고:
 
@@ -604,7 +604,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : control-plane`
   `- hostname : vm-rke2-cp1`
-  `- node ip : 192.168.0.181`
+  `- node ip : 192.168.77.181`
   `- longhorn : installed`
   `- nfs storageclass : installed`
   `- rancher : installed`
@@ -614,7 +614,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : worker-1`
   `- hostname : vm-rke2-w1`
-  `- node ip : 192.168.0.191`
+  `- node ip : 192.168.77.191`
   `- longhorn replica target : enabled`
   `- nfs client : ready`
   `- ingress target : available`
@@ -624,7 +624,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : worker-2`
   `- hostname : vm-rke2-w2`
-  `- node ip : 192.168.0.192`
+  `- node ip : 192.168.77.192`
   `- longhorn replica target : enabled`
   `- nfs client : ready`
   `- ingress target : available`
@@ -634,7 +634,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : worker-3`
   `- hostname : vm-rke2-w3`
-  `- node ip : 192.168.0.193`
+  `- node ip : 192.168.77.193`
   `- longhorn replica target : enabled`
   `- nfs client : ready`
   `- ingress target : available`

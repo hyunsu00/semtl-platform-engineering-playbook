@@ -346,14 +346,14 @@ ingress 진입 주소로 사용합니다.
 
 예:
 
-- `vm-rke2-cp1` -> `192.168.0.181`
-- `vm-rke2-w1` -> `192.168.0.191`
-- `vm-rke2-w2` -> `192.168.0.192`
-- `vm-rke2-w3` -> `192.168.0.193`
+- `vm-rke2-cp1` -> `192.168.77.181`
+- `vm-rke2-w1` -> `192.168.77.191`
+- `vm-rke2-w2` -> `192.168.77.192`
+- `vm-rke2-w3` -> `192.168.77.193`
 
 예를 들어 Synology Reverse Proxy 대상을 `vm-rke2-cp1`로 정했다면 DNS는 아래처럼 맞춥니다.
 
-- `argocd.semtl.synology.me` -> `192.168.0.181`
+- `argocd.semtl.synology.me` -> `192.168.77.181`
 
 검증 항목:
 
@@ -543,7 +543,7 @@ VM별 권장 설명:
   `- chart : argo-cd`
   `- role : control-plane`
   `- hostname : vm-rke2-cp1`
-  `- node ip : 192.168.0.181`
+  `- node ip : 192.168.77.181`
   `- monitoring : installed`
   `- argocd-server : installed`
   `- repo-server : installed`
@@ -554,7 +554,7 @@ VM별 권장 설명:
   `- chart : argo-cd`
   `- role : worker-1`
   `- hostname : vm-rke2-w1`
-  `- node ip : 192.168.0.191`
+  `- node ip : 192.168.77.191`
   `- argocd workload target : available`
   `- ingress target : available`
   `- monitoring target : available`
@@ -564,7 +564,7 @@ VM별 권장 설명:
   `- chart : argo-cd`
   `- role : worker-2`
   `- hostname : vm-rke2-w2`
-  `- node ip : 192.168.0.192`
+  `- node ip : 192.168.77.192`
   `- argocd workload target : available`
   `- ingress target : available`
   `- monitoring target : available`
@@ -574,7 +574,7 @@ VM별 권장 설명:
   `- chart : argo-cd`
   `- role : worker-3`
   `- hostname : vm-rke2-w3`
-  `- node ip : 192.168.0.193`
+  `- node ip : 192.168.77.193`
   `- argocd workload target : available`
   `- ingress target : available`
   `- monitoring target : available`

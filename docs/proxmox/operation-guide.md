@@ -150,8 +150,8 @@ usermod -U root
 
 이 저장소의 기본 DNS 토폴로지는 아래 기준으로 운영합니다.
 
-- Gateway: `192.168.0.1`
-- 내부 DNS: `192.168.0.2` (Synology `DNS Server`)
+- Gateway: `192.168.77.1`
+- 내부 DNS: `192.168.77.2` (Synology `DNS Server`)
 - 내부 도메인: `semtl.synology.me`
 
 핵심 원칙:
@@ -165,14 +165,14 @@ Proxmox Host 예시:
 ```text
 /etc/hosts
 127.0.0.1 localhost.localdomain localhost
-192.168.0.241 proxmox.internal.semtl.synology.me proxmox
+192.168.77.241 proxmox.internal.semtl.synology.me proxmox
 ```
 
 정상 예시:
 
 - `hostname` -> `proxmox`
 - `hostname -f` -> `proxmox.internal.semtl.synology.me`
-- `nslookup proxmox.internal.semtl.synology.me` -> `192.168.0.241`
+- `nslookup proxmox.internal.semtl.synology.me` -> `192.168.77.241`
 
 운영 메모:
 

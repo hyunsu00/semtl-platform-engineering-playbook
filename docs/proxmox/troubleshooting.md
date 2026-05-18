@@ -63,7 +63,7 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
 - 조치:
   - systemd-resolved 기반이면 symlink 복구 후 서비스 재시작
   - static DNS 기반이면 `/etc/resolv.conf`를 재작성
-  - Synology DNS(`192.168.0.2`)와 forwarder 설정 재검증
+  - Synology DNS(`192.168.77.2`)와 forwarder 설정 재검증
   - DHCP VM에 `chattr +i /etc/resolv.conf`를 즉시 적용하지 않음
 
 ### 이슈 5: Proxmox 재부팅 후 VM DNS가 살아남
@@ -77,8 +77,8 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
   ```bash
   cat /etc/network/interfaces
   cat /etc/resolv.conf
-  nslookup proxmox.internal.semtl.synology.me 192.168.0.2
-  nslookup google.com 192.168.0.2
+  nslookup proxmox.internal.semtl.synology.me 192.168.77.2
+  nslookup google.com 192.168.77.2
   ```
 
 ### 이슈 6: Proxmox Host는 정상인데 Intel AMT만 죽음
@@ -104,8 +104,8 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
   - AMT 콘솔로는 Proxmox Host 접속 가능
   - `ip -br addr` 기준 `vmbr0`에 관리 IP가 정상 설정됨
   - `ethtool eth1` 기준 `Link detected: yes`
-  - 그런데 `ping 192.168.0.1`, `ping 192.168.0.2` 같은 같은 대역 통신이 모두 실패
-  - `ip neigh`에 `192.168.0.x dev vmbr0 FAILED`가 반복됨
+  - 그런데 `ping 192.168.77.1`, `ping 192.168.77.2` 같은 같은 대역 통신이 모두 실패
+  - `ip neigh`에 `192.168.77.x dev vmbr0 FAILED`가 반복됨
 - 가장 가능성 높은 원인:
   - Proxmox Host의 `vmbr0`/`eth1` ARP 또는 L2 상태가 일시적으로 꼬인 경우
   - 스위치 포트/VLAN/포트 보안 문제 가능성도 함께 고려
@@ -121,8 +121,8 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
   cat /etc/network/interfaces
   ethtool eth1
   ip neigh
-  ping -c 2 192.168.0.1
-  ping -c 2 192.168.0.2
+  ping -c 2 192.168.77.1
+  ping -c 2 192.168.77.2
   ```
 
 - 판단 포인트:
@@ -141,13 +141,13 @@ Proxmox 주요 장애 사례와 해결 절차를 정리합니다.
   ip link set vmbr0 down
   ip link set vmbr0 up
   ip neigh flush all
-  ping -c 2 192.168.0.1
-  ping -c 2 192.168.0.2
+  ping -c 2 192.168.77.1
+  ping -c 2 192.168.77.2
   ip neigh
   ```
 
 - 이번 사례 결과:
-  - 위 조치 후 `192.168.0.1`, `192.168.0.2` ping이 즉시 복구됨
+  - 위 조치 후 `192.168.77.1`, `192.168.77.2` ping이 즉시 복구됨
   - `ip neigh` 상태도 `FAILED`에서 `REACHABLE`로 전환됨
   - 따라서 근본 원인은 Kubernetes 스토리지 설치보다는 Proxmox Host 네트워크 상태 꼬임 쪽으로 판단
 - 후속 점검:

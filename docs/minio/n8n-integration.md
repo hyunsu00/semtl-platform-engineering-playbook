@@ -17,7 +17,7 @@ MinIO bucket으로 분리하는 방법을 기록해 두는 것입니다.
 
 ## 대상 환경
 
-- MinIO API endpoint: `http://192.168.0.171:9000`
+- MinIO API endpoint: `http://192.168.77.171:9000`
 - MinIO public S3 endpoint: `https://s3.semtl.synology.me`
 - n8n URL: `https://n8n.semtl.synology.me`
 - n8n 배포 방식: `Docker Compose`
@@ -36,7 +36,7 @@ MinIO bucket으로 분리하는 방법을 기록해 두는 것입니다.
 endpoint 선택 기준:
 
 - n8n은 서버가 MinIO에 직접 접근하므로 내부 API endpoint만으로도 연동은 가능합니다.
-- 기본 구성은 `192.168.0.171:9000` 같은 내부 MinIO API endpoint를 권장합니다.
+- 기본 구성은 `192.168.77.171:9000` 같은 내부 MinIO API endpoint를 권장합니다.
 - 내/외부 공용 DNS와 TLS 구성이 이미 준비되어 있으면
   `s3.semtl.synology.me` 같은
   공개 S3 API endpoint로 바꿀 수 있습니다.
@@ -111,7 +111,7 @@ mc admin user info local svc-n8n-s3
 ```bash
 # n8n external binary storage(S3/MinIO)
 N8N_DEFAULT_BINARY_DATA_MODE=s3
-N8N_EXTERNAL_STORAGE_S3_HOST=192.168.0.171
+N8N_EXTERNAL_STORAGE_S3_HOST=192.168.77.171
 N8N_EXTERNAL_STORAGE_S3_BUCKET_NAME=n8n-binaries
 N8N_EXTERNAL_STORAGE_S3_BUCKET_REGION=us-east-1
 N8N_EXTERNAL_STORAGE_S3_ACCESS_KEY=svc-n8n-s3
@@ -122,7 +122,7 @@ N8N_EXTERNAL_STORAGE_S3_ACCESS_SECRET=<minio-secret-key>
 
 - `N8N_DEFAULT_BINARY_DATA_MODE=s3`로 두면 새 binary data는 MinIO에 저장합니다.
 - `N8N_EXTERNAL_STORAGE_S3_HOST`는 프로토콜 없이 host만 사용합니다.
-- 기본값은 내부 MinIO API host인 `192.168.0.171`을 사용합니다.
+- 기본값은 내부 MinIO API host인 `192.168.77.171`을 사용합니다.
 - 공개 S3 API endpoint를 사용할 때는
   `s3.semtl.synology.me`처럼
   Console이 아닌 API 도메인을 사용합니다.

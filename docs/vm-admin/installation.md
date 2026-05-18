@@ -10,7 +10,7 @@
 
 - `kubectl` 설치 및 RKE2 원격 제어
 - `helm` 설치 및 차트 배포 준비
-- `mc` 설치 및 MinIO(`192.168.0.171`) 관리
+- `mc` 설치 및 MinIO(`192.168.77.171`) 관리
 - `k9s` 바이너리 설치
 - 운영 경로에서 사용하지 않는 `snap` 정리
 
@@ -22,22 +22,22 @@
 - 관리 노드: `vm-admin`
 - 관리 노드 네트워크:
   - NIC 1개
-  - `192.168.0.x` 대역으로만 직접 접근
+  - `192.168.77.x` 대역으로만 직접 접근
 - RKE2 Control Plane:
   - `vm-rke2-cp1`
-  - `192.168.0.181`
+  - `192.168.77.181`
 - RKE2 Worker:
-  - `vm-rke2-w1`: `192.168.0.191`
-  - `vm-rke2-w2`: `192.168.0.192`
-  - `vm-rke2-w3`: `192.168.0.193`
+  - `vm-rke2-w1`: `192.168.77.191`
+  - `vm-rke2-w2`: `192.168.77.192`
+  - `vm-rke2-w3`: `192.168.77.193`
 - Kubernetes API:
-  - `https://192.168.0.181:6443`
+  - `https://192.168.77.181:6443`
 - MinIO:
-  - API: `http://192.168.0.171:9000`
-  - Console: `http://192.168.0.171:9001`
+  - API: `http://192.168.77.171:9000`
+  - Console: `http://192.168.77.171:9001`
 
 이 문서는 별도 내부망 `10.10.10.x`를 사용하지 않습니다.
-RKE2 노드와 `vm-admin` 모두 `192.168.0.0/24` 단일 네트워크 기준입니다.
+RKE2 노드와 `vm-admin` 모두 `192.168.77.0/24` 단일 네트워크 기준입니다.
 
 ## 1. kubectl 설치
 
@@ -73,7 +73,7 @@ kubectl version --client
 
 ```bash
 mkdir -p ~/.kube
-scp semtl@192.168.0.181:/home/semtl/.kube/config ~/.kube/config
+scp semtl@192.168.77.181:/home/semtl/.kube/config ~/.kube/config
 chmod 600 ~/.kube/config
 ```
 
@@ -98,9 +98,9 @@ server: https://127.0.0.1:6443
 
 이 값을 그대로 두면 `vm-admin`에서는 API 서버에 접속할 수 없습니다.
 `vm-admin`은 외부에서 `vm-rke2-cp1`의 실제 주소인
-`192.168.0.181:6443`로 접속해야 합니다.
+`192.168.77.181:6443`로 접속해야 합니다.
 
-`rke2-server` 설정의 `tls-san`에 `192.168.0.181`이 포함되어 있어야 하며,
+`rke2-server` 설정의 `tls-san`에 `192.168.77.181`이 포함되어 있어야 하며,
 이 기준은 [`RKE2 Installation`](../rke2/installation.md) 문서와 동일합니다.
 
 ### 3.1 kubeconfig 백업 및 server 변경
@@ -108,7 +108,7 @@ server: https://127.0.0.1:6443
 ```bash
 cp ~/.kube/config ~/.kube/config.bak
 OLD_SERVER='server: https://127.0.0.1:6443'
-NEW_SERVER='server: https://192.168.0.181:6443'
+NEW_SERVER='server: https://192.168.77.181:6443'
 sed -i \
   "s#${OLD_SERVER}#${NEW_SERVER}#g" \
   ~/.kube/config
@@ -118,7 +118,7 @@ grep server ~/.kube/config
 기대 결과:
 
 ```text
-server: https://192.168.0.181:6443
+server: https://192.168.77.181:6443
 ```
 
 ## 4. kubectl 동작 검증
@@ -130,16 +130,16 @@ kubectl get pods -A
 
 확인 예시:
 
-- `vm-rke2-cp1`: `Ready`, `control-plane`, `192.168.0.181`
-- `vm-rke2-w1`: `Ready`, `192.168.0.191`
-- `vm-rke2-w2`: `Ready`, `192.168.0.192`
-- `vm-rke2-w3`: `Ready`, `192.168.0.193`
+- `vm-rke2-cp1`: `Ready`, `control-plane`, `192.168.77.181`
+- `vm-rke2-w1`: `Ready`, `192.168.77.191`
+- `vm-rke2-w2`: `Ready`, `192.168.77.192`
+- `vm-rke2-w3`: `Ready`, `192.168.77.193`
 
 위 결과가 보이면 `vm-admin`에서 RKE2 원격 제어가 가능한 상태입니다.
 
 문제가 있으면 다음을 먼저 확인합니다.
 
-- `vm-admin`에서 `192.168.0.181:6443`로 네트워크 접근 가능한지
+- `vm-admin`에서 `192.168.77.181:6443`로 네트워크 접근 가능한지
 - `vm-rke2-cp1`의 `/etc/rancher/rke2/config.yaml`에 `tls-san`이 올바르게 들어갔는지
 - 복사한 kubeconfig의 `server:` 값이 `127.0.0.1`로 남아 있지 않은지
 
@@ -156,7 +156,7 @@ helm version
 
 ## 6. MinIO 관리용 mc 설치
 
-MinIO 서버는 별도 VM(`192.168.0.171`)에 두고,
+MinIO 서버는 별도 VM(`192.168.77.171`)에 두고,
 `vm-admin`에는 관리 클라이언트 `mc`만 설치합니다.
 
 ```bash
@@ -169,13 +169,13 @@ mc --version
 ## 7. MinIO alias 등록
 
 ```bash
-mc alias set minio http://192.168.0.171:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
+mc alias set minio http://192.168.77.171:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
 ```
 
 예시:
 
 ```bash
-mc alias set minio http://192.168.0.171:9000 admin '비밀번호'
+mc alias set minio http://192.168.77.171:9000 admin '비밀번호'
 ```
 
 검증:

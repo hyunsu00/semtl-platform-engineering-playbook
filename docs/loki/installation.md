@@ -77,7 +77,7 @@ mc --version
 예시:
 
 ```bash
-mc alias set local http://192.168.0.171:9000 admin '<change-required>'
+mc alias set local http://192.168.77.171:9000 admin '<change-required>'
 mc mb -p local/loki-chunks
 mc mb -p local/loki-ruler
 mc mb -p local/loki-admin
@@ -183,7 +183,7 @@ loki:
       ruler: loki-ruler
       admin: loki-admin
     s3:
-      endpoint: 192.168.0.171:9000
+      endpoint: 192.168.77.171:9000
       region: minio
       accessKeyId: loki
       secretAccessKey: <change-required>
@@ -329,13 +329,13 @@ Synology Reverse Proxy 예시:
 
 예:
 
-- `kubectl -n ingress-nginx get svc ingress-nginx-controller` 결과가 `192.168.0.200`
-- Synology Reverse Proxy 대상: `http://192.168.0.200:80`
+- `kubectl -n ingress-nginx get svc ingress-nginx-controller` 결과가 `192.168.77.200`
+- Synology Reverse Proxy 대상: `http://192.168.77.200:80`
 
 참고:
 
 - Loki도 Prometheus, Grafana와 같은 `ingress-nginx` 외부 IP를 함께 사용할 수 있습니다.
-- 예를 들어 셋 다 `192.168.0.200`을 공유하고, host 기준으로 라우팅합니다.
+- 예를 들어 셋 다 `192.168.77.200`을 공유하고, host 기준으로 라우팅합니다.
 
 검증 항목:
 

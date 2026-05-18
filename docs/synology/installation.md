@@ -12,11 +12,11 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 ## 아키텍처와 예시 값
 
 - 내부 도메인: `semtl.synology.me`
-- Synology DNS Server IP: `192.168.0.2`
-- Gateway: `192.168.0.1`
+- Synology DNS Server IP: `192.168.77.2`
+- Gateway: `192.168.77.1`
 - PBS FQDN: `pbs.semtl.synology.me`
-- PBS IP: `192.168.0.170`
-- PBS NFS Export: `192.168.0.2:/volume2/lab-data`
+- PBS IP: `192.168.77.170`
+- PBS NFS Export: `192.168.77.2:/volume2/lab-data`
 
 ## 사전 조건
 
@@ -36,7 +36,7 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 예시:
 
 - Zone: `semtl.synology.me`
-- Master DNS Server: `192.168.0.2`
+- Master DNS Server: `192.168.77.2`
 
 ## 3) PBS A 레코드 생성
 
@@ -44,7 +44,7 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 
 - Name: `pbs`
 - FQDN: `pbs.semtl.synology.me`
-- IP: `192.168.0.170`
+- IP: `192.168.77.170`
 
 ## 4) 해상도(Resolution)와 전달자 설정
 
@@ -58,7 +58,7 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 
 주의:
 
-- Synology DNS의 전달자에 공유기 IP(`192.168.0.1`)를 넣지 않습니다.
+- Synology DNS의 전달자에 공유기 IP(`192.168.77.1`)를 넣지 않습니다.
 - 공유기가 다시 Synology를 DNS로 광고하는 구조와 겹치면 DNS 질의가
   우회/반복되어 지연 또는 루프처럼 보이는 현상이 생길 수 있습니다.
 
@@ -68,7 +68,7 @@ DNS, 공유기 DHCP DNS 배포, Proxmox Backup Server(PBS)용 NFS Export
 
 ASUS 공유기 예시:
 
-- Primary DNS: `192.168.0.2`
+- Primary DNS: `192.168.77.2`
 - Secondary DNS: `8.8.8.8`
 - `Advertise router's IP in addition to user-specified DNS`: `No`
 
@@ -88,7 +88,7 @@ ASUS 공유기 예시:
 
 - 공유 폴더: `lab-data`
 - Export 경로: `/volume2/lab-data`
-- 허용 클라이언트: `192.168.0.170`
+- 허용 클라이언트: `192.168.77.170`
 - 권한: `Read/Write`
 
 확인 포인트:
@@ -101,19 +101,19 @@ ASUS 공유기 예시:
 DNS 검증:
 
 ```bash
-nslookup pbs.semtl.synology.me 192.168.0.2
-nslookup google.com 192.168.0.2
+nslookup pbs.semtl.synology.me 192.168.77.2
+nslookup google.com 192.168.77.2
 ```
 
 NFS Export 검증:
 
 ```bash
-showmount -e 192.168.0.2
+showmount -e 192.168.77.2
 ```
 
 정상 기준:
 
-- `pbs.semtl.synology.me`가 `192.168.0.170`으로 응답
+- `pbs.semtl.synology.me`가 `192.168.77.170`으로 응답
 - 외부 도메인 조회도 Synology DNS를 통해 정상 응답
 - PBS IP가 NFS Export 허용 목록에 포함
 

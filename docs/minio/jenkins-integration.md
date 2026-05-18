@@ -7,7 +7,7 @@
 
 ## 대상 환경
 
-- MinIO API endpoint: `http://192.168.0.171:9000`
+- MinIO API endpoint: `http://192.168.77.171:9000`
 - MinIO public S3 endpoint: `https://s3.semtl.synology.me`
 - Jenkins URL: `https://jenkins.semtl.synology.me`
 - Jenkins 플러그인: `aws-credentials`, `artifact-manager-s3`, `pipeline-utility-steps`
@@ -381,7 +381,7 @@ mc admin user info local svc-jenkins-s3
 
 확인 순서:
 
-1. `Custom Endpoint`가 `192.168.0.171:9000`처럼 `host:port` 형식인지 확인합니다.
+1. `Custom Endpoint`가 `192.168.77.171:9000`처럼 `host:port` 형식인지 확인합니다.
 2. MinIO VM에서 `svc-jenkins-s3` 비밀번호를 다시 설정합니다.
 3. Jenkins의 `jenkins-minio-s3` credential에도 같은 Secret Access Key를 다시 저장합니다.
 4. 새 build를 다시 실행합니다.
@@ -399,7 +399,7 @@ mc admin user info local svc-jenkins-s3
 
 주요 원인:
 
-- `Custom Endpoint`가 `192.168.0.171:9000` 같은 내부 IP로 설정되어 있어 외부 브라우저가 접근하지 못함
+- `Custom Endpoint`가 `192.168.77.171:9000` 같은 내부 IP로 설정되어 있어 외부 브라우저가 접근하지 못함
 - reverse proxy가 MinIO S3 API가 아니라 Console 화면으로 연결됨
 
 확인 순서:

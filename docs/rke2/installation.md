@@ -8,7 +8,7 @@
 
 이번 설치 기준은 다음과 같습니다.
 
-- 모든 VM은 `192.168.0.x` 단일 네트워크를 사용
+- 모든 VM은 `192.168.77.x` 단일 네트워크를 사용
 - VM 레벨의 별도 내부망 `10.10.10.x`는 사용하지 않음
 - Pod/Service 네트워크는 RKE2 기본 CNI가 별도로 구성
 - `vm-rke2-cp1`에 `rke2-server` 설치
@@ -30,16 +30,16 @@ control-plane HA는 제공하지 않습니다.
 
 | 노드 | 역할 | vCPU | RAM | 디스크 | IP |
 | --- | --- | --- | --- | --- | --- |
-| `vm-rke2-cp1` | control-plane | 4 | 8GB | 100GB | `192.168.0.181` |
-| `vm-rke2-w1` | worker | 4 | 8GB | 300GB | `192.168.0.191` |
-| `vm-rke2-w2` | worker | 4 | 8GB | 300GB | `192.168.0.192` |
-| `vm-rke2-w3` | worker | 4 | 8GB | 300GB | `192.168.0.193` |
+| `vm-rke2-cp1` | control-plane | 4 | 8GB | 100GB | `192.168.77.181` |
+| `vm-rke2-w1` | worker | 4 | 8GB | 300GB | `192.168.77.191` |
+| `vm-rke2-w2` | worker | 4 | 8GB | 300GB | `192.168.77.192` |
+| `vm-rke2-w3` | worker | 4 | 8GB | 300GB | `192.168.77.193` |
 
 네트워크 기준:
 
 - Proxmox 브리지: `vmbr0`
-- 노드 네트워크: `192.168.0.0/24`
-- 게이트웨이 예시: `192.168.0.1`
+- 노드 네트워크: `192.168.77.0/24`
+- 게이트웨이 예시: `192.168.77.1`
 - DNS 예시: 내부 DNS 또는 게이트웨이 DNS
 
 RKE2 내부 기본 네트워크:
@@ -47,7 +47,7 @@ RKE2 내부 기본 네트워크:
 - Pod CIDR: `10.42.0.0/16`
 - Service CIDR: `10.43.0.0/16`
 
-즉, 노드 VM은 `192.168.0.x`를 사용하고,
+즉, 노드 VM은 `192.168.77.x`를 사용하고,
 Pod와 Service는 RKE2 내부 네트워크를 따로 사용합니다.
 
 포트 메모:
@@ -123,10 +123,10 @@ Network:
 
 | VM | CPU | RAM | Disk | IP |
 | --- | --- | --- | --- | --- |
-| `vm-rke2-cp1` | 4 vCPU | 8GB | 100GB | `192.168.0.181/24` |
-| `vm-rke2-w1` | 4 vCPU | 8GB | 300GB | `192.168.0.191/24` |
-| `vm-rke2-w2` | 4 vCPU | 8GB | 300GB | `192.168.0.192/24` |
-| `vm-rke2-w3` | 4 vCPU | 8GB | 300GB | `192.168.0.193/24` |
+| `vm-rke2-cp1` | 4 vCPU | 8GB | 100GB | `192.168.77.181/24` |
+| `vm-rke2-w1` | 4 vCPU | 8GB | 300GB | `192.168.77.191/24` |
+| `vm-rke2-w2` | 4 vCPU | 8GB | 300GB | `192.168.77.192/24` |
+| `vm-rke2-w3` | 4 vCPU | 8GB | 300GB | `192.168.77.193/24` |
 
 생성 후 확인:
 
@@ -201,10 +201,10 @@ network:
 
 DHCP 예약 기준 IP:
 
-- `vm-rke2-cp1`: `192.168.0.181`
-- `vm-rke2-w1`: `192.168.0.191`
-- `vm-rke2-w2`: `192.168.0.192`
-- `vm-rke2-w3`: `192.168.0.193`
+- `vm-rke2-cp1`: `192.168.77.181`
+- `vm-rke2-w1`: `192.168.77.191`
+- `vm-rke2-w2`: `192.168.77.192`
+- `vm-rke2-w3`: `192.168.77.193`
 
 권장 순서:
 
@@ -270,10 +270,10 @@ systemctl is-enabled iscsid
 
 예시:
 
-- `rke2-cp1.internal.semtl.synology.me` -> `192.168.0.181`
-- `rke2-w1.internal.semtl.synology.me` -> `192.168.0.191`
-- `rke2-w2.internal.semtl.synology.me` -> `192.168.0.192`
-- `rke2-w3.internal.semtl.synology.me` -> `192.168.0.193`
+- `rke2-cp1.internal.semtl.synology.me` -> `192.168.77.181`
+- `rke2-w1.internal.semtl.synology.me` -> `192.168.77.191`
+- `rke2-w2.internal.semtl.synology.me` -> `192.168.77.192`
+- `rke2-w3.internal.semtl.synology.me` -> `192.168.77.193`
 
 확인:
 
@@ -352,18 +352,18 @@ sudo ufw status
 RKE2 설치 전에 노드 간 통신이 정상인지 먼저 확인합니다.
 
 ```bash
-ping -c 2 192.168.0.181
-ping -c 2 192.168.0.191
-ping -c 2 192.168.0.192
-ping -c 2 192.168.0.193
+ping -c 2 192.168.77.181
+ping -c 2 192.168.77.191
+ping -c 2 192.168.77.192
+ping -c 2 192.168.77.193
 ```
 
 필요 시 `cp1`에서:
 
 ```bash
-ssh semtl@192.168.0.191 hostname
-ssh semtl@192.168.0.192 hostname
-ssh semtl@192.168.0.193 hostname
+ssh semtl@192.168.77.191 hostname
+ssh semtl@192.168.77.192 hostname
+ssh semtl@192.168.77.193 hostname
 ```
 
 정상 기준:
@@ -397,11 +397,11 @@ cat <<'EOF' | sudo tee /etc/rancher/rke2/config.yaml
 token: "<RKE2_TOKEN_VALUE>"
 tls-san:
   - "rke2-cp1.internal.semtl.synology.me"
-  - "192.168.0.181"
+  - "192.168.77.181"
 write-kubeconfig-mode: "0644"
 cni: "canal"
 node-name: "vm-rke2-cp1"
-node-ip: "192.168.0.181"
+node-ip: "192.168.77.181"
 EOF
 ```
 
@@ -409,7 +409,7 @@ EOF
 
 - `<RKE2_TOKEN_VALUE>`는 실제 토큰으로 교체합니다.
 - `tls-san`에는 운영자가 실제로 접속할 FQDN/IP를 넣습니다.
-- 단일망 기준이므로 `node-ip`는 `192.168.0.181`을 사용합니다.
+- 단일망 기준이므로 `node-ip`는 `192.168.77.181`을 사용합니다.
 
 ### 12. `rke2-server` 설치 및 기동 `[cp1 전용]`
 
@@ -462,10 +462,10 @@ kubectl get pods -A
 sudo mkdir -p /etc/rancher/rke2
 
 cat <<'EOF' | sudo tee /etc/rancher/rke2/config.yaml
-server: "https://192.168.0.181:9345"
+server: "https://192.168.77.181:9345"
 token: "<RKE2_TOKEN_VALUE>"
 node-name: "vm-rke2-w1"
-node-ip: "192.168.0.191"
+node-ip: "192.168.77.191"
 EOF
 ```
 
@@ -475,10 +475,10 @@ EOF
 sudo mkdir -p /etc/rancher/rke2
 
 cat <<'EOF' | sudo tee /etc/rancher/rke2/config.yaml
-server: "https://192.168.0.181:9345"
+server: "https://192.168.77.181:9345"
 token: "<RKE2_TOKEN_VALUE>"
 node-name: "vm-rke2-w2"
-node-ip: "192.168.0.192"
+node-ip: "192.168.77.192"
 EOF
 ```
 
@@ -488,10 +488,10 @@ EOF
 sudo mkdir -p /etc/rancher/rke2
 
 cat <<'EOF' | sudo tee /etc/rancher/rke2/config.yaml
-server: "https://192.168.0.181:9345"
+server: "https://192.168.77.181:9345"
 token: "<RKE2_TOKEN_VALUE>"
 node-name: "vm-rke2-w3"
-node-ip: "192.168.0.193"
+node-ip: "192.168.77.193"
 EOF
 ```
 
@@ -515,7 +515,7 @@ sudo journalctl -u rke2-agent -f
 정상 기준:
 
 - `Active: active (running)`
-- `server https://192.168.0.181:9345` 연결 오류가 지속되지 않음
+- `server https://192.168.77.181:9345` 연결 오류가 지속되지 않음
 
 ### 16. 클러스터 상태 검증 `[cp1 전용]`
 
@@ -529,7 +529,7 @@ kubectl get pods -A -o wide
 정상 기준:
 
 - 노드 4대가 모두 `Ready`
-- 모든 노드의 `INTERNAL-IP`가 `192.168.0.x`로 표시
+- 모든 노드의 `INTERNAL-IP`가 `192.168.77.x`로 표시
 - `kube-system` 네임스페이스의 핵심 파드가 `Running`
 - `rke2-ingress-nginx`, `canal`, `coredns`, `metrics-server`가 정상 기동
 
@@ -605,7 +605,7 @@ sudo /var/lib/rancher/rke2/bin/crictl images
 
 1. `RKE2` 노드와 기본 애드온 상태 확인
 2. `MetalLB` 설치
-3. `192.168.0.200-192.168.0.220` IP 풀 구성
+3. `192.168.77.200-192.168.77.220` IP 풀 구성
 4. `ingress-nginx` 서비스를 `LoadBalancer`로 전환
 5. `Argo CD`, `Grafana`, `Prometheus`, `Rancher` 같은 후속 서비스 설치
 
@@ -731,7 +731,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : control-plane`
   `- hostname : vm-rke2-cp1`
-  `- node ip : 192.168.0.181`
+  `- node ip : 192.168.77.181`
   `- bootstrap : rke2-server 설치 및 초기 클러스터 구성 완료`
   `- kubectl : configured`
   `- addons : canal, ingress-nginx, coredns, metrics-server`
@@ -741,7 +741,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : worker-1`
   `- hostname : vm-rke2-w1`
-  `- node ip : 192.168.0.191`
+  `- node ip : 192.168.77.191`
   `- join : rke2-agent join 완료`
   `- cni : canal ready`
   `- metrics : kubectl top nodes 확인 가능`
@@ -751,7 +751,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : worker-2`
   `- hostname : vm-rke2-w2`
-  `- node ip : 192.168.0.192`
+  `- node ip : 192.168.77.192`
   `- join : rke2-agent join 완료`
   `- cni : canal ready`
   `- metrics : kubectl top nodes 확인 가능`
@@ -761,7 +761,7 @@ VM별 권장 설명:
   `- rke2 : v1.34.6+rke2r1`
   `- role : worker-3`
   `- hostname : vm-rke2-w3`
-  `- node ip : 192.168.0.193`
+  `- node ip : 192.168.77.193`
   `- join : rke2-agent join 완료`
   `- cni : canal ready`
   `- metrics : kubectl top nodes 확인 가능`

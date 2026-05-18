@@ -7,10 +7,10 @@
 
 이 저장소 기준 기본 전제는 아래와 같습니다.
 
-- Gateway: `192.168.0.1`
-- 내부 DNS: `192.168.0.2` (Synology `DNS Server`, Master Zone)
+- Gateway: `192.168.77.1`
+- 내부 DNS: `192.168.77.2` (Synology `DNS Server`, Master Zone)
 - 내부 도메인: `semtl.synology.me`
-- Proxmox Host: `192.168.0.241`
+- Proxmox Host: `192.168.77.241`
 
 ## DNS 토폴로지 기준
 
@@ -18,7 +18,7 @@
 
 ```text
 VM / Host
-  -> Synology DNS (192.168.0.2)
+  -> Synology DNS (192.168.77.2)
   -> Forwarders (1.1.1.1 / 8.8.8.8)
   -> Public DNS
 ```
@@ -31,9 +31,9 @@ Synology `DNS Server` 확인 항목:
 
 예시:
 
-- `proxmox.internal.semtl.synology.me -> 192.168.0.241`
-- `minio.internal.semtl.synology.me -> 192.168.0.x`
-- `pbs.semtl.synology.me -> 192.168.0.170`
+- `proxmox.internal.semtl.synology.me -> 192.168.77.241`
+- `minio.internal.semtl.synology.me -> 192.168.77.x`
+- `pbs.semtl.synology.me -> 192.168.77.170`
 
 ## Proxmox Host 표준
 
@@ -49,13 +49,13 @@ Synology `DNS Server` 확인 항목:
 
 - `hostname` -> `proxmox`
 - `hostname -f` -> `proxmox.internal.semtl.synology.me`
-- `/etc/hosts` -> `192.168.0.241 proxmox.internal.semtl.synology.me proxmox`
+- `/etc/hosts` -> `192.168.77.241 proxmox.internal.semtl.synology.me proxmox`
 
 예시:
 
 ```text
 127.0.0.1 localhost.localdomain localhost
-192.168.0.241 proxmox.internal.semtl.synology.me proxmox
+192.168.77.241 proxmox.internal.semtl.synology.me proxmox
 ```
 
 검증 명령:
@@ -96,7 +96,7 @@ nslookup proxmox.internal.semtl.synology.me
 - `hostname -f` -> `minio.internal.semtl.synology.me`
 - `getent hosts minio.internal.semtl.synology.me` -> `127.0.1.1 ...`
 - MinIO VM 자신에서 `nslookup minio.internal.semtl.synology.me` -> `127.0.0.1`
-- 다른 PC에서 `nslookup minio.internal.semtl.synology.me` -> `192.168.0.x`
+- 다른 PC에서 `nslookup minio.internal.semtl.synology.me` -> `192.168.77.x`
 
 중요:
 
@@ -116,15 +116,15 @@ nslookup proxmox.internal.semtl.synology.me
 예시:
 
 ```text
-192.168.0.170 pbs.semtl.synology.me pbs
-192.168.0.171 harbor.semtl.synology.me vm-harbor
+192.168.77.170 pbs.semtl.synology.me pbs
+192.168.77.171 harbor.semtl.synology.me vm-harbor
 ```
 
 ## DNS 설정 기준
 
 기본 권장:
 
-- Primary DNS: `192.168.0.2`
+- Primary DNS: `192.168.77.2`
 - Secondary DNS: `1.1.1.1`
 
 `8.8.8.8`를 써도 동작에는 문제가 없습니다. 문서에서는 일관성을 위해
@@ -204,7 +204,7 @@ resolvectl status
 운영자가 정적으로 관리하는 서버라면 `/etc/resolv.conf`를 재작성합니다.
 
 ```text
-nameserver 192.168.0.2
+nameserver 192.168.77.2
 nameserver 1.1.1.1
 ```
 
@@ -214,8 +214,8 @@ nameserver 1.1.1.1
 ### 4) Synology DNS 확인
 
 ```bash
-nslookup proxmox.internal.semtl.synology.me 192.168.0.2
-nslookup google.com 192.168.0.2
+nslookup proxmox.internal.semtl.synology.me 192.168.77.2
+nslookup google.com 192.168.77.2
 ```
 
 확인 포인트:

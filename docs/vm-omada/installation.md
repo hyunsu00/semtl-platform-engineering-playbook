@@ -35,8 +35,8 @@ Docker 우회 구성은 제외합니다.
 예시 운영값:
 
 - hostname: `vm-omada`
-- IP: `192.168.0.20`
-- Omada URL: `https://192.168.0.20:8043`
+- IP: `192.168.77.20`
+- Omada URL: `https://192.168.77.20:8043`
 
 ## 사전 조건
 
@@ -90,7 +90,7 @@ systemctl status ssh --no-pager
 다른 관리 PC에서 접속을 확인합니다.
 
 ```bash
-ssh semtl@192.168.0.20
+ssh semtl@192.168.77.20
 sudo whoami
 ```
 
@@ -254,7 +254,7 @@ ss -lntp | grep -E '8043|8088'
 브라우저에서 아래 주소로 접속합니다.
 
 ```text
-https://192.168.0.20:8043
+https://192.168.77.20:8043
 ```
 
 초기 접속 시 확인할 항목:
@@ -267,7 +267,7 @@ https://192.168.0.20:8043
 운영 메모:
 
 - 첫 기동 직후에는 초기화에 수 분 걸릴 수 있습니다.
-- `http://192.168.0.20:8088`로 접속하면 보통 `https://192.168.0.20:8043/`로 이동합니다.
+- `http://192.168.77.20:8088`로 접속하면 보통 `https://192.168.77.20:8043/`로 이동합니다.
 - 접속이 되지 않으면 `sudo tpeap status`, `curl -I http://localhost:8088`,
   `curl -kI https://localhost:8043`를 먼저 확인합니다.
 
@@ -296,15 +296,15 @@ Synology NAS 작업 기록 예시:
 ==> curl -I http://localhost:8088
 ==> curl -kI https://localhost:8043
 - 접속 확인
-==> https://192.168.0.20:8043
+==> https://192.168.77.20:8043
 ```
 
 운영 메모:
 
 - `MAC 주소`는 실제 VM 값으로 바꿔 적습니다.
 - 비밀번호는 문서에 그대로 적지 않고 마스킹하거나 별도 안전한 위치에만 보관합니다.
-- 스냅샷 설명에는 `IP: 192.168.0.20`도 함께 남기면 추적이 편합니다.
-- `Omada URL: https://192.168.0.20:8043`도 같이 적어두면 확인이 쉽습니다.
+- 스냅샷 설명에는 `IP: 192.168.77.20`도 함께 남기면 추적이 편합니다.
+- `Omada URL: https://192.168.77.20:8043`도 같이 적어두면 확인이 쉽습니다.
 
 ## 12. `wg-route` 연결 서비스 등록
 
@@ -320,11 +320,11 @@ Omada 기본 설치와 스냅샷 생성까지 끝낸 뒤,
 예시 운영값:
 
 - 로컬 NIC: `enp3s0`
-- 로컬 LAN: `192.168.0.0/24`
-- 로컬 게이트웨이: `192.168.0.1`
+- 로컬 LAN: `192.168.77.0/24`
+- 로컬 게이트웨이: `192.168.77.1`
 - 원격 WireGuard 대역: `10.99.0.0/24`
-- 원격 사설망 범위: `192.168.0.0/16`
-- Alpine WireGuard VM IP: `192.168.0.10`
+- 원격 사설망 범위: `192.168.77.0/16`
+- Alpine WireGuard VM IP: `192.168.77.10`
 
 ### 12-1. 라우트 대상 확인
 
@@ -350,11 +350,11 @@ sudo tee /usr/local/bin/wg-route.sh >/dev/null <<'EOF'
 #!/usr/bin/env bash
 set -eu
 
-WG_GATEWAY="192.168.0.10"
+WG_GATEWAY="192.168.77.10"
 WG_DEVICE="enp3s0"
 TARGET_ROUTES=(
   "10.99.0.0/24"
-  "192.168.0.0/16"
+  "192.168.77.0/16"
 )
 
 for route in "${TARGET_ROUTES[@]}"; do
@@ -366,15 +366,15 @@ sudo chmod 755 /usr/local/bin/wg-route.sh
 
 운영 메모:
 
-- 이 문서 예시는 로컬 LAN `192.168.0.0/24`, Alpine WireGuard VM `192.168.0.10`,
+- 이 문서 예시는 로컬 LAN `192.168.77.0/24`, Alpine WireGuard VM `192.168.77.10`,
   Omada VM NIC `enp3s0` 기준입니다.
 - Ubuntu 기본 환경에서는 `/usr/local/bin`이 이미 있으므로 별도 생성 없이 진행해도 됩니다.
 - `WG_GATEWAY`는 실제 WireGuard VM 또는 상위 라우터 IP로 바꿉니다.
 - `WG_DEVICE`는 `enp3s0`, `ens18`, `eth0` 등 실제 인터페이스명으로 바꿉니다.
 - 여러 원격 대역이 있으면 `TARGET_ROUTES`에 계속 추가합니다.
 - `ip route replace`를 사용하면 재실행 시에도 중복 오류 없이 덮어쓸 수 있습니다.
-- 로컬망이 `192.168.0.0/24`로 직접 붙어 있다면 더 구체적인 경로가 우선하므로
-  `192.168.0.x`는 로컬로 남고, 그 외 `192.168.x.x`는 `wg-route`로 보낼 수 있습니다.
+- 로컬망이 `192.168.77.0/24`로 직접 붙어 있다면 더 구체적인 경로가 우선하므로
+  `192.168.77.x`는 로컬로 남고, 그 외 `192.168.x.x`는 `wg-route`로 보낼 수 있습니다.
 
 ### 12-3. `systemd` 서비스 등록
 
@@ -414,10 +414,10 @@ ip route
 기대 결과:
 
 - `wg-route.service`가 `active (exited)` 상태
-- `10.99.0.0/24 via 192.168.0.10 dev enp3s0` 같은 경로 확인
-- `192.168.0.0/16 via 192.168.0.10 dev enp3s0` 같은 경로 확인
-- `ip route get 192.168.0.20`는 로컬 NIC를 사용
-- `ip route get 192.168.200.10`는 `via 192.168.0.10 dev enp3s0`로 표시
+- `10.99.0.0/24 via 192.168.77.10 dev enp3s0` 같은 경로 확인
+- `192.168.77.0/16 via 192.168.77.10 dev enp3s0` 같은 경로 확인
+- `ip route get 192.168.77.20`는 로컬 NIC를 사용
+- `ip route get 192.168.200.10`는 `via 192.168.77.10 dev enp3s0`로 표시
 
 ### 12-5. 재부팅 검증
 
@@ -430,7 +430,7 @@ sudo reboot
 ```bash
 systemctl status wg-route.service --no-pager
 ip route
-ip route get 192.168.0.20
+ip route get 192.168.77.20
 ip route get 192.168.200.10
 ```
 

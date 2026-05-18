@@ -3,20 +3,20 @@
 ## 개요
 
 이 문서는 `Synology DSM7` 환경에서 `Tailscale`을 설치하고
-`192.168.0.0/24`를 subnet router로 광고해 외부에서 `192.168.0.x` 대역에
+`192.168.77.0/24`를 subnet router로 광고해 외부에서 `192.168.77.x` 대역에
 접근하는 가장 단순한 절차만 정리합니다.
 
 ## 아키텍처와 예시 값
 
-- Synology NAS IP: `192.168.0.2`
-- Synology 관리 UI: `https://192.168.0.2:5001`
+- Synology NAS IP: `192.168.77.2`
+- Synology 관리 UI: `https://192.168.77.2:5001`
 - Tailscale 장치 이름: `semtl-nas`
 - Tailscale IPv4 예시: `100.81.55.127`
 - Tailscale IPv6 예시: `fd7a:115c:a1e0::2b37:377f`
 - Tailscale FQDN 예시: `semtl-nas.taila9290d.ts.net`
-- 예시 로컬 LAN 대역: `192.168.0.0/24`
+- 예시 로컬 LAN 대역: `192.168.77.0/24`
 - Tailscale 주소 대역: `100.64.0.0/10`
-- 예시 광고 라우트: `192.168.0.0/24`
+- 예시 광고 라우트: `192.168.77.0/24`
 
 ## 사전 조건
 
@@ -47,18 +47,18 @@
 
 ## 2. Synology를 Subnet Router로 사용
 
-Tailscale을 설치한 뒤 외부 기기에서 `192.168.0.x` 대역으로 직접 접근하려면
+Tailscale을 설치한 뒤 외부 기기에서 `192.168.77.x` 대역으로 직접 접근하려면
 Synology NAS가 subnet router 역할을 하도록 로컬 대역을 광고해야 합니다.
 
 예시:
 
 ```bash
-sudo tailscale set --advertise-routes=192.168.0.0/24
+sudo tailscale set --advertise-routes=192.168.77.0/24
 ```
 
 주의:
 
-- Tailscale만 설치한 상태로는 NAS 자신만 접근되고 `192.168.0.x` 대역 전체는 자동으로 열리지 않습니다.
+- Tailscale만 설치한 상태로는 NAS 자신만 접근되고 `192.168.77.x` 대역 전체는 자동으로 열리지 않습니다.
 - subnet router 승인 전에는 Tailscale Admin Console에 `Pending approval`로 보일 수 있습니다.
 
 그 다음 Tailscale Admin Console에서:
@@ -71,11 +71,11 @@ sudo tailscale set --advertise-routes=192.168.0.0/24
 
 승인 후 확인 예시:
 
-- 외부 기기에서 `http://192.168.0.1`
-- 외부 기기에서 `ping 192.168.0.1`
-- 외부 기기에서 `192.168.0.x` 대역의 내부 장비 접속
+- 외부 기기에서 `http://192.168.77.1`
+- 외부 기기에서 `ping 192.168.77.1`
+- 외부 기기에서 `192.168.77.x` 대역의 내부 장비 접속
 - Tailscale UI 기준 `Subnet router`에 `1 route` 표시
-- `192.168.0.0/24` 상태가 `Approved`
+- `192.168.77.0/24` 상태가 `Approved`
 
 ### 2-1. 여러 VLAN 대역을 함께 광고하는 경우
 
@@ -88,7 +88,7 @@ sudo tailscale set --advertise-routes=192.168.1.0/24,192.168.10.0/24,192.168.110
 또는 대역을 크게 묶는 예시:
 
 ```bash
-sudo tailscale set --advertise-routes=192.168.0.0/16
+sudo tailscale set --advertise-routes=192.168.77.0/16
 ```
 
 전제 조건:
@@ -103,7 +103,7 @@ sudo tailscale set --advertise-routes=192.168.0.0/16
 
 권장 순서:
 
-1. 로컬 DNS가 있다면 `vm-win11.semtl.synology.me -> 192.168.0.x` A 레코드 등록
+1. 로컬 DNS가 있다면 `vm-win11.semtl.synology.me -> 192.168.77.x` A 레코드 등록
 1. 외부 Tailscale 기기에서도 같은 이름을 쓰려면 MagicDNS 또는 각 기기의 `hosts` 파일을 별도로 관리
 
 주의:
