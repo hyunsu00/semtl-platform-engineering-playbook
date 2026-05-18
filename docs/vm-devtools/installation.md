@@ -33,6 +33,8 @@
 - `sudo whoami` 결과가 `root`
 - 게스트 OS에서 `lspci`로 NVIDIA VGA 장치 확인 가능
 - Ubuntu 기본 원격 데스크톱 RDP로 GUI 세션 접속 가능
+- Desktop 세션이 `x11`로 동작
+- RustDesk 설치 완료
 - Docker 서비스 기동 및 `docker ps` 정상 동작
 - `docker compose up -d`로 관리 도구 스택 기동 완료
 
@@ -562,7 +564,58 @@ ss -lntp | grep 3389
   원격 데스크톱 도구를 검토합니다.
 - `3389/tcp`는 내부 관리망에서만 접근 가능하게 제한합니다.
 
-### 6-3. 기본 RDP와 GPU 가속 기준
+### 6-3. X11 세션 활성화
+
+RustDesk 원격 제어 안정성을 위해 Ubuntu Desktop 세션은 X11로 사용합니다.
+Wayland 세션에서는 화면 제어, 입력 제어, 권한 팝업 처리가 제한될 수 있습니다.
+
+`/etc/gdm3/custom.conf`에서 아래 값을 설정합니다.
+
+```ini
+WaylandEnable=false
+```
+
+적용 후 재부팅합니다.
+
+```bash
+sudo reboot
+```
+
+다시 로그인한 뒤 세션 타입을 확인합니다.
+
+```bash
+echo "$XDG_SESSION_TYPE"
+```
+
+기대 결과:
+
+```text
+x11
+```
+
+### 6-4. RustDesk 설치
+
+RDP 접속을 확인한 뒤 보조 원격 접속 도구로 RustDesk를 설치합니다.
+
+```bash
+cd /tmp
+wget https://github.com/rustdesk/rustdesk/releases/latest/download/rustdesk-1.4.6-x86_64.deb
+sudo apt install -y ./rustdesk-1.4.6-x86_64.deb
+```
+
+검증:
+
+```bash
+dpkg -l rustdesk
+```
+
+운영 메모:
+
+- `latest/download` URL을 사용하더라도 파일명은 설치 시점의 대상 버전에 맞춰
+  확인합니다.
+- RustDesk ID와 접속 비밀번호는 GUI에서 확인하고, 문서에는 기록하지 않습니다.
+
+### 6-5. 기본 RDP와 GPU 가속 기준
 
 이 문서의 기본 RDP 구성은 관리 작업용 원격 GUI 기준입니다. P1000 패스스루와
 NVIDIA 드라이버가 정상이어도 원격 데스크톱 세션의 그래픽 정보는 로컬 물리
@@ -614,6 +667,7 @@ cat /dev/null > ~/.bash_history && history -c
 - nvidia-smi : success
 - ubuntu remote desktop : enabled
 - rdp port : 3389/tcp
+- rustdesk : installed
 ```
 
 ## 8. Docker 설치 전 최종 확인
@@ -625,7 +679,9 @@ systemctl is-active qemu-guest-agent
 systemctl is-active ssh
 systemctl --user is-active gnome-remote-desktop
 timedatectl
+echo "$XDG_SESSION_TYPE"
 lspci -nn | grep -i nvidia
+dpkg -l rustdesk
 ```
 
 확인 기준:
@@ -634,7 +690,9 @@ lspci -nn | grep -i nvidia
 - `qemu-guest-agent`, `ssh`가 `active`
 - 사용자 세션의 `gnome-remote-desktop`이 `active`
 - `System clock synchronized: yes`
+- `XDG_SESSION_TYPE`이 `x11`
 - `lspci`에서 `Quadro P1000`과 Audio 함수 확인
+- `dpkg -l rustdesk`에서 `ii  rustdesk` 확인
 
 ## 9. VM 기준 Docker 설치
 
