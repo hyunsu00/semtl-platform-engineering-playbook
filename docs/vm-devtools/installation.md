@@ -3,13 +3,13 @@
 ## 개요
 
 이 문서는 `Proxmox VE`에서 `P1000` 패스스루가 포함된 `vm-devtools` VM을 만들고
-`Ubuntu 22.04 Server` 기본 설치, SSH, Docker, 기본 관리 도구까지 한 번에
+`Ubuntu 22.04 Desktop` 기본 설치, SSH, Docker, 기본 관리 도구까지 한 번에
 따라갈 수 있게 정리한 문서입니다.
 
 목표:
 
 - VM 이름: `vm-devtools`
-- 게스트 OS: `Ubuntu 22.04 Server`
+- 게스트 OS: `Ubuntu 22.04 Desktop`
 - GPU: `NVIDIA Quadro P1000` PCIe 패스스루
 - 운영 계정: `semtl`
 - 접속 방식: `semtl` 계정 + `sudo`
@@ -26,13 +26,13 @@
 
 ## 최종 성공 기준
 
-- Proxmox에서 `Ubuntu 22.04 Server` 기반 VM 생성 완료
+- Proxmox에서 `Ubuntu 22.04 Desktop` 기반 VM 생성 완료
 - `P1000` VGA 패스스루 추가 완료
 - `qemu-guest-agent` 설치 및 Proxmox 연동 완료
 - 다른 관리 PC에서 `ssh semtl@<VM-IP>` 접속 가능
 - `sudo whoami` 결과가 `root`
 - 게스트 OS에서 `lspci`로 NVIDIA VGA 장치 확인 가능
-- `xrdp`를 통해 GUI 세션 접속 가능
+- Ubuntu 기본 원격 데스크톱 RDP로 GUI 세션 접속 가능
 - Docker 서비스 기동 및 `docker ps` 정상 동작
 - `docker compose up -d`로 관리 도구 스택 기동 완료
 
@@ -45,7 +45,7 @@
 ## 사전 조건
 
 - Proxmox VE 설치 및 관리 접속 가능 상태
-- Proxmox 노드에 `Ubuntu 22.04 Server` ISO 업로드 완료
+- Proxmox 노드에 `Ubuntu 22.04 Desktop` ISO 업로드 완료
 - `vmbr0` 등 VM 연결용 브리지 준비 완료
 - VM용 스토리지 확보
 - BIOS/UEFI에서 `VT-d` 또는 `AMD-Vi(IOMMU)` 활성화 완료
@@ -66,7 +66,7 @@ Proxmox Web UI에서 `Create VM`으로 `vm-devtools` VM을 생성합니다.
 권장 기준:
 
 - Name: `vm-devtools`
-- OS: `Ubuntu 22.04 Server`
+- OS: `Ubuntu 22.04 Desktop`
 - BIOS: `OVMF (UEFI)`
 - Machine Type: `Q35`
 - EFI Disk: 추가
@@ -84,22 +84,28 @@ Proxmox Web UI에서 `Create VM`으로 `vm-devtools` VM을 생성합니다.
 권장 리소스:
 
 - vCPU: `4`
-- RAM: `16GB`
+- Memory: `16384MiB`
+- Minimum memory: `12288MiB`
+- Ballooning Device: 체크
+- KSM 허용: 체크
 - Disk: `120GB`
 
 운영 메모:
 
 - Docker 기반 관리 도구와 GPU 패스스루 검증을 함께 둘 계획이면
-  `vCPU 4`, `RAM 16GB`, `Disk 120GB` 기준으로 시작하는 편이 안정적입니다.
+  `vCPU 4`, `Memory 16384MiB`, `Disk 120GB` 기준으로 시작하는 편이
+  안정적입니다.
+- Ubuntu Desktop과 Docker 관리 도구를 함께 쓰므로 최소 메모리는 너무 낮게
+  잡지 않고 `12288MiB` 정도를 유지합니다.
 - 네트워크는 먼저 `DHCP`로 검증한 뒤 필요 시 고정 IP로 전환하는 편이 안전합니다.
 - `Homepage`, `Uptime Kuma`, `Dozzle`, `Watchtower`를 함께 올릴 계획이면
-  `16GB` 구성이 여유롭습니다.
+  최대 `16384MiB` 구성이 여유롭습니다.
 
-## 2. Ubuntu 22.04 Server 기본 설치
+## 2. Ubuntu 22.04 Desktop 기본 설치
 
-Ubuntu Server 설치 화면에서 일반 사용자 계정 `semtl`을 생성합니다.
-설치가 끝나면 VM 콘솔 또는 SSH로 로그인해 hostname, 게스트 에이전트,
-기본 패키지를 먼저 정리합니다.
+Ubuntu Desktop 설치 화면에서 일반 사용자 계정 `semtl`을 생성합니다.
+설치가 끝나면 VM 콘솔의 Desktop 세션 또는 SSH로 로그인해 hostname,
+게스트 에이전트, 기본 패키지를 먼저 정리합니다.
 
 ### 2-1. hostname 및 `/etc/hosts` 설정
 
@@ -130,18 +136,20 @@ getent hosts devtools.internal.semtl.synology.me
 - `hostname`: `vm-devtools`
 - `hostname -f`: `devtools.internal.semtl.synology.me`
 
-### 2-2. qemu-guest-agent 및 기본 패키지 설치
+### 2-2. qemu-guest-agent, SSH 및 기본 패키지 설치
 
 ```bash
 sudo apt update -y
-sudo apt install -y qemu-guest-agent
+sudo apt install -y qemu-guest-agent openssh-server
 sudo systemctl enable --now qemu-guest-agent
+sudo systemctl enable --now ssh
 ```
 
 검증:
 
 ```bash
 systemctl status qemu-guest-agent --no-pager
+systemctl status ssh --no-pager
 ip -brief address
 ```
 
@@ -150,6 +158,8 @@ ip -brief address
 - Proxmox에서 게스트 IP 확인, 종료, 일부 상태 수집을 안정적으로 하려면
   `qemu-guest-agent`를 먼저 넣는 편이 좋습니다.
 - Proxmox VM `Options`에서 `QEMU Guest Agent`가 `Enabled`인지 같이 확인합니다.
+- Ubuntu Desktop 설치 직후에는 SSH 서버가 없을 수 있으므로 `openssh-server`를
+  함께 설치합니다.
 
 ### 2-3. SSH, sudo, 시간 확인
 
@@ -384,7 +394,7 @@ PCI 디바이스 (hostpci1)  0000:02:00.1,pcie=1
 
 운영 메모:
 
-- Server VM에서는 noVNC와 기본 콘솔 접근성을 유지하기 위해 `Primary GPU`와
+- Desktop VM에서도 noVNC와 기본 콘솔 접근성을 유지하기 위해 `Primary GPU`와
   `x-vga=1`을 사용하지 않는 구성을 우선합니다.
 - 패스스루 후 부팅이 되지 않으면 `Primary GPU` 체크 여부와 EFI/OVMF 조합을
   먼저 다시 확인합니다.
@@ -452,67 +462,78 @@ lsmod | grep nvidia
 - `nvidia-smi`에서 `Quadro P1000`이 보여야 합니다.
 - NVIDIA VGA 장치의 `Kernel driver in use`가 `nvidia`로 보여야 합니다.
 
-## 6. XRDP GUI 접속 환경 설치
+## 6. Ubuntu 기본 RDP 접속 환경 설정
 
-Ubuntu Server 기준으로는 GUI 세션이 없으므로 `xrdp`와 가벼운 데스크톱 환경을
-함께 설치합니다. 이 단계까지 완료한 뒤 스냅샷을 남기면 Docker 설치 전
-GUI 접속 가능한 기준점으로 되돌아갈 수 있습니다.
+Ubuntu Desktop에는 기본 GNOME 데스크톱 세션이 포함되어 있습니다. 이 문서에서는
+`xrdp`를 별도로 설치하지 않고 Ubuntu 기본 원격 데스크톱 기능으로 RDP 접속을
+사용합니다. 이 단계까지 완료한 뒤 스냅샷을 남기면 Docker 설치 전 GUI 접속
+가능한 기준점으로 되돌아갈 수 있습니다.
 
-### 6-1. XRDP/XFCE 설치
+### 6-1. 원격 데스크톱 활성화
 
-```bash
-sudo apt update
-sudo apt install -y xrdp xorgxrdp xfce4 xfce4-goodies dbus-x11 \
-  arc-theme papirus-icon-theme fonts-noto-cjk language-pack-ko \
-  language-pack-gnome-ko
-echo "startxfce4" > ~/.xsession
-sudo adduser xrdp ssl-cert
-sudo systemctl enable --now xrdp
-sudo systemctl restart xrdp
-```
+VM 콘솔의 Ubuntu Desktop 세션에서 아래 항목을 설정합니다.
 
-### 6-2. XFCE 메뉴 한글화
+1. `Settings` 실행
+1. `Sharing` 선택
+1. 우측 상단 `Sharing` 활성화
+1. `Remote Desktop` 선택
+1. `Remote Desktop` 활성화
+1. `Remote Control` 활성화
+1. RDP 접속용 사용자 이름과 고정 비밀번호 설정
 
-XFCE 메뉴와 기본 앱 이름을 한글로 보려면 시스템 locale을 `ko_KR.UTF-8`로
-생성한 뒤 기본 locale로 설정합니다.
+권장 운영값:
 
-```bash
-sudo locale-gen ko_KR.UTF-8
-sudo update-locale LANG=ko_KR.UTF-8
-cat /etc/default/locale
-```
-
-재접속 후 확인:
-
-```bash
-locale
-```
-
-### 6-3. XRDP 속도 튜닝
-
-XRDP가 다소 느리게 느껴지면 서버 설정 파일을 직접 바꾸기보다 RDP 클라이언트와
-XFCE 효과를 먼저 조정합니다.
-
-- Color depth: `True color (24 bit)` 또는 느리면 `High color (16 bit)`
-- 화면 크기: 필요한 해상도만 사용
-- 배경화면, 애니메이션, 창 내용 표시 옵션은 끄기
-- 내부망에서는 `LAN` 또는 최고 품질보다 한 단계 낮은 성능 프리셋 사용
-
-### 6-4. XFCE UI 정리
-
-첫 XRDP 로그인 후 `Settings`에서 아래처럼 정리합니다.
-
-- `Appearance > Style`: `Arc-Dark` 또는 `Arc`
-- `Appearance > Icons`: `Papirus`
-- `Window Manager > Style`: `Arc-Dark` 또는 `Arc`
-- `Window Manager Tweaks > Compositor`: 비활성화
-- `Session and Startup > Application Autostart`: 불필요한 자동 시작 항목 비활성화
+- RDP username: `semtl`
+- RDP password: `<RDP_PASSWORD>`
 
 운영 메모:
 
-- XFCE compositor를 끄면 투명 효과는 줄어들지만 XRDP 반응성이 좋아집니다.
-- 한글 UI나 한글 파일명을 볼 계획이면 `fonts-noto-cjk`를 설치해두는 편이
-  안전합니다.
+- Ubuntu 기본 RDP 비밀번호는 시스템 로그인 비밀번호와 별도로 관리할 수 있습니다.
+- 실제 RDP 비밀번호는 문서에 기록하지 말고 비밀번호 관리자에 보관합니다.
+- 자동 로그인은 사용하지 않습니다. 자동 로그인 상태에서는 GNOME keyring 처리와
+  RDP 비밀번호 저장이 꼬일 수 있습니다.
+- 재부팅 후에는 noVNC 또는 물리 콘솔에서 `semtl` 계정으로 먼저 로그인한 뒤
+  RDP 접속을 확인합니다.
+
+RDP 비밀번호가 재부팅 후 계속 바뀌면 `Passwords and Keys`에서 RDP 비밀번호를
+고정합니다.
+
+1. `Passwords and Keys` 실행
+1. `+` 선택
+1. `Password Keyring` 선택
+1. 새 keyring 이름 입력: `Zero Security Keyring`
+1. 비밀번호 입력 화면에서 아무것도 입력하지 않고 계속 진행
+1. 암호화되지 않은 keyring 경고를 확인하고 계속 진행
+1. `Zero Security Keyring`을 우클릭해 `Set as default` 선택
+1. 기존 RDP 관련 항목 삭제
+1. `Settings > Sharing > Remote Desktop`에서 RDP 비밀번호 다시 설정
+1. 새 RDP 비밀번호가 `Zero Security Keyring`에 저장됐는지 확인
+1. `Default keyring`을 우클릭해 다시 `Set as default` 선택
+
+운영 메모:
+
+- `Zero Security Keyring`은 RDP 비밀번호 저장 위치를 고정하기 위한 우회
+  절차로만 사용합니다.
+- 암호 없는 keyring을 기본값으로 계속 두지 말고, RDP 비밀번호 저장을 확인한 뒤
+  `Default keyring`을 다시 기본값으로 돌립니다.
+- 참고: [ubuntu에서 Remote Desktop password가 자꾸 변경될때](https://hjh1023.tistory.com/83)
+
+CLI로 RDP 자격 증명을 다시 설정해야 하면 `semtl` Desktop 세션에서 아래 명령을
+사용합니다.
+
+```bash
+grdctl rdp set-credentials semtl '<RDP_PASSWORD>'
+grdctl rdp enable
+grdctl rdp disable-view-only
+systemctl --user restart gnome-remote-desktop
+```
+
+운영 메모:
+
+- `grdctl` 명령에 실제 비밀번호를 넣으면 셸 히스토리에 남을 수 있으므로,
+  실행 후 `history -d <번호>`로 해당 이력을 지우거나 GUI에서 다시 설정합니다.
+
+### 6-2. RDP 접속 확인
 
 방화벽을 사용하는 경우에만 RDP 포트를 허용합니다.
 
@@ -523,7 +544,7 @@ sudo ufw allow from 192.168.0.0/24 to any port 3389 proto tcp
 검증:
 
 ```bash
-systemctl status xrdp --no-pager
+systemctl --user status gnome-remote-desktop --no-pager
 ss -lntp | grep 3389
 ```
 
@@ -531,41 +552,34 @@ ss -lntp | grep 3389
 
 - 접속 주소: `192.168.0.231:3389`
 - 계정: `semtl`
-- 세션: `Xorg`
+- 비밀번호: `Remote Desktop`에서 설정한 `<RDP_PASSWORD>`
 
 운영 메모:
 
-- XRDP 로그인 전 VM 콘솔이나 SSH에서 같은 사용자 GUI 세션을 열어둔 경우
-  세션 충돌이 날 수 있으므로 로그아웃 후 접속합니다.
+- Ubuntu 기본 RDP는 Desktop 로그인 세션 공유 방식이므로, VM 콘솔에서 `semtl`
+  계정으로 로그인한 뒤 RDP 접속을 확인합니다.
+- VM 재부팅 직후 로그인 화면에 바로 RDP 접속하는 운영 모델이 필요하면 별도
+  원격 데스크톱 도구를 검토합니다.
 - `3389/tcp`는 내부 관리망에서만 접근 가능하게 제한합니다.
 
-### 6-5. XRDP와 GPU 가속 기준
+### 6-3. 기본 RDP와 GPU 가속 기준
 
-이 문서의 XRDP 구성은 관리 작업용 원격 GUI 기준입니다. P1000 패스스루와
-NVIDIA 드라이버가 정상이어도 XRDP/XFCE 정보 창에서는 GPU가 `llvmpipe`로
-보일 수 있습니다.
+이 문서의 기본 RDP 구성은 관리 작업용 원격 GUI 기준입니다. P1000 패스스루와
+NVIDIA 드라이버가 정상이어도 원격 데스크톱 세션의 그래픽 정보는 로컬 물리
+출력 세션과 다르게 보일 수 있습니다.
 
 운영 기준:
 
 - P1000 패스스루와 드라이버 확인: `nvidia-smi`, `lspci -nnk`
-- XRDP 관리 GUI 확인: RDP 로그인, XFCE 동작, 관리 앱 실행
-- XRDP 세션의 3D 렌더링 확인: `glxinfo -B`의 `OpenGL renderer`
-
-```bash
-sudo apt install -y mesa-utils
-glxinfo -B
-```
+- RDP 관리 GUI 확인: RDP 로그인, GNOME 동작, 관리 앱 실행
 
 운영 메모:
 
-- `nvidia-smi`가 정상이고 `glxinfo -B`에서 `llvmpipe`가 보여도 GPU 연산용
-  드라이버는 정상일 수 있습니다.
-- XRDP 기본 Xorg 세션을 NVIDIA 렌더러로 직접 가속하는 구성은 배포판,
-  `xrdp`, `xorgxrdp`, NVIDIA 드라이버 버전에 민감합니다. 이 문서의 기본
-  설치 기준에는 포함하지 않습니다.
-- GPU 가속 GUI가 반드시 필요하면 XRDP 기본 세션보다 P1000에 연결된 물리
-  화면의 로컬 Xorg 세션을 원격으로 보는 방식이나, VirtualGL/TurboVNC,
-  NoMachine 같은 별도 원격 데스크톱 구성을 우선 검토합니다.
+- Ubuntu 기본 RDP 세션의 렌더러 표시는 물리 출력 세션과 다를 수 있으므로,
+  P1000 인식 기준은 `nvidia-smi`와 `lspci -nnk` 결과로 판단합니다.
+- GPU 가속 GUI가 반드시 필요하면 P1000에 연결된 물리 화면의 로컬 GNOME 세션을
+  기준으로 검증하거나, VirtualGL/TurboVNC, NoMachine 같은 별도 원격 데스크톱
+  구성을 우선 검토합니다.
 
 ## 7. P1000 장치 추가 직후 스냅샷
 
@@ -589,7 +603,7 @@ cat /dev/null > ~/.bash_history && history -c
 1. `Take Snapshot`
 1. 스냅샷 이름과 설명 입력 후 생성
 
-- 권장 이름: `p1000-xrdp-clean-v1`
+- 권장 이름: `p1000-rdp-clean-v1`
 
 권장 설명:
 
@@ -598,8 +612,8 @@ cat /dev/null > ~/.bash_history && history -c
 - gpu passthrough : NVIDIA Quadro P1000 VGA/Audio
 - gpu driver : NVIDIA 535.288.01
 - nvidia-smi : success
-- xrdp/xfce : enabled
-- xrdp renderer : llvmpipe
+- ubuntu remote desktop : enabled
+- rdp port : 3389/tcp
 ```
 
 ## 8. Docker 설치 전 최종 확인
@@ -609,7 +623,7 @@ hostname
 hostname -f
 systemctl is-active qemu-guest-agent
 systemctl is-active ssh
-systemctl is-active xrdp
+systemctl --user is-active gnome-remote-desktop
 timedatectl
 lspci -nn | grep -i nvidia
 ```
@@ -617,7 +631,8 @@ lspci -nn | grep -i nvidia
 확인 기준:
 
 - `hostname -f`가 `devtools.internal.semtl.synology.me`
-- `qemu-guest-agent`, `ssh`, `xrdp`가 `active`
+- `qemu-guest-agent`, `ssh`가 `active`
+- 사용자 세션의 `gnome-remote-desktop`이 `active`
 - `System clock synchronized: yes`
 - `lspci`에서 `Quadro P1000`과 Audio 함수 확인
 
@@ -830,12 +845,12 @@ docker compose logs --tail=100 homepage
 - GPU 드라이버/출력 검증 후 `Display: none`으로 바꿀지 결정합니다.
 - 실제 화면 출력은 P1000에 연결한 모니터 또는 별도 원격 데스크톱 도구 기준으로 확인합니다.
 
-### XRDP의 XFCE 정보 창에서 GPU가 llvmpipe로 보임
+### 기본 RDP에서 GPU 정보가 다르게 보임
 
 - `nvidia-smi`가 `Quadro P1000`을 표시하면 패스스루와 NVIDIA 드라이버 로드는
   성공한 상태로 봅니다.
-- XRDP/XFCE 세션은 물리 GPU 출력 세션이 아니라 가상 Xorg 세션이므로
-  `llvmpipe` 소프트웨어 렌더러로 표시될 수 있습니다.
+- 기본 RDP 세션은 물리 GPU 출력 세션과 렌더링 경로가 다를 수 있으므로, GPU
+  인식 여부는 RDP 정보 창보다 아래 명령 기준으로 판단합니다.
 - 드라이버 연결 상태는 아래 명령으로 확인합니다.
 
 ```bash
@@ -844,24 +859,28 @@ lspci -nnk | grep -A3 -i nvidia
 lsmod | grep nvidia
 ```
 
-- GUI 앱에서 P1000 가속이 반드시 필요하면 XRDP 기본 세션만으로 판단하지 말고
+- GUI 앱에서 P1000 가속이 반드시 필요하면 기본 RDP 세션만으로 판단하지 말고
   물리 모니터 출력, 별도 Xorg 설정, VirtualGL 같은 GPU 오프로딩 구성을 별도로
   검토합니다.
 
-### XRDP에서도 P1000 가속을 쓰고 싶음
+### 재부팅 직후 RDP 접속이 되지 않음
 
-- Ubuntu의 기본 `xrdp`/`xorgxrdp` 조합은 관리용 원격 GUI로 쓰고, GPU 연산은
-  `nvidia-smi`와 CUDA/컨테이너 작업 기준으로 검증하는 구성을 권장합니다.
-- XRDP 세션 자체의 OpenGL 렌더러를 NVIDIA로 바꾸는 구성은 가능 사례가 있지만
-  일반 설치 절차로 안정화되어 있지 않습니다. `xorgxrdp`의 GLAMOR/NVIDIA 관련
-  빌드, Xorg 권한, 드라이버 버전, 세션 시작 방식이 함께 맞아야 합니다.
-- 안정적인 GPU 가속 GUI가 목적이면 아래 대안을 먼저 검토합니다.
+- Ubuntu 기본 원격 데스크톱은 일반적으로 로그인된 Desktop 세션을 공유하는
+  방식입니다.
+- VM 재부팅 직후에는 noVNC 또는 물리 콘솔에서 `semtl` 계정으로 먼저 로그인한
+  뒤 RDP 접속을 확인합니다.
+- 자동 로그인은 끕니다. 자동 로그인 상태에서는 RDP 비밀번호가 재부팅 때마다
+  바뀌거나 저장되지 않을 수 있습니다.
+- RDP 비밀번호가 바뀌면 `semtl` 계정으로 비밀번호 로그인한 뒤
+  `Passwords and Keys`에서 RDP 비밀번호 저장 위치를 고정합니다.
+- CLI 재설정이 필요하면 `grdctl rdp set-credentials`로 RDP 자격 증명을 다시
+  설정합니다.
+- 로그인 화면부터 원격 접속해야 하는 운영 모델이면 아래 대안을 검토합니다.
 
 ```text
 권장 1: P1000 물리 출력 + 로컬 Xorg 세션 + 원격 화면 도구
 권장 2: VirtualGL/TurboVNC로 GPU 렌더링 앱만 오프로딩
 권장 3: NoMachine 같은 GPU 가속 친화 원격 데스크톱 도구
-비권장 기본값: 운영 기준 VM에서 xrdp/xorgxrdp를 직접 빌드해 NVIDIA 가속 적용
 ```
 
 ## 참고

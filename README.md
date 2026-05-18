@@ -51,8 +51,8 @@ make link-check
 - `docs/proxmox/ct-template-guide.md`
   (Proxmox CT 템플릿 등록, 운영 계정 포함 표준 LXC 복제 절차)
 - `docs/vm-devtools/installation.md`
-  (Proxmox 기반 vm-devtools VM 생성, P1000 VGA 패스스루, Ubuntu 22.04 Server,
-  XRDP/XFCE, semtl 계정, SSH, Docker, Homepage/Uptime Kuma/Dozzle 구성)
+  (Proxmox 기반 vm-devtools VM 생성, P1000 VGA 패스스루, Ubuntu 22.04 Desktop,
+  Ubuntu 기본 RDP, semtl 계정, SSH, Docker, Homepage/Uptime Kuma/Dozzle 구성)
 - `docs/vm-omada/installation.md`
   (Ubuntu 22.04 VM 기반 Omada Controller 설치, Docker 구성, 초기 접속 확인)
 - `docs/proxmox/vm-template-guide.md`
