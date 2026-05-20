@@ -7,9 +7,9 @@
 
 이 문서의 기준은 다음과 같습니다.
 
-- 대상 클러스터는 [`../rke2/installation.md`](../rke2/installation.md) 기준으로 이미 구축되어 있습니다.
+- 대상 클러스터는 [`../rke2/01.installation.md`](../rke2/01.installation.md) 기준으로 이미 구축되어 있습니다.
 - 스토리지는
-  [`../rke2/longhorn-installation.md`](../rke2/longhorn-installation.md)
+  [`../rke2/02.longhorn-installation.md`](../rke2/02.longhorn-installation.md)
   기준의 `longhorn`을 사용합니다.
 - Ingress Controller는 RKE2 기본 포함 `ingress-nginx`를 사용합니다.
 - 외부 TLS 종료는 현재 `Synology Reverse Proxy`에서 처리합니다.
@@ -485,7 +485,7 @@ kubectl -n monitoring logs deploy/monitoring-grafana --tail=100
 
 ## 참고
 
-- Kubernetes 기본 설치: [`../rke2/installation.md`](../rke2/installation.md)
-- Longhorn 설치: [`../rke2/longhorn-installation.md`](../rke2/longhorn-installation.md)
+- Kubernetes 기본 설치: [`../rke2/01.installation.md`](../rke2/01.installation.md)
+- Longhorn 설치: [`../rke2/02.longhorn-installation.md`](../rke2/02.longhorn-installation.md)
 - Loki 설치: [`../loki/installation.md`](../loki/installation.md)
 - Helm chart 저장소: `https://prometheus-community.github.io/helm-charts`

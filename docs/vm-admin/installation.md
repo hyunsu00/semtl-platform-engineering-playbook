@@ -3,7 +3,7 @@
 ## 문서 목적
 
 이 문서는 `vm-admin`를 운영 전용 관리 노드로 구성하는 절차를 정리합니다.
-현재 기준은 [`RKE2 Installation`](../rke2/installation.md) 문서의 단일 control-plane,
+현재 기준은 [`RKE2 Installation`](../rke2/01.installation.md) 문서의 단일 control-plane,
 단일 네트워크 구성에 맞춘 결과만 반영합니다.
 
 이 문서에서 확인한 범위는 다음과 같습니다.
@@ -101,7 +101,7 @@ server: https://127.0.0.1:6443
 `192.168.77.181:6443`로 접속해야 합니다.
 
 `rke2-server` 설정의 `tls-san`에 `192.168.77.181`이 포함되어 있어야 하며,
-이 기준은 [`RKE2 Installation`](../rke2/installation.md) 문서와 동일합니다.
+이 기준은 [`RKE2 Installation`](../rke2/01.installation.md) 문서와 동일합니다.
 
 ### 3.1 kubeconfig 백업 및 server 변경
 

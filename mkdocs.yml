@@ -48,7 +48,7 @@ nav:
       - Jenkins 연동: minio/jenkins-integration.md
       - n8n 연동: minio/n8n-integration.md
   - RKE2:
-      - 설치: rke2/installation.md
+      - 설치: rke2/01.installation.md
   - MetalLB:
       - 설치: metallb/installation.md
   - VM-ADMIN:

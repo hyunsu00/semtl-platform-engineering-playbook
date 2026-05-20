@@ -33,7 +33,7 @@ Jenkins 플러그인과 Web UI 용어는 `Kubernetes`로 표시되지만,
 ## 사전 조건
 
 - [Jenkins 설치](./installation.md) 완료
-- [RKE2 설치](../rke2/installation.md) 완료
+- [RKE2 설치](../rke2/01.installation.md) 완료
 - Jenkins 관리자 계정 준비 완료
 - `kubectl`이 가능한 관리 노드에서 대상 `RKE2` 클러스터 접속 가능
 - Jenkins URL이 외부 또는 내부에서 정상 접근 가능
@@ -951,5 +951,5 @@ id
 ## 참고
 
 - [Jenkins 설치](./installation.md)
-- [RKE2 설치](../rke2/installation.md)
+- [RKE2 설치](../rke2/01.installation.md)
 - [MinIO Jenkins 연동](../minio/jenkins-integration.md)

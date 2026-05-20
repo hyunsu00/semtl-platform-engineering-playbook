@@ -21,7 +21,7 @@
 1. Harbor 설치:
    [Harbor Installation](./harbor/installation.md)
 1. Runner/Jenkins 운영 기반:
-   [RKE2 Installation](./rke2/installation.md)
+   [RKE2 Installation](./rke2/01.installation.md)
 1. 원격 운영 관리 노드 구성:
    [VM-ADMIN Installation](./vm-admin/installation.md)
 1. Jenkins 설치:
@@ -74,7 +74,7 @@
 - GitLab:
   [Installation](./gitlab/installation.md)
 - RKE2:
-  [Installation](./rke2/installation.md)
+  [Installation](./rke2/01.installation.md)
 - VM-ADMIN:
   [Installation](./vm-admin/installation.md)
 - Keycloak:

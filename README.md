@@ -95,7 +95,7 @@ make link-check
 - `docs/gitlab/runner-installation.md`
   (GitLab VM과 RKE2 클러스터 연동, Runner 설치 및 Harbor Registry 연동)
 - `docs/gitlab/backup-and-restore.md`
-- `docs/rke2/installation.md`
+- `docs/rke2/01.installation.md`
   (RKE2 단일 control-plane, worker 3대 기준 설치 및 초기 검증)
 - `docs/metallb/installation.md`
   (RKE2 설치 직후 MetalLB L2 구성, `ingress-nginx` 외부 IP 할당)

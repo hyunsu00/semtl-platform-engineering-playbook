@@ -271,4 +271,4 @@ RAM(최대 기준):
 - GitLab 설치 상세: `docs/gitlab/installation.md`
 - Harbor 설치 상세: `docs/harbor/installation.md`
 - Jenkins 설치 상세: `docs/jenkins/installation.md`
-- Kubernetes 운영: `docs/rke2/installation.md`
+- Kubernetes 운영: `docs/rke2/01.installation.md`
