@@ -34,7 +34,6 @@
 - 게스트 OS에서 `lspci`로 NVIDIA VGA 장치 확인 가능
 - Ubuntu 기본 원격 데스크톱 RDP로 GUI 세션 접속 가능
 - Desktop 세션이 `x11`로 동작
-- RustDesk 설치 완료
 - Docker 서비스 기동 및 `docker ps` 정상 동작
 - `docker compose up -d`로 관리 도구 스택 기동 완료
 
@@ -566,8 +565,9 @@ ss -lntp | grep 3389
 
 ### 6-3. X11 세션 활성화
 
-RustDesk 원격 제어 안정성을 위해 Ubuntu Desktop 세션은 X11로 사용합니다.
-Wayland 세션에서는 화면 제어, 입력 제어, 권한 팝업 처리가 제한될 수 있습니다.
+Ubuntu Desktop 원격 GUI 운영은 X11 세션을 기준으로 맞춥니다. Wayland 세션에서는
+RustDesk 같은 보조 원격 제어 도구의 화면 제어, 입력 제어, 권한 팝업 처리가
+제한될 수 있습니다.
 
 `/etc/gdm3/custom.conf`에서 아래 값을 설정합니다.
 
@@ -593,9 +593,10 @@ echo "$XDG_SESSION_TYPE"
 x11
 ```
 
-### 6-4. RustDesk 설치
+### 6-4. 선택: RustDesk 설치
 
-RDP 접속을 확인한 뒤 보조 원격 접속 도구로 RustDesk를 설치합니다.
+RDP 접속만으로 충분하면 이 단계는 건너뜁니다. 별도 보조 원격 접속 도구가
+필요한 경우에만 RustDesk를 설치합니다.
 
 ```bash
 cd /tmp
@@ -614,6 +615,7 @@ dpkg -l rustdesk
 - `latest/download` URL을 사용하더라도 파일명은 설치 시점의 대상 버전에 맞춰
   확인합니다.
 - RustDesk ID와 접속 비밀번호는 GUI에서 확인하고, 문서에는 기록하지 않습니다.
+- RustDesk 설치 여부는 이 문서의 필수 성공 기준에 포함하지 않습니다.
 
 ### 6-5. 기본 RDP와 GPU 가속 기준
 
@@ -656,7 +658,7 @@ cat /dev/null > ~/.bash_history && history -c
 1. `Take Snapshot`
 1. 스냅샷 이름과 설명 입력 후 생성
 
-- 권장 이름: `p1000-rdp-clean-v1`
+- 권장 이름: `devtools-add-hw-clean-v1`
 
 권장 설명:
 
@@ -667,7 +669,12 @@ cat /dev/null > ~/.bash_history && history -c
 - nvidia-smi : success
 - ubuntu remote desktop : enabled
 - rdp port : 3389/tcp
-- rustdesk : installed
+- vnc port : 5900/tcp
+- 자동 로그인
+- 화면 잠금 OFF
+- 절전 OFF
+- x11 : enabled
+
 ```
 
 ## 8. Docker 설치 전 최종 확인
@@ -681,7 +688,6 @@ systemctl --user is-active gnome-remote-desktop
 timedatectl
 echo "$XDG_SESSION_TYPE"
 lspci -nn | grep -i nvidia
-dpkg -l rustdesk
 ```
 
 확인 기준:
@@ -692,15 +698,40 @@ dpkg -l rustdesk
 - `System clock synchronized: yes`
 - `XDG_SESSION_TYPE`이 `x11`
 - `lspci`에서 `Quadro P1000`과 Audio 함수 확인
-- `dpkg -l rustdesk`에서 `ii  rustdesk` 확인
 
-## 9. VM 기준 Docker 설치
+## 9. VM 기준 Docker Engine 설치
+
+Ubuntu Desktop 안에서는 Docker Desktop이 아니라 공식 Docker 문서의
+`Install using the apt repository` 방식으로 Docker Engine을 설치합니다.
+
+참고 문서:
+
+- [Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+
+### 9-1. 기존 Docker 패키지 제거
+
+Ubuntu 저장소 패키지나 이전 설치 흔적이 있으면 먼저 제거합니다.
 
 ```bash
-for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do
+for pkg in \
+  docker.io docker-doc docker-compose docker-compose-v2 \
+  podman-docker containerd runc; do
   sudo apt remove -y "$pkg"
 done
+```
 
+운영 메모:
+
+- 패키지가 설치되어 있지 않으면 `Unable to locate package` 또는 제거 대상 없음
+  메시지가 나올 수 있습니다.
+- `/var/lib/docker/`의 기존 이미지, 컨테이너, 볼륨은 이 단계에서 삭제하지
+  않습니다.
+
+### 9-2. Docker 공식 APT 저장소 등록
+
+Docker 공식 GPG 키와 APT 저장소를 등록합니다.
+
+```bash
 sudo apt update
 sudo apt install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -714,22 +745,84 @@ Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
 Components: stable
 Signed-By: /etc/apt/keyrings/docker.asc
 EOF
+```
 
+등록 확인:
+
+```bash
 sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
 
+### 9-3. Docker Engine 및 Compose 플러그인 설치
+
+공식 저장소에서 Docker Engine, CLI, containerd, Buildx, Compose 플러그인을
+설치합니다.
+
+```bash
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+설치된 버전을 확인합니다.
+
+```bash
+docker --version
+docker compose version
+```
+
+### 9-4. Docker 서비스 활성화
+
+부팅 시 Docker가 자동으로 시작되도록 설정하고 현재 세션에서도 시작합니다.
+
+```bash
 sudo systemctl enable docker
 sudo systemctl start docker
+systemctl is-active docker
+```
+
+기대 결과:
+
+```text
+active
+```
+
+### 9-5. 일반 사용자 실행 권한 설정
+
+`semtl` 계정에서 `sudo` 없이 `docker` 명령을 실행할 수 있도록 `docker` 그룹에
+현재 사용자를 추가합니다.
+
+```bash
 sudo usermod -aG docker "$USER"
 ```
 
-다시 로그인 후 확인:
+그룹 변경은 새 로그인 세션부터 적용됩니다. 로그아웃 후 다시 로그인하거나 VM을
+재부팅한 뒤 확인합니다.
 
 ```bash
-sudo docker run hello-world
+groups
 docker version
 docker ps
 ```
+
+확인 기준:
+
+- `groups` 출력에 `docker` 포함
+- `docker ps`가 `permission denied` 없이 실행됨
+
+### 9-6. Docker 동작 검증
+
+공식 테스트 이미지로 컨테이너 실행까지 확인합니다.
+
+```bash
+docker run hello-world
+docker ps -a
+```
+
+운영 메모:
+
+- 재로그인 전에는 `sudo docker run hello-world`로 서비스 동작만 먼저 확인할 수
+  있습니다.
+- `docker compose`는 `docker-compose` 명령이 아니라 Docker Compose 플러그인
+  형식인 `docker compose`를 기준으로 사용합니다.
 
 ## 10. Docker 설치 직후 정리 후 스냅샷
 
@@ -751,7 +844,20 @@ cat /dev/null > ~/.bash_history && history -c
 1. `Take Snapshot`
 1. 스냅샷 이름과 설명 입력 후 생성
 
-- 권장 이름: `vm-devtools-docker-clean-v1`
+- 권장 이름: `devtools-docker-install-v2`
+
+권장 설명:
+
+```text
+[설치]
+- docker engine : official apt repository
+- docker compose : plugin enabled
+- docker service : enabled / active
+- user group : semtl added to docker group
+- docker run hello-world : success
+- docker ps : permission check success
+- cleanup : apt cache, temp files, journal vacuum
+```
 
 ## 11. 작업 디렉터리 준비
 
