@@ -82,7 +82,7 @@ sudo tailscale set --advertise-routes=192.168.77.0/24
 예시:
 
 ```bash
-sudo tailscale set --advertise-routes=192.168.1.0/24,192.168.10.0/24,192.168.110.0/24
+sudo tailscale set --advertise-routes=192.168.30.0/24,192.168.31.0/24,192.168.32.0/24
 ```
 
 또는 대역을 크게 묶는 예시:

@@ -417,7 +417,7 @@ ip route
 - `10.99.0.0/24 via 192.168.77.10 dev enp3s0` 같은 경로 확인
 - `192.168.77.0/16 via 192.168.77.10 dev enp3s0` 같은 경로 확인
 - `ip route get 192.168.77.20`는 로컬 NIC를 사용
-- `ip route get 192.168.200.10`는 `via 192.168.77.10 dev enp3s0`로 표시
+- `ip route get 192.168.32.10`는 `via 192.168.77.10 dev enp3s0`로 표시
 
 ### 12-5. 재부팅 검증
 
@@ -431,7 +431,7 @@ sudo reboot
 systemctl status wg-route.service --no-pager
 ip route
 ip route get 192.168.77.20
-ip route get 192.168.200.10
+ip route get 192.168.32.10
 ```
 
 운영 메모:
