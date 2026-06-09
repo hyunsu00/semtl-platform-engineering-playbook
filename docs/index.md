@@ -48,6 +48,9 @@
   [Installation](./vm-devtools/installation.md)
 - VM-OMADA:
   [Installation](./vm-omada/installation.md)
+- Raspberry Pi 2:
+  [Installation](./rpi2/installation.md) |
+  [Apps Installation](./rpi2/apps-installation.md)
 - ttyd:
   [Installation](./ttyd/installation.md)
 - Upsnap:

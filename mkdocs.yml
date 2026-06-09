@@ -34,6 +34,9 @@ nav:
       - 설치: vm-win11/installation.md
   - VM-OMADA:
       - 설치: vm-omada/installation.md
+  - Raspberry Pi 2:
+      - 설치: rpi2/installation.md
+      - 앱 설치: rpi2/apps-installation.md
   - ttyd:
       - 설치: ttyd/installation.md
   - Upsnap:

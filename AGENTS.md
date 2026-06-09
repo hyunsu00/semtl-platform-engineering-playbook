@@ -9,7 +9,8 @@
 
 현재 운영 컴포넌트 예시: `synology`, `adguardhome`, `proxmox`, `minio`,
 `rke2`, `metallb`, `gitlab`, `harbor`, `jenkins`, `n8n`, `keycloak`,
-`prometheus`, `grafana`, `argocd`, `vm-devtools`, `vm-win11`, `vm-omada`
+`prometheus`, `grafana`, `argocd`, `vm-devtools`, `vm-win11`, `vm-omada`,
+`rpi2`
 
 문서에서 참조하는 다이어그램/스크린샷은 `assets/images/`를 사용합니다. 기본 뼈대는 `templates/how-to-template.md`를 재사용합니다. `scripts/`는 자동화 유틸리티용 디렉터리이며(현재는 최소 구성), 기여자가 실행할 공통 명령은 `Makefile`을 기준으로 합니다.
 
