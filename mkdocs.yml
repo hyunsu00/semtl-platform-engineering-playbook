@@ -37,6 +37,8 @@ nav:
   - Raspberry Pi 2:
       - 설치: rpi2/installation.md
       - 앱 설치: rpi2/apps-installation.md
+  - OpenMQTTGateway:
+      - 설치: openmqttgateway/installation.md
   - ttyd:
       - 설치: ttyd/installation.md
   - Upsnap:

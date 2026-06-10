@@ -2,8 +2,8 @@
 
 Synology, AdGuard Home, Proxmox, MinIO, Jenkins, n8n, Harbor, GitLab,
 RKE2, VM-ADMIN, VM-DEVTOOLS, VM-WIN11, VM-OMADA, Raspberry Pi 2,
-Keycloak, Monitoring, Argo CD 등 플랫폼 엔지니어링 영역의 설치/설정/운용
-문서를 지속적으로 관리하는 저장소입니다.
+OpenMQTTGateway, Keycloak, Monitoring, Argo CD 등 플랫폼 엔지니어링
+영역의 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
 
 ## 목적
 
@@ -64,6 +64,8 @@ make link-check
   네트워크 검증)
 - `docs/rpi2/apps-installation.md`
   (Raspberry Pi 2에 Tailscale, Mosquitto MQTT, Node-RED 설치와 접속 검증)
+- `docs/openmqttgateway/installation.md`
+  (ESP32-WROVER-IE와 CC1101 기반 OpenMQTTGateway 433MHz RF 수신 구성)
 - `docs/proxmox/vm-template-guide.md`
   (Proxmox VM 템플릿 등록, Cloud-Init 기반 복제 절차)
 - `docs/proxmox/storage-and-network-expansion.md`

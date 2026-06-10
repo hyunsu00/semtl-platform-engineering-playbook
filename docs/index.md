@@ -51,6 +51,8 @@
 - Raspberry Pi 2:
   [Installation](./rpi2/installation.md) |
   [Apps Installation](./rpi2/apps-installation.md)
+- OpenMQTTGateway:
+  [Installation](./openmqttgateway/installation.md)
 - ttyd:
   [Installation](./ttyd/installation.md)
 - Upsnap:
