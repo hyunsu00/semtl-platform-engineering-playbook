@@ -75,7 +75,11 @@ https://docs.openmqttgateway.com/upload/web-install.html
 
 ## 3. CC1101 배선
 
-아래 배선은 실제 수신 성공이 확인된 구성입니다.
+아래 배선은 공식 문서의 ESP32 + CC1101 Pinout 기준이며, 실제 수신 성공이
+확인된 구성입니다.
+
+출처:
+[`OpenMQTTGateway RF gateway - CC1101 Pinout`](https://docs.openmqttgateway.com/setitup/rf.html#cc1101-pinout)
 
 | CC1101 핀 순서 | 기능 | ESP32 |
 | --- | --- | --- |
@@ -287,6 +291,13 @@ openmqttgateway/rf433-gw/433toMQTT/13145953
 | `C89768` | `13145960` |
 | `C89769` | `13145961` |
 | `C8976C` | `13145964` |
+
+| Sonoff RF Bridge HEX | OpenMQTTGateway DEC |
+| --- | --- |
+| `C3BDD4` | `12828116` |
+| `C3BDD2` | `12828114` |
+| `C3BDD1` | `12828113` |
+| `C3BDD8` | `12828120` |
 
 ## 13. 검증 완료 기준
 

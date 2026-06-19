@@ -63,7 +63,8 @@ make link-check
   (Raspberry Pi 2에 Raspberry Pi OS Legacy 32-bit Lite 설치, SSH, 기본 패키지,
   네트워크 검증)
 - `docs/rpi2/apps-installation.md`
-  (Raspberry Pi 2에 Tailscale, Mosquitto MQTT, Node-RED 설치와 접속 검증)
+  (Raspberry Pi 2에 Tailscale, Mosquitto MQTT, Node-RED, Zigbee2MQTT,
+  Node-RED Dashboard 구성)
 - `docs/openmqttgateway/installation.md`
   (ESP32-WROVER-IE와 CC1101 기반 OpenMQTTGateway 433MHz RF 수신 구성)
 - `docs/proxmox/vm-template-guide.md`

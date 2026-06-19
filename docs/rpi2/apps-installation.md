@@ -576,11 +576,216 @@ tar -czvf ~/zigbee2mqtt-backup-$(date +%Y%m%d-%H%M).tar.gz \
   /etc/mosquitto/conf.d
 ```
 
+## 5. Node-RED Dashboard 구성
+
+Node-RED Dashboard는 일상 운영 화면으로 사용합니다. Zigbee2MQTT frontend는
+페어링, 장치 상세 설정, 로그 확인용으로 유지하고, Node-RED Dashboard에는
+자주 보는 상태와 제어 버튼만 배치합니다.
+
+권장 역할:
+
+| 구분 | 용도 |
+| --- | --- |
+| Zigbee2MQTT frontend | 장치 페어링, friendly name 변경, 상세 설정 |
+| Node-RED Dashboard | 센서 상태, 스위치 제어, MQTT 이벤트 확인 |
+| Home Assistant | 홈 자동화, 장기 통합, 모바일 앱 연동 |
+
+### 5.1. Dashboard 2.0 설치
+
+신규 구성은 기존 `node-red-dashboard` 대신
+`@flowfuse/node-red-dashboard`를 사용합니다.
+
+설치 명령:
+
+```bash
+cd ~/.node-red
+npm install @flowfuse/node-red-dashboard
+sudo systemctl restart nodered.service
+```
+
+설치 확인:
+
+```bash
+cd ~/.node-red
+npm list @flowfuse/node-red-dashboard --depth=0
+systemctl is-active nodered.service
+```
+
+관리 PC 브라우저에서 Node-RED 에디터를 확인합니다.
+
+```text
+http://192.168.32.11:1880
+http://100.114.82.33:1880
+```
+
+정상 기준:
+
+- `@flowfuse/node-red-dashboard` 패키지가 표시됨
+- `nodered.service`가 `active`
+- Node-RED 왼쪽 팔레트에 Dashboard 2.0 UI 노드가 표시됨
+
+참고:
+
+- Dashboard URL은 `http://192.168.32.11:1880/dashboard`입니다.
+- 설치 직후 UI 노드를 배치하지 않은 상태에서는
+  `Cannot GET /dashboard`가 표시될 수 있습니다.
+- `ui-button`, `ui-text` 같은 Dashboard 노드를 하나 이상 배치하고
+  `Deploy`한 뒤 Dashboard URL을 확인합니다.
+
+### 5.2. MQTT 브로커 연결
+
+Node-RED 에디터에서 MQTT broker 설정을 생성합니다.
+
+기본값:
+
+| 항목 | 값 |
+| --- | --- |
+| Server | `127.0.0.1` |
+| Port | `1883` |
+| Username | `admin` |
+| Password | `<MQTT_PASSWORD>` |
+| Name | `rpi2-mosquitto` |
+
+처음에는 읽기 전용 구독 플로우부터 구성합니다. 스위치, 조명, 릴레이처럼
+상태를 변경하는 장치는 토픽과 payload를 확인한 뒤 제어 플로우를 추가합니다.
+
+### 5.3. 기본 대시보드 페이지
+
+Dashboard 구성 예시:
+
+| Page | Group | Widget | MQTT topic |
+| --- | --- | --- | --- |
+| `RPI2` | `서비스 상태` | Text | `zigbee2mqtt-slzb/bridge/state` |
+| `RPI2` | `서비스 상태` | Text | `zigbee2mqtt-zbbridge-pro/bridge/state` |
+| `RPI2` | `최근 이벤트` | Text/Table | `zigbee2mqtt-slzb/#` |
+| `RPI2` | `최근 이벤트` | Text/Table | `zigbee2mqtt-zbbridge-pro/#` |
+| `RPI2` | `센서` | Gauge/Chart | `zigbee2mqtt-slzb/<FRIENDLY_NAME>` |
+| `RPI2` | `제어` | Switch/Button | `zigbee2mqtt-slzb/<FRIENDLY_NAME>/set` |
+
+최소 구성 순서:
+
+1. `ui-base`를 만들고 이름을 `rpi2-dashboard`로 지정
+1. `ui-page`를 만들고 이름을 `RPI2`로 지정
+1. `서비스 상태`, `최근 이벤트`, `센서`, `제어` group 생성
+1. MQTT input 노드로 `zigbee2mqtt-slzb/bridge/state` 구독
+1. MQTT input 노드로 `zigbee2mqtt-zbbridge-pro/bridge/state` 구독
+1. 두 bridge state를 Text 위젯에 연결
+1. `zigbee2mqtt-slzb/#`, `zigbee2mqtt-zbbridge-pro/#` 구독 플로우를
+   Debug 노드에 연결해 실제 토픽과 payload 확인
+1. 자주 보는 센서만 Gauge, Chart, Text 위젯으로 승격
+1. 제어 대상은 MQTT output 노드를 `<FRIENDLY_NAME>/set` 토픽에 연결
+
+Dashboard URL:
+
+```text
+http://192.168.32.11:1880/dashboard
+http://100.114.82.33:1880/dashboard
+```
+
+### 5.4. 센서 payload 처리 예시
+
+Zigbee2MQTT 센서 payload는 JSON 문자열로 들어오므로 JSON 노드로 변환한 뒤
+필요한 값만 Dashboard 위젯으로 전달합니다.
+
+온도 센서 예시:
+
+```text
+mqtt in: zigbee2mqtt-slzb/<TEMPERATURE_SENSOR>
+  -> json
+  -> change: msg.payload = msg.payload.temperature
+  -> ui-gauge 또는 ui-chart
+```
+
+배터리 상태 예시:
+
+```text
+mqtt in: zigbee2mqtt-slzb/<BATTERY_DEVICE>
+  -> json
+  -> change: msg.payload = msg.payload.battery
+  -> ui-text 또는 ui-gauge
+```
+
+스위치 제어 예시:
+
+```text
+ui-switch
+  -> change: msg.payload = {"state": msg.payload ? "ON" : "OFF"}
+  -> mqtt out: zigbee2mqtt-slzb/<SWITCH_DEVICE>/set
+```
+
+### 5.5. 운영 기준
+
+Dashboard에는 운영자가 자주 보는 항목만 올립니다.
+
+권장 항목:
+
+- SLZB-06 bridge 상태
+- ZBBridge Pro bridge 상태
+- 주요 온습도 센서
+- 배터리 20% 미만 장치
+- 자주 쓰는 조명, 플러그, 릴레이 제어
+- 최근 MQTT 이벤트
+
+주의 사항:
+
+- Node-RED 에디터와 Dashboard는 인터넷에 직접 노출하지 않습니다.
+- 외부 접속은 Tailscale 주소를 우선 사용합니다.
+- 제어 플로우는 실제 토픽과 payload를 Debug 노드로 확인한 뒤 연결합니다.
+- 장치 friendly name을 바꾸면 Dashboard 플로우의 토픽도 함께 수정합니다.
+- 자동화 로직이 복잡해지면 Dashboard 표시용 플로우와 제어용 플로우를
+  분리합니다.
+
+### 5.6. 검증 완료 기준
+
+동작 확인 항목:
+
+- `/dashboard` 접속 가능
+- 두 Zigbee2MQTT bridge state 표시
+- 주요 센서 값 표시
+- 제어 위젯에서 MQTT command topic 발행
+- Zigbee2MQTT frontend에서 제어 결과 확인
+- 재부팅 후 `nodered.service`와 Dashboard 자동 복구
+
+### 5.7. `Cannot GET /dashboard` 처리
+
+증상:
+
+```text
+Cannot GET /dashboard
+```
+
+확인 순서:
+
+1. Dashboard 2.0 패키지 설치 확인
+1. Node-RED 서비스 재시작
+1. Node-RED 에디터에서 Dashboard UI 노드가 보이는지 확인
+1. `ui-button` 또는 `ui-text` 노드를 하나 배치
+1. Dashboard sidebar에서 `ui-base`, `ui-page`, `ui-group` 생성 여부 확인
+1. `Deploy` 실행
+1. `/dashboard` 재접속
+
+확인 명령:
+
+```bash
+cd ~/.node-red
+npm list @flowfuse/node-red-dashboard --depth=0
+sudo systemctl restart nodered.service
+journalctl -u nodered.service -n 80 --no-pager
+```
+
+정상 기준:
+
+- `npm list`에 `@flowfuse/node-red-dashboard` 표시
+- Node-RED 팔레트에 Dashboard 2.0 UI 노드 표시
+- UI 노드 배치 후 `Deploy`하면 `/dashboard` 접속 가능
+
 ## 참고
 
 - Tailscale Linux installation:
   `https://tailscale.com/docs/install/linux`
 - Node-RED Running on Raspberry Pi:
   `https://nodered.org/docs/getting-started/raspberrypi`
+- FlowFuse Dashboard:
+  `https://dashboard.flowfuse.com/`
 - Zigbee2MQTT Getting started:
   `https://www.zigbee2mqtt.io/guide/getting-started/`
