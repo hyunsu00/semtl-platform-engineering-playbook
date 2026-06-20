@@ -37,6 +37,7 @@ nav:
   - Raspberry Pi 2:
       - 설치: rpi2/installation.md
       - 앱 설치: rpi2/apps-installation.md
+      - 백업/복구: rpi2/backup-restore.md
   - OpenMQTTGateway:
       - 설치: openmqttgateway/installation.md
   - ttyd:

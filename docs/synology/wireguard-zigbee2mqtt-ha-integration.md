@@ -623,7 +623,7 @@ homeassistant:
 mqtt:
   server: mqtt://192.168.77.21:1883
   user: zigbee2mqtt
-  password: mypassword123
+  password: <MQTT_PASSWORD>
   base_topic: zigbee2mqtt_zbbridge_pro
 
 serial:
@@ -638,33 +638,9 @@ frontend:
 advanced:
   log_level: info
   channel: 15
-  pan_id: 4660
-  ext_pan_id:
-    - 1
-    - 2
-    - 3
-    - 4
-    - 5
-    - 6
-    - 7
-    - 8
-  network_key:
-    - 1
-    - 3
-    - 5
-    - 7
-    - 9
-    - 11
-    - 13
-    - 15
-    - 2
-    - 4
-    - 6
-    - 8
-    - 10
-    - 12
-    - 14
-    - 16
+  pan_id: GENERATE
+  ext_pan_id: GENERATE
+  network_key: GENERATE
 
 availability:
   enabled: true
@@ -678,6 +654,11 @@ devices: {}
 
 - `mqtt.user`, `mqtt.password`는 실제 값으로 교체합니다.
 - `base_topic`은 기존 Zigbee2MQTT 인스턴스와 겹치지 않게 분리합니다.
+- 신규 Zigbee 네트워크는 `pan_id`, `ext_pan_id`, `network_key`를
+  `GENERATE`로 시작합니다.
+- 첫 실행 후 Zigbee2MQTT가 실제 값을 생성해 `configuration.yaml`에 저장합니다.
+- 장치를 페어링한 뒤 `pan_id`, `ext_pan_id`, `network_key`를 바꾸면 기존
+  장치를 다시 페어링해야 할 수 있으므로 운영 중에는 변경하지 않습니다.
 - 원격 브리지 종류에 따라 `adapter` 값은 조정이 필요할 수 있습니다.
 - 원격 TCP 브리지 환경에서는 `Z2M_WATCHDOG=default`를 두는 편이 재시작 복구에 유리합니다.
 

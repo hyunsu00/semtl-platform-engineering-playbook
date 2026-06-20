@@ -10,7 +10,7 @@ Raspberry Pi 2 기본 설치 후 Tailscale, MQTT, Node-RED, Zigbee2MQTT를
 - hostname: `rpi2`
 - SSH username: `semtl`
 - DHCP IP: `192.168.32.11`
-- Tailscale IPv4: `100.114.82.33`
+- Tailscale IPv4: `100.126.244.46`
 - MQTT username: `admin`
 - Zigbee2MQTT SLZB-06 frontend: `8099/tcp`
 - Zigbee2MQTT ZBBridge Pro frontend: `8100/tcp`
@@ -46,7 +46,7 @@ tailscale ip -6
 관리 PC에서 실행합니다.
 
 ```bash
-ssh semtl@100.114.82.33
+ssh semtl@100.126.244.46
 ```
 
 정상 기준:
@@ -121,22 +121,96 @@ mosquitto_pub -h 192.168.32.11 -u admin -P '<MQTT_PASSWORD>' -t rpi2/test -m 'he
 
 ## 3. Node-RED 설치
 
-설치 명령:
+목표 상태:
+
+- `node`, `npm` 명령 사용 가능
+- `node-red` 또는 `node-red-pi` 명령 사용 가능
+- `nodered.service`가 `active`
+- `1880/tcp` 리스너 표시
+- 관리 PC에서 Node-RED 웹 에디터 접속 가능
+
+Node-RED 5.x는 Node.js `22.9` 이상이 필요합니다. Raspbian 기본 저장소의
+`nodejs 18.x`가 설치되어 있으면 제거하고 NodeSource Node.js 22를 설치합니다.
+
+### 3.1. 기존 Node.js 제거
 
 ```bash
-bash <(curl -sL https://github.com/node-red/linux-installers/releases/latest/download/update-nodejs-and-nodered-deb)
+sudo systemctl stop nodered.service || true
+sudo apt purge -y nodejs npm
+sudo apt autoremove -y
+sudo rm -f /etc/apt/sources.list.d/nodesource.list
+sudo rm -f /etc/apt/preferences.d/nodejs.pref
 ```
 
-서비스 설정:
+### 3.2. Node.js 22 설치
 
 ```bash
-node-red-start
+sudo apt install -y ca-certificates curl gnupg
+sudo install -d -m 0755 /etc/apt/keyrings
+KEYRING="/etc/apt/keyrings/nodesource.gpg"
+curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+  | sudo gpg --batch --yes --dearmor -o "$KEYRING"
+
+NODESOURCE_REPO="https://deb.nodesource.com/node_22.x"
+echo "deb [signed-by=$KEYRING] $NODESOURCE_REPO nodistro main" \
+  | sudo tee /etc/apt/sources.list.d/nodesource.list
+
+sudo apt update
+apt-cache policy nodejs
+sudo apt install -y nodejs
+```
+
+Node.js 확인:
+
+```bash
+node -v
+npm -v
+```
+
+정상 기준:
+
+- `node -v`가 `v22.9.0` 이상
+- `npm -v`가 버전 출력
+
+### 3.3. Node-RED 설치
+
+```bash
+sudo npm uninstall -g node-red || true
+
+INSTALLER_URL="https://github.com/node-red/linux-installers/releases/latest/download/install-update-nodered-deb"
+bash <(curl -sL "$INSTALLER_URL") \
+  --confirm-install \
+  --skip-pi \
+  --no-init
+```
+
+설치 옵션 기준:
+
+| 옵션 | 의미 |
+| --- | --- |
+| `--confirm-install` | 설치 확인 프롬프트에 자동으로 `yes` 응답 |
+| `--skip-pi` | Raspberry Pi 전용 Node-RED 노드 설치 생략 |
+| `--no-init` | 설치 직후 `node-red admin init` 실행 생략 |
+
+`--skip-pi`를 사용하면 GPIO, serialport, ping, audio 같은 Raspberry Pi 전용
+Node-RED 노드를 설치하지 않습니다. MQTT, Zigbee2MQTT, Dashboard 중심 구성에서는
+기본값으로 생략하고, 필요할 때 팔레트에서 개별 설치합니다.
+
+### 3.4. 서비스 시작
+
+```bash
+sudo systemctl start nodered.service
 sudo systemctl enable nodered.service
 ```
 
-확인 명령:
+### 3.5. 성공 확인
 
 ```bash
+node -v
+npm -v
+command -v node-red
+command -v node-red-pi
+npm -g list node-red --depth=0
 systemctl is-active nodered.service
 sudo ss -lntp | grep ':1880'
 ```
@@ -145,14 +219,46 @@ sudo ss -lntp | grep ':1880'
 
 ```text
 http://192.168.32.11:1880
-http://100.114.82.33:1880
+http://100.126.244.46:1880
 ```
 
 정상 기준:
 
+- `node -v`가 `v22.9.0` 이상
+- `npm -v`가 버전을 출력
+- `node-red` 또는 `node-red-pi` 경로가 표시됨
+- `npm -g list node-red --depth=0`에 `node-red` 표시
 - `nodered.service`가 `active`
 - `1880/tcp` 리스너 표시
 - Node-RED 웹 에디터 접속 가능
+
+### 3.6. 실패 시 확인
+
+설치 로그 확인:
+
+```bash
+sudo tail -n 160 /var/log/nodered-install.log
+```
+
+`nodered.service`가 `activating` 상태이거나 `1880/tcp` 리스너가 보이지 않으면
+서비스 로그를 확인합니다.
+
+```bash
+systemctl status nodered.service --no-pager
+journalctl -u nodered.service -n 120 --no-pager
+```
+
+서비스 로그만으로 원인이 보이지 않으면 터미널에서 직접 실행해 오류를 확인합니다.
+
+```bash
+node-red-pi
+```
+
+초기 보안 설정은 서비스 접속 확인 후 필요할 때 실행합니다.
+
+```bash
+node-red admin init
+```
 
 ## 4. Zigbee2MQTT 이중 인스턴스 설치
 
@@ -305,13 +411,16 @@ advanced:
   network_key: <SLZB_NETWORK_KEY>
   pan_id: <SLZB_PAN_ID>
   ext_pan_id: <SLZB_EXT_PAN_ID>
-
 availability:
   enabled: true
 
 devices: {}
 groups: {}
 ```
+
+기존 Zigbee 네트워크를 유지하므로 `network_key`, `pan_id`, `ext_pan_id`는
+기존 Zigbee2MQTT `configuration.yaml`에서 복사합니다. 이 값을 유지하면 기존
+장치의 재페어링을 줄일 수 있습니다. 운영 중에는 변경하지 않습니다.
 
 실행 테스트:
 
@@ -324,7 +433,7 @@ pnpm start
 
 ```text
 http://192.168.32.11:8099
-http://100.114.82.33:8099
+http://100.126.244.46:8099
 ```
 
 ### 4.5. Zigbee2MQTT ZBBridge Pro 설치
@@ -372,7 +481,6 @@ advanced:
   pan_id: <ZBBRIDGE_PAN_ID>
   ext_pan_id: <ZBBRIDGE_EXT_PAN_ID>
   network_key: <ZBBRIDGE_NETWORK_KEY>
-
 availability:
   enabled: true
 
@@ -380,6 +488,11 @@ device_options: {}
 groups: {}
 devices: {}
 ```
+
+ZBBridge Pro도 기존 Zigbee 네트워크를 유지하려면 기존 Zigbee2MQTT
+`configuration.yaml`에서 `pan_id`, `ext_pan_id`, `network_key`를 복사합니다.
+SLZB-06과 물리적으로 충분히 떨어져 있으므로 동일하게 Zigbee 채널 `15`를
+사용합니다.
 
 실행 테스트:
 
@@ -392,7 +505,7 @@ pnpm start
 
 ```text
 http://192.168.32.11:8100
-http://100.114.82.33:8100
+http://100.126.244.46:8100
 ```
 
 ### 4.6. systemd 서비스 등록
@@ -465,8 +578,8 @@ systemctl status zigbee2mqtt-zbbridge-pro --no-pager
 로그 확인:
 
 ```bash
-journalctl -u zigbee2mqtt-slzb -f
-journalctl -u zigbee2mqtt-zbbridge-pro -f
+journalctl -u zigbee2mqtt-slzb -n 160 --no-pager
+journalctl -u zigbee2mqtt-zbbridge-pro -n 160 --no-pager
 ```
 
 ### 4.7. 재부팅 테스트
@@ -490,8 +603,8 @@ systemctl status zigbee2mqtt-zbbridge-pro --no-pager
 ```text
 http://192.168.32.11:8099
 http://192.168.32.11:8100
-http://100.114.82.33:8099
-http://100.114.82.33:8100
+http://100.126.244.46:8099
+http://100.126.244.46:8100
 ```
 
 정상 기준:
@@ -615,7 +728,7 @@ systemctl is-active nodered.service
 
 ```text
 http://192.168.32.11:1880
-http://100.114.82.33:1880
+http://100.126.244.46:1880
 ```
 
 정상 기준:
@@ -679,7 +792,7 @@ Dashboard URL:
 
 ```text
 http://192.168.32.11:1880/dashboard
-http://100.114.82.33:1880/dashboard
+http://100.126.244.46:1880/dashboard
 ```
 
 ### 5.4. 센서 payload 처리 예시

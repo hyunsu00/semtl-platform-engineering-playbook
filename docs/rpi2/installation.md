@@ -271,18 +271,36 @@ ip addr show wlan0
 nmcli connection show
 ```
 
+`nmcli dev wifi list`의 SSID와 `nmcli connection show`의 `NAME`은 다를 수
+있습니다. Raspberry Pi Imager에서 Wi-Fi를 미리 설정한 경우 연결 프로파일
+이름이 `preconfigured`로 생성될 수 있습니다.
+
+현재 Wi-Fi 프로파일 이름 확인:
+
+```bash
+nmcli -t -f NAME,TYPE,DEVICE connection show --active
+nmcli connection show
+```
+
+아래 예시는 Wi-Fi 프로파일 이름을 변수로 지정해 사용합니다. 실제 환경에 맞게
+`preconfigured` 또는 `DJCAMP-IoT`로 바꿉니다.
+
+```bash
+WIFI_PROFILE="preconfigured"
+```
+
 자동 연결 비활성화:
 
 ```bash
-sudo nmcli connection modify "DJCAMP-IoT" connection.autoconnect no
-nmcli connection show "DJCAMP-IoT" | grep autoconnect
+sudo nmcli connection modify "$WIFI_PROFILE" connection.autoconnect no
+nmcli connection show "$WIFI_PROFILE" | grep autoconnect
 ```
 
 Wi-Fi 절전 비활성화:
 
 ```bash
-sudo nmcli connection modify "DJCAMP-IoT" 802-11-wireless.powersave disable
-nmcli connection show "DJCAMP-IoT" | grep powersave
+sudo nmcli connection modify "$WIFI_PROFILE" 802-11-wireless.powersave disable
+nmcli connection show "$WIFI_PROFILE" | grep powersave
 ```
 
 수동 연결:
@@ -290,13 +308,13 @@ nmcli connection show "DJCAMP-IoT" | grep powersave
 ```bash
 sudo rfkill unblock all
 sudo nmcli radio wifi on
-sudo nmcli connection up "DJCAMP-IoT"
+sudo nmcli connection up "$WIFI_PROFILE"
 ```
 
 수동 해제:
 
 ```bash
-sudo nmcli connection down "DJCAMP-IoT"
+sudo nmcli connection down "$WIFI_PROFILE"
 ```
 
 정상 기준:
