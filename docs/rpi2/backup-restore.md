@@ -559,3 +559,133 @@ mosquitto_sub -h localhost -u zigbee2mqtt-zbbridge-pro \
 - NAS에 최근 5개 이상 보관
 - SD 카드 재설치 직후 최신 백업으로 복구 테스트 1회 수행
 - 오래된 백업은 NAS 보관 정책에 따라 삭제
+
+## 9. 주간 자동 백업
+
+`systemd timer`로 매주 1회 로컬 백업을 만들고 NAS FTP로 업로드합니다.
+
+### 9.1. 환경 파일 생성
+
+FTP 접속 정보는 서비스 파일에 직접 쓰지 않고 root만 읽을 수 있는 환경 파일로
+분리합니다.
+
+```bash
+sudo nano /etc/rpi2-backup.env
+```
+
+내용:
+
+```bash
+NAS_FTP_USER=semtl
+NAS_FTP_HOST=192.168.77.2
+NAS_FTP_DIR=/nfs/device-backups/rpi2
+NAS_FTP_PASSWORD=<NAS_FTP_PASSWORD>
+BACKUP_ROOT=/home/semtl/backups
+```
+
+권한 설정:
+
+```bash
+sudo chown root:root /etc/rpi2-backup.env
+sudo chmod 600 /etc/rpi2-backup.env
+```
+
+### 9.2. 실행 스크립트 생성
+
+```bash
+sudo nano /usr/local/sbin/rpi2-weekly-backup.sh
+```
+
+스크립트 내용:
+
+```bash
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+echo "[rpi2-backup] start weekly backup"
+
+set -a
+source /etc/rpi2-backup.env
+set +a
+
+runuser -u semtl -- /home/semtl/scripts/backup-rpi2-apps.sh
+runuser -u semtl -- /home/semtl/scripts/upload-rpi2-backup-to-nas.sh
+
+echo "[rpi2-backup] weekly backup complete"
+```
+
+권한 설정:
+
+```bash
+sudo chown root:root /usr/local/sbin/rpi2-weekly-backup.sh
+sudo chmod 700 /usr/local/sbin/rpi2-weekly-backup.sh
+```
+
+### 9.3. systemd 서비스 생성
+
+```bash
+sudo nano /etc/systemd/system/rpi2-weekly-backup.service
+```
+
+서비스 파일:
+
+```ini
+[Unit]
+Description=Raspberry Pi 2 weekly app backup
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/rpi2-weekly-backup.sh
+```
+
+### 9.4. systemd 타이머 생성
+
+```bash
+sudo nano /etc/systemd/system/rpi2-weekly-backup.timer
+```
+
+타이머 파일:
+
+```ini
+[Unit]
+Description=Run Raspberry Pi 2 weekly app backup
+
+[Timer]
+OnCalendar=Sun 03:30
+Persistent=true
+Unit=rpi2-weekly-backup.service
+
+[Install]
+WantedBy=timers.target
+```
+
+### 9.5. 타이머 활성화
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now rpi2-weekly-backup.timer
+systemctl list-timers rpi2-weekly-backup.timer
+```
+
+### 9.6. 수동 실행과 로그 확인
+
+수동 실행:
+
+```bash
+sudo systemctl start rpi2-weekly-backup.service
+```
+
+상태 확인:
+
+```bash
+systemctl status rpi2-weekly-backup.service --no-pager
+journalctl -u rpi2-weekly-backup.service -n 120 --no-pager
+```
+
+정상 기준:
+
+- `~/backups/`에 새 `.tar.gz`, `.sha256` 파일 생성
+- NAS FTP 경로에 같은 파일 2개 업로드
+- `journalctl`에 `weekly backup complete` 표시
