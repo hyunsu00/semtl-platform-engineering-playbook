@@ -279,26 +279,30 @@ Maximum TTL: 86400
 *.semtl.synology.me                 -> 192.168.77.2
 
 내부 서비스
-admin.internal.semtl.synology.me    -> 192.168.77.41
-auth.internal.semtl.synology.me     -> 192.168.77.31
-proxmox.internal.semtl.synology.me  -> 192.168.77.254
-pbs.internal.semtl.synology.me      -> 192.168.77.241
-haos.internal.semtl.synology.me     -> 192.168.77.21
-nas.internal.semtl.synology.me      -> 192.168.77.2
-n8n.internal.semtl.synology.me      -> 192.168.77.175
-jenkins.internal.semtl.synology.me  -> 192.168.77.174
-harbor.internal.semtl.synology.me   -> 192.168.77.173
-gitlab.internal.semtl.synology.me   -> 192.168.77.172
-minio.internal.semtl.synology.me    -> 192.168.77.171
-vm-win11.internal.semtl.synology.me -> 192.168.77.11
-k8s-cp1.internal.semtl.synology.me  -> 192.168.77.181
-k8s-cp2.internal.semtl.synology.me  -> 192.168.77.182
-k8s-cp3.internal.semtl.synology.me  -> 192.168.77.183
-k8s-w1.internal.semtl.synology.me   -> 192.168.77.191
-k8s-w2.internal.semtl.synology.me   -> 192.168.77.192
-k8s-cp.internal.semtl.synology.me   -> 192.168.77.180
-router.internal.semtl.synology.me   -> 192.168.77.1
-adguard.internal.semtl.synology.me  -> 192.168.77.2
+router.internal.semtl.synology.me     -> 192.168.77.1
+adguard.internal.semtl.synology.me    -> 192.168.77.2
+nas.internal.semtl.synology.me        -> 192.168.77.2
+haos.internal.semtl.synology.me       -> 192.168.77.21
+auth.internal.semtl.synology.me       -> 192.168.77.31
+admin.internal.semtl.synology.me      -> 192.168.77.41
+openwisp.internal.semtl.synology.me   -> 192.168.77.51
+omada.internal.semtl.synology.me      -> 192.168.77.61
+pbs.internal.semtl.synology.me        -> 192.168.77.170
+minio.internal.semtl.synology.me      -> 192.168.77.171
+gitlab.internal.semtl.synology.me     -> 192.168.77.172
+harbor.internal.semtl.synology.me     -> 192.168.77.173
+jenkins.internal.semtl.synology.me    -> 192.168.77.174
+n8n.internal.semtl.synology.me        -> 192.168.77.175
+k8s-cp1.internal.semtl.synology.me    -> 192.168.77.181
+k8s-cp2.internal.semtl.synology.me    -> 192.168.77.182
+k8s-cp3.internal.semtl.synology.me    -> 192.168.77.183
+k8s-w1.internal.semtl.synology.me     -> 192.168.77.191
+k8s-w2.internal.semtl.synology.me     -> 192.168.77.192
+k8s-w3.internal.semtl.synology.me     -> 192.168.77.193
+devtools.internal.semtl.synology.me   -> 192.168.77.231
+vm-win11.internal.semtl.synology.me   -> 192.168.77.232
+proxmox.internal.semtl.synology.me    -> 192.168.77.241
+pve-k8s.internal.semtl.synology.me    -> 192.168.77.242
 ```
 
 권장 기준:

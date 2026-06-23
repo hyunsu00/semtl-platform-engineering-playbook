@@ -149,8 +149,8 @@ docker compose logs -f upsnap
 예시:
 
 - 이름: `vm-admin`
-- IP: `192.168.77.20`
-- MAC: `AA:BB:CC:DD:EE:FF`
+- IP: `192.168.77.41`
+- MAC: `02:11:32:29:6E:4F`
 - Ping Port: `22`
 
 ### 자동 스캔
