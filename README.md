@@ -1,7 +1,7 @@
 # SEMTL Platform Engineering Playbook
 
 Synology, AdGuard Home, Proxmox, MinIO, Jenkins, n8n, Harbor, GitLab,
-RKE2, VM-ADMIN, VM-DEVTOOLS, VM-WIN11, VM-OMADA, Raspberry Pi 2,
+RKE2, VM-ADMIN, VM-DEVTOOLS, VM-WIN11, VM-OMADA, VM-OPENWISP, Raspberry Pi 2,
 OpenMQTTGateway, Keycloak, Monitoring, Argo CD 등 플랫폼 엔지니어링
 영역의 설치/설정/운용 문서를 지속적으로 관리하는 저장소입니다.
 
@@ -59,6 +59,8 @@ make link-check
   QEMU Guest Agent, RDP 접속 확인)
 - `docs/vm-omada/installation.md`
   (Ubuntu 22.04 VM 기반 Omada Controller 설치, Docker 구성, 초기 접속 확인)
+- `docs/vm-openwisp/installation.md`
+  (Ubuntu 22.04 VM 기반 OpenWISP Docker 설치 준비, Docker Engine/Compose 구성)
 - `docs/rpi2/installation.md`
   (Raspberry Pi 2에 Raspberry Pi OS Legacy 32-bit Lite 설치, SSH, 기본 패키지,
   네트워크 검증)

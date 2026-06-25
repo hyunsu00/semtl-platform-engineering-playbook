@@ -48,6 +48,8 @@
   [Installation](./vm-devtools/installation.md)
 - VM-OMADA:
   [Installation](./vm-omada/installation.md)
+- VM-OPENWISP:
+  [Installation](./vm-openwisp/installation.md)
 - Raspberry Pi 2:
   [Installation](./rpi2/installation.md) |
   [Apps Installation](./rpi2/apps-installation.md)

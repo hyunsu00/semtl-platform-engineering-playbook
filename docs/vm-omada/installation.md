@@ -59,7 +59,7 @@ Ubuntu 22.04 Server 기반 VM을 생성합니다.
 
 권장 리소스:
 
-- vCPU: `1`
+- vCPU: `2`
 - RAM: `4GB`
 - Disk: `40GB`
 
