@@ -1,22 +1,7 @@
 # VM OpenWISP Installation
 
-Ubuntu 22.04 Server 기반 `vm-openwisp` VM을 Docker 기반 OpenWISP 배포
-직전 상태까지 준비합니다.
-
-## 최종 성공 기준
-
-- hostname이 `vm-openwisp`
-- `qemu-guest-agent`와 `ssh` 서비스가 `active (running)`
-- `ssh semtl@192.168.77.51` 접속 가능
-- `sudo whoami` 결과가 `root`
-- 시간 동기화 정상
-- Ubuntu 기본 설치 직후 스냅샷 생성 완료
-- `docker --version` 출력 확인
-- `docker compose version` 출력 확인
-- `docker run --rm hello-world` 실행 성공
-- `~/docker/openwisp` 작업 디렉터리 생성 완료
-- `docker compose ps`에서 OpenWISP 컨테이너 확인
-- Synology Reverse Proxy를 통한 dashboard 접속 가능
+Ubuntu 22.04 Server 기반 `vm-openwisp` VM에 Docker 기반 OpenWISP를 배포합니다.
+OpenWrt 장비 등록은 [OpenWrt OpenVPN](./openwrt-openvpn.md) 문서에서 진행합니다.
 
 ## 운영값
 
@@ -24,13 +9,14 @@ Ubuntu 22.04 Server 기반 `vm-openwisp` VM을 Docker 기반 OpenWISP 배포
 - hostname: `vm-openwisp`
 - 운영 계정: `semtl`
 - IP: `192.168.77.51`
-- FQDN: `openwisp.semtl.synology.me`
+- Dashboard FQDN: `openwisp.semtl.synology.me`
 - API FQDN: `openwisp-api.semtl.synology.me`
+- OpenVPN FQDN: `openwisp-vpn.semtl.synology.me`
+- OpenVPN External Port: `11194/udp`
+- OpenVPN Internal Port: `1194/udp`
 - 작업 경로: `~/docker/openwisp`
 - OpenWISP Version: `25.10.4`
-- Wildcard DNS: `*.semtl.synology.me` -> `192.168.77.2`
 - Web Reverse Proxy: `192.168.77.2` -> `192.168.77.51`
-- OpenWISP OpenVPN: 사용 안 함
 
 ## 1. VM 기준
 
@@ -57,30 +43,36 @@ sudo apt update -y
 sudo apt install -y qemu-guest-agent openssh-server
 sudo systemctl enable --now qemu-guest-agent
 sudo systemctl enable --now ssh
-```
-
-```bash
 hostname
 hostname -f
-systemctl status qemu-guest-agent --no-pager
-systemctl status ssh --no-pager
+systemctl is-active qemu-guest-agent
+systemctl is-active ssh
 ip -brief address
 ```
+
+성공 기준:
+
+- hostname이 `vm-openwisp`
+- FQDN이 `openwisp.semtl.synology.me`
+- `qemu-guest-agent`가 `active`
+- `ssh`가 `active`
+- `192.168.77.51` 확인
 
 ## 3. SSH와 시간 확인
 
 ```bash
 ssh semtl@192.168.77.51
-```
-
-```bash
 sudo whoami
 timedatectl
 ```
 
-## 4. Ubuntu 기본 설치 직후 스냅샷
+성공 기준:
 
-스냅샷 전 불필요한 파일을 정리합니다.
+- `ssh semtl@192.168.77.51` 접속 가능
+- `sudo whoami` 결과가 `root`
+- 시간 동기화 정상
+
+## 4. Ubuntu 기본 설치 직후 스냅샷
 
 ```bash
 sudo rm -rf /tmp/*
@@ -105,6 +97,10 @@ Synology NAS 스냅샷 설명:
 ==> sudo apt install qemu-guest-agent
 ==> sudo systemctl enable qemu-guest-agent
 ```
+
+성공 기준:
+
+- Ubuntu 기본 설치 직후 스냅샷 생성 완료
 
 ## 5. Docker Engine 설치
 
@@ -135,14 +131,19 @@ sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io \
   docker-buildx-plugin docker-compose-plugin
 sudo systemctl enable --now docker
-```
 
-```bash
-systemctl status docker --no-pager
+systemctl is-active docker
 docker --version
 docker compose version
 sudo docker run --rm hello-world
 ```
+
+성공 기준:
+
+- `docker`가 `active`
+- `docker --version` 출력
+- `docker compose version` 출력
+- `sudo docker run --rm hello-world` 성공
 
 ## 6. Docker 권한 설정
 
@@ -151,12 +152,17 @@ sudo usermod -aG docker "$USER"
 exit
 ```
 
-SSH를 새로 접속한 뒤:
+SSH 재접속 후:
 
 ```bash
 id
 docker run --rm hello-world
 ```
+
+성공 기준:
+
+- `id`에 `docker` 그룹 포함
+- `sudo` 없이 `docker run --rm hello-world` 성공
 
 ## 7. OpenWISP Docker Compose 준비
 
@@ -180,11 +186,13 @@ cat >> .env <<EOF
 # SEMTL overrides
 DASHBOARD_DOMAIN=openwisp.semtl.synology.me
 API_DOMAIN=openwisp-api.semtl.synology.me
-VPN_DOMAIN=
+VPN_DOMAIN=openwisp-vpn.semtl.synology.me
 OPENWISP_VERSION=${OPENWISP_VERSION}
 EMAIL_DJANGO_DEFAULT=admin@semtl.synology.me
 SSL_CERT_MODE=External
-CELERY_SERVICE_NETWORK_MODE=
+CELERY_SERVICE_NETWORK_MODE=service:openvpn
+VPN_NAME=default
+VPN_CLIENT_NAME=semtl-openwrt-vpn
 DB_USER=openwisp
 DB_PASS=${OW_DB_PASS}
 INFLUXDB_USER=openwisp
@@ -208,19 +216,21 @@ CSRF_COOKIE_DOMAIN = ".semtl.synology.me"
 EOF
 
 tail -n 20 .env
+test -f docker-compose.yml
 ```
 
 성공 기준:
 
-- `~/docker/openwisp/docker-compose.yml` 파일 존재
+- `~/docker/openwisp/docker-compose.yml` 존재
 - `OPENWISP_VERSION=25.10.4`
 - `SSL_CERT_MODE=External`
-- `VPN_DOMAIN=` 값이 비어 있음
-- `CELERY_SERVICE_NETWORK_MODE=` 값이 비어 있음
+- `VPN_DOMAIN=openwisp-vpn.semtl.synology.me`
+- `CELERY_SERVICE_NETWORK_MODE=service:openvpn`
+- `VPN_NAME=default`
+- `VPN_CLIENT_NAME=semtl-openwrt-vpn`
 - `DJANGO_ALLOWED_HOSTS=.semtl.synology.me`
 - `DJANGO_CORS_HOSTS`에 dashboard/API HTTPS 도메인 포함
 - `custom_django_settings.py`에 `CSRF_TRUSTED_ORIGINS` 설정 완료
-- CSRF/Session 쿠키 도메인이 `.semtl.synology.me`
 
 ## 8. OpenWISP 기동
 
@@ -233,13 +243,43 @@ docker compose ps
 
 성공 기준:
 
-- `dashboard`, `api`, `nginx`, `postgres`, `redis` 컨테이너가 실행 상태
-- OpenVPN을 사용하지 않으므로 `openvpn` 컨테이너 skip 허용
-- `http://192.168.77.51` 직접 접속 시 nginx `404 Not Found`가 나올 수 있음
-- 첫 기동 직후 dashboard 초기화 중에는 일시적으로 nginx `502 Bad Gateway`가
-  나올 수 있음
+- `dashboard`, `api`, `nginx`, `postgres`, `redis` 실행 상태
+- `openvpn` 실행 상태
+- `celery`, `celery_monitoring`이 `openvpn` 서비스 네트워크 공유
 
-## 9. Synology Reverse Proxy 확인
+## 9. OpenVPN 포트 포워딩과 확인
+
+포트 포워딩:
+
+```text
+WAN UDP 11194 -> 192.168.77.51 UDP 1194
+```
+
+확인:
+
+```bash
+cd ~/docker/openwisp
+docker compose ps openvpn
+docker compose logs --tail=100 openvpn
+docker compose exec openvpn sh -lc 'echo "VPN_NAME=$VPN_NAME"; ls -l /*.conf'
+ss -lunp | grep 1194
+docker inspect "$(docker compose ps -q celery)" \
+  --format '{{ .HostConfig.NetworkMode }}'
+docker inspect "$(docker compose ps -q celery_monitoring)" \
+  --format '{{ .HostConfig.NetworkMode }}'
+```
+
+성공 기준:
+
+- `openvpn`이 `Up` 또는 `healthy`
+- 내부 `1194/udp` listen 확인
+- `VPN_NAME=default`
+- OpenVPN 컨테이너 안에 `/default.conf` 존재
+- `celery`, `celery_monitoring`의 `NetworkMode`가 OpenVPN 공유 네트워크
+- OpenWISP dashboard에서 VPN 서버 `default` 확인
+- OpenWISP dashboard에서 VPN 클라이언트 템플릿 `semtl-openwrt-vpn` 확인
+
+## 10. Synology Reverse Proxy 확인
 
 ```bash
 getent hosts openwisp.semtl.synology.me
@@ -253,7 +293,7 @@ openwisp.semtl.synology.me -> http://192.168.77.51:80
 openwisp-api.semtl.synology.me -> http://192.168.77.51:80
 ```
 
-Synology Reverse Proxy `사용자 지정 머리글` 탭:
+사용자 지정 머리글:
 
 ```text
 Upgrade             $http_upgrade
@@ -267,12 +307,11 @@ X-Forwarded-Port    443
 성공 기준:
 
 - `getent hosts` 결과가 `192.168.77.2`
-- 브라우저에서 `https://openwisp.semtl.synology.me` 접속 가능
-- 초기 관리자 계정은 `admin` / `admin`
-- 로그인 후 OpenWISP dashboard 표시
+- `https://openwisp.semtl.synology.me` 접속 가능
+- 초기 관리자 계정 `admin` / `admin` 로그인 가능
 - 최초 로그인 후 관리자 비밀번호 변경 완료
 
-## 10. OpenWISP 운영 명령
+## 11. OpenWISP 운영 명령
 
 상태 확인:
 
@@ -280,7 +319,7 @@ X-Forwarded-Port    443
 cd ~/docker/openwisp
 docker compose ps
 docker compose logs --tail=100
-docker compose logs -f dashboard nginx
+docker compose logs -f dashboard nginx openvpn
 ```
 
 다시 시작:
@@ -301,14 +340,14 @@ make clean
 make start USER=openwisp OPENWISP_VERSION="${OPENWISP_VERSION}"
 ```
 
-주의:
+성공 기준:
 
-- `make stop`은 컨테이너를 중지하고 네트워크를 정리합니다.
-- `make clean`은 볼륨과 이미지를 함께 삭제하므로 운영 데이터가 사라질 수 있습니다.
-- `.env`의 DB 계정/비밀번호를 바꾼 뒤 PostgreSQL 볼륨이 남아 있으면
-  dashboard와 api가 database 대기 상태에 머물 수 있습니다.
+- `docker compose ps`에서 주요 컨테이너 실행 상태 확인
+- `make stop` 후 `make start` 재기동 가능
+- `make clean`은 운영 데이터 삭제 가능성을 확인한 뒤에만 실행
+- `VPN_NAME=default` 유지
 
-## 11. 최종 확인
+## 12. 최종 확인
 
 ```bash
 hostnamectl
@@ -321,19 +360,25 @@ docker compose version
 docker ps
 cd ~/docker/openwisp
 docker compose ps
+docker compose ps openvpn
+docker compose logs --tail=50 openvpn
+docker compose exec openvpn sh -lc 'echo "VPN_NAME=$VPN_NAME"; ls -l /default.conf'
+ss -lunp | grep 1194
 test -d ~/docker/openwisp && echo "openwisp workdir ok"
 ```
 
 성공 기준:
 
 - hostname이 `vm-openwisp`
-- `sudo whoami` 결과가 `root`
 - 시간 동기화 정상
-- Ubuntu 기본 설치 직후 스냅샷 생성 완료
 - `qemu-guest-agent`, `ssh`, `docker`가 `active`
 - Docker와 Compose plugin 정상 출력
 - `sudo` 없이 `docker ps` 실행 가능
 - OpenWISP 컨테이너 실행 상태 확인
-- OpenVPN을 사용하지 않으므로 `openvpn` 컨테이너 skip 허용
+- OpenVPN 컨테이너 실행 상태 확인
+- `VPN_NAME=default`
+- `/default.conf` 존재
+- 내부 `1194/udp` listen 확인
 - `openwisp workdir ok` 출력
 - `openwisp.semtl.synology.me`가 `192.168.77.2`로 해석됨
+- 외부 `openwisp-vpn.semtl.synology.me:11194/udp` 포워딩 완료
