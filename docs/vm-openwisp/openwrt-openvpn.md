@@ -93,25 +93,54 @@ ping -c 3 10.8.0.1
 - OpenWrt에 `10.8.0.x` 터널 IP 할당
 - `10.8.0.1` ping 성공
 
-## 6. OpenWrt 방화벽 설정
+## 6. OpenWrt OpenVPN 네트워크와 방화벽 설정
+
+OpenWrt 방화벽 zone은 Linux 장치명 `tun0`가 아니라 UCI 네트워크 이름
+`openvpn`에 연결합니다.
 
 ```sh
-uci add firewall zone
-uci set firewall.@zone[-1].name='openwisp_vpn'
-uci set firewall.@zone[-1].input='ACCEPT'
-uci set firewall.@zone[-1].output='ACCEPT'
-uci set firewall.@zone[-1].forward='REJECT'
-uci add_list firewall.@zone[-1].device='tun0'
+uci set network.openvpn='interface'
+uci set network.openvpn.proto='none'
+uci set network.openvpn.device='tun0'
+uci commit network
+
+VPN_ZONE="$(uci show firewall |
+  sed -n "s/^\(firewall\.[^.]*\)\.name='openwisp_vpn'$/\1/p" |
+  head -n 1)"
+
+if [ -z "$VPN_ZONE" ]; then
+  VPN_ZONE="$(uci add firewall zone)"
+  uci set "${VPN_ZONE}.name=openwisp_vpn"
+fi
+
+uci set "${VPN_ZONE}.input=ACCEPT"
+uci set "${VPN_ZONE}.output=ACCEPT"
+uci set "${VPN_ZONE}.forward=ACCEPT"
+
+for zone in $(uci show firewall |
+  sed -n "s/^\(firewall\.[^.]*\)\.network=.*openvpn.*/\1/p" |
+  sort -u); do
+  uci -q del_list "${zone}.network=openvpn"
+done
+
+uci add_list "${VPN_ZONE}.network=openvpn"
 uci commit firewall
+/etc/init.d/network reload
 /etc/init.d/firewall restart
-uci show firewall | grep openwisp_vpn
-uci show firewall | grep tun0
+
+uci show network.openvpn
+uci show firewall | grep "name='openwisp_vpn'"
+uci show firewall | grep "network='openvpn'"
 ```
 
 성공 기준:
 
-- `openwisp_vpn` zone의 `input`이 `ACCEPT`
-- `openwisp_vpn` zone에 `tun0` 장치 포함
+- `network.openvpn.device`가 `tun0`
+- `openwisp_vpn` zone의 `input`, `output`, `forward`가 `ACCEPT`
+- `openwisp_vpn` zone에 `openvpn` 네트워크 포함
+
+OpenWISP agent의 관리 IP 보고는 뒤 단계에서 `tun0`를 직접 사용하지만, 방화벽
+zone 소속은 `openvpn` 네트워크를 사용합니다.
 
 ## 7. OpenWrt VPN IP 고정
 
