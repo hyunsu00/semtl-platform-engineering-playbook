@@ -30,7 +30,7 @@ ls -l /etc/init.d/openvpn
 ## 2. VPN-client 템플릿 확인
 
 ```text
-Network Configuration
+Configurations
 -> Templates
 -> semtl-openwrt-vpn
 -> Preview configuration

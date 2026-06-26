@@ -37,6 +37,7 @@ nav:
   - VM-OPENWISP:
       - 설치: vm-openwisp/installation.md
       - OpenWrt OpenVPN: vm-openwisp/openwrt-openvpn.md
+      - OpenWrt Wi-Fi 설정: vm-openwisp/openwrt-wifi-configuration.md
   - Raspberry Pi 2:
       - 설치: rpi2/installation.md
       - 앱 설치: rpi2/apps-installation.md

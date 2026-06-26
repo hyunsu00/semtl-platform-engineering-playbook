@@ -63,6 +63,8 @@ make link-check
   (Ubuntu 22.04 VM 기반 OpenWISP Docker 설치 준비, Docker Engine/Compose 구성)
 - `docs/vm-openwisp/openwrt-openvpn.md`
   (OpenWrt 장비 등록, OpenVPN 클라이언트 실행, 방화벽 및 터널 확인)
+- `docs/vm-openwisp/openwrt-wifi-configuration.md`
+  (OpenWISP 템플릿 기반 OpenWrt Wi-Fi SSID 설정, 장비별 변수 적용, 검증)
 - `docs/rpi2/installation.md`
   (Raspberry Pi 2에 Raspberry Pi OS Legacy 32-bit Lite 설치, SSH, 기본 패키지,
   네트워크 검증)
